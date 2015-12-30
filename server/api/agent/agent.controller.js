@@ -1,22 +1,24 @@
 var sqlanywhere = require('sqlanywhere');
-var config = require('../../config/sqlanywhere/agent');
+var config = require('./../../domain/agent');
+var orm = require('../../orm/orm');
 var _ = require('lodash');
 
 var conn = sqlanywhere.createConnection();
 var connParams = config.connectionParams;
+console.log(connParams);
 
-export function index(req, res, next) {
+exports.index = function(req, res, next) {
     "use strict";
 
     conn.connect(connParams, function (err) {
         if (err) next(err);
         console.log('Connect success');
-        let query = `SELECT ${config.fields.join(', ')} FROM ${config.tableName}`;
+        let query = orm.query(config);
+        console.log(query);
         conn.exec(query, function (err, result) {
             if (err) next(err);
             conn.disconnect();
             if (result) {
-                //TODO convert data
                 return res.status(200).json(result);
             }
             else {
@@ -24,7 +26,7 @@ export function index(req, res, next) {
             }
         });
     });
-}
+};
 
 export function post(req, res, next) {
     "use strict";
