@@ -4,7 +4,6 @@
 // ==================================
 module.exports = {
 
-  // Seed database on startup
-  seedDB: true
-
+    // Seed database on startup
+    seedDB: true
 };
