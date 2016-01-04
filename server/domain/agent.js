@@ -1,5 +1,7 @@
+var connParams =require('./../config/sqlanywhere/connectionParams').connectionParams;
+
 module.exports = {
-    connectionParams: require('./../config/sqlanywhere/connectionParams') || process.env.SQLANY,
+    connectionParams: connParams || process.env.SQLANY,
     fields: {
         id: 'xid',
         ts: {
@@ -18,14 +20,14 @@ module.exports = {
             type: 'string'
         },
         mobileNumber: {
-            expr: 'substring(mobile_number,2) as mobileNumber'
+            expr: 'substring(mobile_number,2)'
         },
         org: 'org',
         info: 'info',
         email: 'email',
         roles: 'roles',
         isDisabled: {
-            expr: 'isnull(isDisabled,0) as isDisabled'
+            expr: 'isnull(isDisabled,0)'
         },
         lastAuth: {
             expr: '(select max([lastAuth]) from [pha].[accesstoken] where [agent] = [Agent].[id])'

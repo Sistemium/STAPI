@@ -1,7 +1,7 @@
-let createQuery = require('./createQuery')
-    , toModel = require('./transformResponseToModel');
+"use strict";
+
+let createQuery = require('./createQuery');
 
 export function query (config) {
-    "use strict";
     return createQuery(config);
 }
