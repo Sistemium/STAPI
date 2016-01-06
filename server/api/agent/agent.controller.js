@@ -9,29 +9,21 @@ var conn = sqlanywhere.createConnection();
 var connParams = config.connectionParams;
 
 
-var errorHandler = function (conn,next) {
-    return function (err) {
-        if (err) {
-            conn.disconnect();
-            return next(err);
-        }
+var errorHandler = function (err,conn,next) {
+    if (err) {
+        conn.disconnect();
+        return next(err);
     }
 };
 
 export function index(req, res, next) {
     conn.connect(connParams, function (err) {
-        if (err) {
-            conn.disconnect();
-            next(err);
-        }
+        errorHandler(err, conn, next);
         console.log('Connect success');
         let query = orm.query(config);
         console.log(query);
         conn.exec(query, function (err, result) {
-            if (err) {
-                conn.disconnect();
-                return next(err);
-            }
+            errorHandler(err, conn, next);
             conn.disconnect();
             if (result) {
                 return res.status(200).json(result);
@@ -45,10 +37,7 @@ export function index(req, res, next) {
 
 export function post(req, res, next) {
     conn.connect(connParams, function (err) {
-        if (err) {
-            conn.disconnect();
-            return next(err);
-        }
+        errorHandler(err, conn, next);
         console.log('Connect success');
         if (_.isEmpty(req.body)) {
             conn.disconnect();
@@ -57,11 +46,9 @@ export function post(req, res, next) {
         let query = orm.insert(req.body, config);
         console.log(query);
         conn.exec(query, function (err, affected) {
-            if (err) {
-                conn.disconnect();
-                return next(err);
-            }
+            errorHandler(err, conn, next);
             conn.commit(function (err) {
+                errorHandler(err, conn, next);
                 console.log('Committed', affected);
                 conn.disconnect();
                 return res.status(204).send('smt');
@@ -69,24 +56,3 @@ export function post(req, res, next) {
         });
     });
 }
-//
-//export function put(req, res, next) {
-//    console.log('put');
-//    conn.connect(connParams, function (err) {
-//        if (err) next (err);
-//        console.log('Connect success');
-//        let condition = req.params['condition'];
-//        let setExpr = [];
-//        _.each(req.body, (n, key) => {
-//            setExpr.push(`${key} = ${n}`);
-//        });
-//        setExpr = setExpr.join(', ');
-//
-//        conn.exec(`UPDATE ${config.tableName} SET ${setExpr} WHERE ${condition}`, function (err, result) {
-//            if (err) next(err);
-//            conn.disconnect();
-//            return res.status(203);
-//        })
-//
-//    })
-//}

@@ -4,6 +4,7 @@ export default function (body, config) {
     "use strict";
 
     var fields = {};
+
     _.each(Object.keys(body), (k) => {
         if (_.isString(config['fields'][k])) {
             fields[config['fields'][k]] = body[k];
@@ -28,7 +29,11 @@ export default function (body, config) {
             `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
              SELECT `;
         _.each(fields, (v, k) => {
-            query += `'${v}' AS [${k}],`
+            if (v === null) {
+                query += `${v} AS [${k}],`
+            } else {
+                query += `'${v}' AS [${k}],`
+            }
         });
         query = query.slice(0, -1);
         query +=
