@@ -8,7 +8,17 @@ var _ = require('lodash');
 var conn = sqlanywhere.createConnection();
 var connParams = config.connectionParams;
 
-export function index (req, res, next) {
+
+var errorHandler = function (conn,next) {
+    return function (err) {
+        if (err) {
+            conn.disconnect();
+            return next(err);
+        }
+    }
+};
+
+export function index(req, res, next) {
     conn.connect(connParams, function (err) {
         if (err) {
             conn.disconnect();
@@ -30,24 +40,34 @@ export function index (req, res, next) {
                 return res.status(404);
             }
         });
-
     });
 }
 
 export function post(req, res, next) {
     conn.connect(connParams, function (err) {
-        if (err) next(err);
-        console.log('Connect success');
-        let fields = Object.keys(req.body).join(', ');
-        let values = _.values(req.body).join(', ');
-        conn.exec(`INSERT INTO ${config.tableName} (${fields}) VALUES (${values})`, function (err, result) {
-            if (err) next(err);
+        if (err) {
             conn.disconnect();
-            console.log(result);
-
-            return res.status(204);
-        })
-    })
+            return next(err);
+        }
+        console.log('Connect success');
+        if (_.isEmpty(req.body)) {
+            conn.disconnect();
+            return next(new Error('Empty body'));
+        }
+        let query = orm.insert(req.body, config);
+        console.log(query);
+        conn.exec(query, function (err, affected) {
+            if (err) {
+                conn.disconnect();
+                return next(err);
+            }
+            conn.commit(function (err) {
+                console.log('Committed', affected);
+                conn.disconnect();
+                return res.status(204).send('smt');
+            });
+        });
+    });
 }
 //
 //export function put(req, res, next) {

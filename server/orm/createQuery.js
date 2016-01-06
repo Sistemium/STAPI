@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-module.exports = function (config) {
+export default function (config) {
     "use strict";
 
     function parseConfig(config) {
@@ -26,7 +26,7 @@ module.exports = function (config) {
         return parsed;
     }
 
-    function makeQuery(cnfg, tableName) {
+    function makeQuery(cnfg, tableName, alias) {
         let query = 'SELECT ';
         _.each(Object.keys(cnfg), (v) => {
             if (_.isObject(cnfg[v])) {
@@ -35,7 +35,7 @@ module.exports = function (config) {
             else if (cnfg[v] == v) {
                 query += `${cnfg[v]},`;
             } else {
-                query += `${cnfg[v]} as [${v}],`;
+                query += `[${alias}].${cnfg[v]} as [${v}],`;
             }
         });
         query = query.slice(0, -1);
@@ -44,5 +44,5 @@ module.exports = function (config) {
     }
 
     let parsedConfig = parseConfig(config.fields);
-    return makeQuery(parsedConfig, config.tableName);
+    return makeQuery(parsedConfig, config.tableName, config.alias);
 };
