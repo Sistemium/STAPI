@@ -13,8 +13,10 @@ var errorHandler = function (err,conn,next) {
 };
 
 export function index(req, res, next) {
-    console.log('acquire:');
+
     pool.acquire(function (err,client) {
+
+        client.busy = true;
 
         var conn = client.sa;
 
@@ -23,55 +25,45 @@ export function index(req, res, next) {
             return res.end(err);
         }
 
-        req.on("close", function() {
-            try {
-                console.log ('request closed unexpectedly');
-                pool.release(client);
-            } catch (e) {
-                console.log ('Req.close catch:', e);
-            }
-        });
-
-        req.on("end", function() {
-            try {
-                console.log ('request end');
-                pool.release(client);
-            } catch (e) {
-                console.log ('Req.end catch:', e);
-            }
+        req.on('close', function() {
+            console.error ('Client:', client.number, 'request closed unexpectedly');
         });
 
         let query = orm.query(config);
-        console.log(client.number, query);
+        console.log('Client:', client.number, 'request:' /*, query*/);
 
         conn.exec(query, function (err, result) {
 
             try {
 
                 if (err) {
-                    console.log('exec err:', err);
-                    //pool.release(client);
-                    //conn.rollback(function () {
-                    //
-                    //});
+                    console.error('exec err:',err);
+                    if (err.match(/(Connection was terminated)|(Not connected to a database)/ig)) {
+                        console.log('Pool will destroy client:', client.number);
+                        client.toDestroy = true;
+                        pool.destroy(client);
+                    } else {
+                        client.busy = false;
+                        conn.rollback(function () {
+                            pool.release(client);
+                        });
+                    }
                     return res.end(err);
                 }
 
-                conn.commit(function () {
-                    //try {
-                    //    pool.release(client);
-                    //} catch (e) {
-                    //    console.log ('Commit catch:', e);
-                    //}
-                    if (result) {
-                        return res.status(200).json(result);
-                    } else {
-                        return res.status(404);
-                    }
-                });
-            } catch (e) {
-                console.log ('catch:', e);
+                client.busy = false;
                 pool.release(client);
+
+                if (result) {
+                    return res.status(200).json(result);
+                } else {
+                    return res.status(404);
+                }
+
+
+            } catch (e) {
+                console.error ('catch:', e);
+                return res.end(e.toString());
             }
         });
 

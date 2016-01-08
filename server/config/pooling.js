@@ -1,33 +1,60 @@
 var poolModule = require('generic-pool');
-var sqlanywhere = require('sqlanywhere');
-var connParams =require('./sqlanywhere/connectionParams').connectionParams.phatest;
+var fork = require('child_process').fork;
+var connParams = require('./sqlanywhere/connectionParams').connectionParams.phatest;
+
 var i = 0;
 
 var pool = poolModule.Pool({
 
     name: 'phatest',
     create: function(callback) {
-        var sa = sqlanywhere.createConnection();
 
-        var c = {
-            sa: sa,
-            number: i++
+        var sa = {
+            process: fork('server/config/sqlAnywhereConnect',[connParams]),
+            number: i++,
+            sa: {
+                exec: function (sql,callback) {
+                    sa.callback = callback;
+                    sa.process.send({sql: sql.toString()});
+                }
+            }
         };
 
-        sa.connect(connParams, function(err) {
-            callback(err, c)
+        sa.process.on('message', function(m) {
+            if (m === 'connected') {
+                callback (null, sa);
+            } else if (m.connectError) {
+                callback (m.connectError);
+                sa.process.kill ();
+            } else if (m.result) {
+                sa.callback (null,m.result);
+            } else if (m.error) {
+                sa.callback (m.error);
+            }
+        });
+
+        sa.process.on('error',function(){
+            console.log ('Client error:', sa.number);
         });
 
     },
 
-    destroy: function(client) {
-        client.sa && client.sa.disconnect();
+    validate: function (client) {
+        if (client.busy) {
+            console.error ('Client busy:', client.number);
+        }
+        return !client.busy;
     },
 
-    max: 3,
+    destroy: function(client) {
+        console.log ('Pool destroy client:', client.number);
+        client.process.disconnect();
+    },
+
+    max: 10,
     min: 2,
     refreshIdle: true,
-    idleTimeoutMillis: 30000,
+    idleTimeoutMillis: 60000,
     log: function (str,level) {
         if (level != 'verbose') {
             console.log (str);
@@ -39,10 +66,11 @@ var pool = poolModule.Pool({
 module.exports = pool;
 
 var killer = function() {
+    console.log ('Killer start');
     pool.drain(function() {
         pool.destroyAllNow();
+        process.exit();
     });
-    process.exit();
 };
 
 process.on('SIGINT', killer);
