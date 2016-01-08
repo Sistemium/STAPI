@@ -6,16 +6,16 @@
 
 import express from 'express';
 import favicon from 'serve-favicon';
-import morgan from 'morgan';
+//import morgan from 'morgan';
 import compression from 'compression';
 import bodyParser from 'body-parser';
-import methodOverride from 'method-override';
-import cookieParser from 'cookie-parser';
+//import methodOverride from 'method-override';
+//import cookieParser from 'cookie-parser';
 import errorHandler from 'errorhandler';
 import path from 'path';
-import lusca from 'lusca';
+//import lusca from 'lusca';
 import config from './environment';
-import session from 'express-session';
+//import session from 'express-session';
 
 export default function(app) {
   var env = app.get('env');
@@ -25,17 +25,17 @@ export default function(app) {
   app.use(compression());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
-  app.use(methodOverride());
-  app.use(cookieParser());
+//  app.use(methodOverride());
+//  app.use(cookieParser());
 
   // Persist sessions with mongoStore / sequelizeStore
   // We need to enable sessions for passport-twitter because it's an
   // oauth 1.0 strategy, and Lusca depends on sessions
-  app.use(session({
-    secret: config.secrets.session,
-    saveUninitialized: true,
-    resave: false
-  }));
+  //app.use(session({
+  //  secret: config.secrets.session,
+  //  saveUninitialized: true,
+  //  resave: false
+  //}));
 
   ///**
   // * Lusca - express server security
@@ -61,7 +61,7 @@ export default function(app) {
   if ('production' === env) {
     app.use(favicon(path.join(config.root, 'client', 'favicon.ico')));
     app.use(express.static(app.get('appPath')));
-    app.use(morgan('dev'));
+    //app.use(morgan('dev'));
   }
 
   if ('development' === env) {
@@ -71,7 +71,7 @@ export default function(app) {
   if ('development' === env || 'test' === env) {
     app.use(express.static(path.join(config.root, '.tmp')));
     app.use(express.static(app.get('appPath')));
-    app.use(morgan('dev'));
+    //app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
 }
