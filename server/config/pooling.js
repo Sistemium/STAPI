@@ -36,7 +36,7 @@ var pool = poolModule.Pool({
                 callback (m.connectError, sa);
                 sa.process.kill ();
             } else if (m.result) {
-                if (m.number = sa.requestCount) {
+                if (m.number == sa.requestCount) {
                     if (sa.callback) {
                         sa.callback (null,m.result);
                     } else {
@@ -76,7 +76,7 @@ var pool = poolModule.Pool({
     idleTimeoutMillis: 60000,
     log: function (str,level) {
         if (level != 'verbose') {
-            console.log (str);
+            console.log ('Pool', level+':', str);
         }
     }
 

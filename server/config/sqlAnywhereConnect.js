@@ -1,3 +1,5 @@
+"use strict";
+
 require('epipebomb')();
 
 var sqlanywhere = require('sqlanywhere');
