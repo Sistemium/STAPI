@@ -6,7 +6,7 @@
 
 import express from 'express';
 import favicon from 'serve-favicon';
-//import morgan from 'morgan';
+import morgan from 'morgan';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 //import methodOverride from 'method-override';
@@ -61,7 +61,7 @@ export default function(app) {
   if ('production' === env) {
     app.use(favicon(path.join(config.root, 'client', 'favicon.ico')));
     app.use(express.static(app.get('appPath')));
-    //app.use(morgan('dev'));
+    app.use(morgan('dev'));
   }
 
   if ('development' === env) {
@@ -71,7 +71,7 @@ export default function(app) {
   if ('development' === env || 'test' === env) {
     app.use(express.static(path.join(config.root, '.tmp')));
     app.use(express.static(app.get('appPath')));
-    //app.use(morgan('dev'));
+    app.use(morgan('dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
 }
