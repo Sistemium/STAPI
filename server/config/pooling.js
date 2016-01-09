@@ -32,7 +32,8 @@ var pool = poolModule.Pool({
             if (m === 'connected') {
                 callback (null, sa);
             } else if (m.connectError) {
-                callback (m.connectError);
+                sa.busy = true;
+                callback (m.connectError, sa);
                 sa.process.kill ();
             } else if (m.result) {
                 if (m.number = sa.requestCount) {
@@ -64,7 +65,9 @@ var pool = poolModule.Pool({
 
     destroy: function(client) {
         console.log ('Pool destroy client:', client.number);
-        client.process.disconnect();
+        if (client.process) {
+            client.process.disconnect();
+        }
     },
 
     max: 10,

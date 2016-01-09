@@ -20,7 +20,7 @@ export function index(req, res, next) {
 
         if (err) {
             console.log('acquire err:', err);
-            return res.end(err);
+            return res.status(500).end(err);
         }
 
         req.on('close', function() {
