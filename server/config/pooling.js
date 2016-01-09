@@ -12,11 +12,19 @@ var pool = poolModule.Pool({
         var sa = {
             process: fork('server/config/sqlAnywhereConnect',[connParams]),
             number: i++,
-            sa: {
-                exec: function (sql,callback) {
-                    sa.callback = callback;
-                    sa.process.send({sql: sql.toString()});
-                }
+            requestCount: 0,
+            exec: function (sql,callback) {
+                sa.callback = callback;
+                sa.process.send({
+                    number: ++ sa.requestCount,
+                    sql: sql.toString()
+                });
+            },
+            rejectExec: function () {
+                sa.callback = function () {
+                    sa.busy = false;
+                    pool.release(sa);
+                };
             }
         };
 
@@ -27,7 +35,15 @@ var pool = poolModule.Pool({
                 callback (m.connectError);
                 sa.process.kill ();
             } else if (m.result) {
-                sa.callback (null,m.result);
+                if (m.number = sa.requestCount) {
+                    if (sa.callback) {
+                        sa.callback (null,m.result);
+                    } else {
+                        console.error ('Client', sa.number, 'empty callback');
+                    }
+                } else {
+                    console.error ('Client', sa.number, 'wrong result message number');
+                }
             } else if (m.error) {
                 sa.callback (m.error);
             }
