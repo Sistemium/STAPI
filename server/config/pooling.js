@@ -10,9 +10,11 @@ var pool = poolModule.Pool({
     create: function(callback) {
 
         var sa = {
+
             process: fork('server/config/sqlAnywhereConnect',[connParams]),
             number: i++,
             requestCount: 0,
+
             exec: function (sql,callback) {
                 sa.callback = callback;
                 sa.process.send({
@@ -20,6 +22,12 @@ var pool = poolModule.Pool({
                     sql: sql.toString()
                 });
             },
+
+            rollback: function (callback) {
+                sa.callback = callback;
+                sa.process.send('rollback');
+            },
+
             rejectExec: function () {
                 sa.callback = function () {
                     sa.busy = false;
@@ -47,6 +55,8 @@ var pool = poolModule.Pool({
                 }
             } else if (m.error) {
                 sa.callback (m.error);
+            } else if (m === 'rolled back') {
+                sa.callback ();
             }
         });
 

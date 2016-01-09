@@ -9,7 +9,7 @@ var errorHandler = function (err,conn,next) {
 
     console.error('Client:', conn.number, 'exec error:', err);
 
-    if (err.match(/(Connection was terminated)|(Not connected to a database)/ig)) {
+    if (err.code.match(/(-308)(-2005)|/ig)) {
         console.log('Pool will destroy conn:', conn.number);
         pool.destroy(conn);
     } else {
@@ -31,7 +31,7 @@ export function index(req, res, next) {
 
         if (err) {
             console.log('acquire err:', err);
-            return res.status(500).end(err);
+            return res.status(500).end(err.text);
         }
 
         req.on('close', function() {
@@ -40,12 +40,12 @@ export function index(req, res, next) {
         });
 
         let query = orm.query(config);
-        console.log('Client:', conn.number, 'request:' /*, query*/);
+        console.log('Client:', conn.number, 'request:', query);
 
         conn.exec(query, function (err, result) {
 
             if (err) {
-                return next(new Error('Empty body'));
+                return errorHandler(err,conn,next);
             }
 
             conn.busy = false;
@@ -65,14 +65,14 @@ export function index(req, res, next) {
 export function post(req, res, next) {
 
     if (_.isEmpty(req.body)) {
-        return next(new Error('Empty body'));
+        return res.status(400) && next('Empty body');
     }
 
     pool.acquire(function (err,conn) {
 
         if (err) {
             console.log('acquire err:', err);
-            return res.status(500).end(err);
+            return res.status(500).end(err.text);
         }
 
         req.on('close', function() {
