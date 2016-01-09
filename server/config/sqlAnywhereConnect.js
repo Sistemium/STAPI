@@ -1,3 +1,5 @@
+require('epipebomb')();
+
 var sqlanywhere = require('sqlanywhere');
 var connParams = process.argv[2];
 var conn = sqlanywhere.createConnection();
