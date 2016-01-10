@@ -3,8 +3,8 @@
 let createQuery = require('./createQuery');
 let insertQuery = require('./insertQuery');
 
-export function query (config) {
-    return createQuery(config);
+export function query (config,params) {
+    return createQuery(config,params);
 }
 
 export function insert (body, config) {

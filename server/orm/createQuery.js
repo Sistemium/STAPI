@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-export default function (config) {
+export default function (config,params) {
     "use strict";
 
     function parseConfig(config) {
@@ -40,6 +40,9 @@ export default function (config) {
         });
         query = query.slice(0, -1);
         query += ` FROM ${tableName}`;
+        if (params && params.id) {
+            query += ` WHERE xid = '${params.id}'`
+        }
         return query;
     }
 

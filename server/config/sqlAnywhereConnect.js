@@ -17,6 +17,7 @@ var parseError = function (saError) {
         }
     } catch (e) {
         return {
+            code: '',
             text: err
         }
     }

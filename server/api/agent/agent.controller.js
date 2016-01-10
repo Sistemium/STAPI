@@ -39,7 +39,9 @@ export function index(req, res, next) {
             conn.rejectExec()
         });
 
-        let query = orm.query(config);
+        console.log (_.assign({},req.params,req.query));
+
+        let query = orm.query(config,_.assign({},req.params,req.query));
         console.log('Client:', conn.number, 'request:', query);
 
         conn.exec(query, function (err, result) {
@@ -51,10 +53,16 @@ export function index(req, res, next) {
             conn.busy = false;
             pool.release(conn);
 
-            if (result) {
+            if (req.params.id) {
+                result = result.length ? result [0] : undefined;
+            }
+
+            if (!result) {
+                return res.status(404).json();
+            } else if (req.params.id || result.length) {
                 return res.status(200).json(result);
             } else {
-                return res.status(404);
+                return res.status(204).json();
             }
 
         });
