@@ -35,20 +35,21 @@ export default function (config,params) {
 
         _.each(Object.keys(cnfg), (v) => {
             if (_.isObject(cnfg[v])) {
-                query += `${cnfg[v]['expr']} as [${v}],`;
+                query += `${cnfg[v]['expr']} as [${v}]`;
             }
             else if (cnfg[v] == v) {
-                query += `${cnfg[v]},`;
+                query += `[${alias}].[${cnfg[v]}]`;
             } else {
-                query += `[${alias}].${cnfg[v]} as [${v}],`;
+                query += `[${alias}].[${cnfg[v]}] as [${v}]`;
             }
+            query += ', ';
         });
-        query = query.slice(0, -1);
+        query = query.slice(0, -2);
         query += ` FROM ${tableName}`;
         if (params && params.id) {
             query += ` WHERE ${tableName}.xid = '${params.id}'`
         }
-        query += ` ORDER BY ${tableName}.id desc`
+        query += ` ORDER BY ${tableName}.id DESC`;
         return query;
     }
 
