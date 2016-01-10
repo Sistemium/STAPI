@@ -5,11 +5,11 @@ var orm = require('../../orm/orm');
 var _ = require('lodash');
 var pool = require('../../config/pooling');
 
-var errorHandler = function (err,conn,next) {
+var errorHandler = function (err,conn,res) {
 
     console.error('Client:', conn.number, 'exec error:', err);
 
-    if (err.code.match(/(-308)(-2005)|/ig)) {
+    if (err.code.match(/(-308)(-2005)/ig)) {
         console.log('Pool will destroy conn:', conn.number);
         pool.destroy(conn);
     } else {
@@ -19,7 +19,7 @@ var errorHandler = function (err,conn,next) {
         });
     }
 
-    return next(new Error(err));
+    return res.status(500).json(err);;
 
 };
 
@@ -48,7 +48,7 @@ export function index(req, res, next) {
         conn.exec(query, function (err, result) {
 
             if (err) {
-                return errorHandler(err,conn,next);
+                return errorHandler(err,conn,res);
             }
 
             conn.busy = false;
@@ -98,7 +98,7 @@ export function post(req, res, next) {
         conn.exec(query, function (err, rowsAffected) {
 
             if (err) {
-               return errorHandler(err,conn,next);
+               return errorHandler(err,conn,res);
             }
 
             pool.release(conn);
