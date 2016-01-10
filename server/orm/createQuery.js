@@ -49,7 +49,7 @@ export default function (config,params) {
         if (params && params.id) {
             query += ` WHERE ${tableName}.xid = '${params.id}'`
         }
-        query += ` ORDER BY ${tableName}.id DESC`;
+        query += ` ORDER BY ${tableName}.ts DESC`;
         return query;
     }
 
