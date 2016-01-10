@@ -39,9 +39,10 @@ export function index(req, res, next) {
             conn.rejectExec()
         });
 
-        console.log (_.assign({},req.params,req.query));
+        let params = _.assign(orm.headersToParams(req.headers),req.params,req.query);
+        console.log (params);
 
-        let query = orm.query(config,_.assign({},req.params,req.query));
+        let query = orm.query(config,params);
         console.log('Client:', conn.number, 'request:', query);
 
         conn.exec(query, function (err, result) {
@@ -60,6 +61,9 @@ export function index(req, res, next) {
             if (!result) {
                 return res.status(404).json();
             } else if (req.params.id || result.length) {
+                if (result.length) {
+                    res.set('X-Rows-Count',result.length);
+                }
                 return res.status(200).json(result);
             } else {
                 return res.status(204).json();
@@ -100,7 +104,7 @@ export function post(req, res, next) {
             pool.release(conn);
 
             if (rowsAffected) {
-                return res.status(200).set('Rows-Affected',rowsAffected).end();
+                return res.status(200).set('X-Rows-Affected',rowsAffected).end();
             } else {
                 return res.status(404).end();
             }
