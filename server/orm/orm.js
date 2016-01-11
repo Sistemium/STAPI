@@ -18,8 +18,7 @@ export function headersToParams (headers) {
     });
 
     return params;
-
-};
+}
 
 export function query (config,params) {
     return createQuery(config,params);

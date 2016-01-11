@@ -1,9 +1,7 @@
 "use strict";
-
-var config = require('./../../domain/agent');
 var orm = require('../../orm/orm');
 var _ = require('lodash');
-var pool = require('../../config/pooling');
+var pools = require('../../config/poolModule');
 
 var errorHandler = function (err,conn,res) {
 
@@ -19,11 +17,12 @@ var errorHandler = function (err,conn,res) {
         });
     }
 
-    return res.status(500).json(err);;
-
+    return res.status(500).json(err);
 };
 
 export function index(req, res, next) {
+    var config = require('./../../domain/' + req.collection);
+    var pool = pools(req.dbname);
 
     pool.acquire(function (err,conn) {
 
@@ -75,6 +74,8 @@ export function index(req, res, next) {
 }
 
 export function post(req, res, next) {
+    var config = require('./../../domain/' + req.collection);
+    var pool = pools(req.dbname);
 
     if (_.isEmpty(req.body)) {
         return res.status(400) && next('Empty body');

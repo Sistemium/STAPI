@@ -1,7 +1,5 @@
-var connParams =require('./../config/sqlanywhere/connectionParams').connectionParams.phatest;
-
 module.exports = {
-    connectionParams: connParams || process.env.SQLANY,
+    pools: ['phatest'],
     fields: {
         id: 'xid',
         ts: {

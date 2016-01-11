@@ -7,18 +7,18 @@ var i = 0;
 var pool = poolModule.Pool({
 
     name: 'phatest',
-    create: function(callback) {
+    create: function (callback) {
 
         var sa = {
 
-            process: fork('server/config/sqlAnywhereConnect',[connParams]),
+            process: fork('server/config/sqlAnywhereConnect', [connParams]),
             number: i++,
             requestCount: 0,
 
-            exec: function (sql,callback) {
+            exec: function (sql, callback) {
                 sa.callback = callback;
                 sa.process.send({
-                    number: ++ sa.requestCount,
+                    number: ++sa.requestCount,
                     sql: sql.toString()
                 });
             },
@@ -36,45 +36,45 @@ var pool = poolModule.Pool({
             }
         };
 
-        sa.process.on('message', function(m) {
+        sa.process.on('message', function (m) {
             if (m === 'connected') {
-                callback (null, sa);
+                callback(null, sa);
             } else if (m.connectError) {
                 sa.busy = true;
-                callback (m.connectError, sa);
-                sa.process.kill ();
+                callback(m.connectError, sa);
+                sa.process.kill();
             } else if (m.result) {
                 if (m.number == sa.requestCount) {
                     if (sa.callback) {
-                        sa.callback (null,m.result);
+                        sa.callback(null, m.result);
                     } else {
-                        console.error ('Client', sa.number, 'empty callback');
+                        console.error('Client', sa.number, 'empty callback');
                     }
                 } else {
-                    console.error ('Client', sa.number, 'wrong result message number');
+                    console.error('Client', sa.number, 'wrong result message number');
                 }
             } else if (m.error) {
-                sa.callback (m.error);
+                sa.callback(m.error);
             } else if (m === 'rolled back') {
-                sa.callback ();
+                sa.callback();
             }
         });
 
-        sa.process.on('error',function(){
-            console.log ('Client error:', sa.number);
+        sa.process.on('error', function () {
+            console.log('Client error:', sa.number);
         });
 
     },
 
     validate: function (client) {
         if (client.busy) {
-            console.error ('Client busy:', client.number);
+            console.error('Client busy:', client.number);
         }
         return !client.busy;
     },
 
-    destroy: function(client) {
-        console.log ('Pool destroy client:', client.number);
+    destroy: function (client) {
+        console.log('Pool destroy client:', client.number);
         if (client.process) {
             client.process.disconnect();
         }
@@ -84,13 +84,13 @@ var pool = poolModule.Pool({
     min: 2,
     refreshIdle: true,
     idleTimeoutMillis: 60000,
-    log: function (str,level) {
+    log: function (str, level) {
         if (level != 'verbose') {
-            console.log ('Pool', level+':', str);
+            console.log('Pool', level + ':', str);
         }
     }
-
 });
+
 
 module.exports = pool;
 
