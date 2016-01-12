@@ -1,7 +1,7 @@
 "use strict";
 var orm = require('../../orm/orm');
 var _ = require('lodash');
-var pools = require('../../config/poolModule');
+var pools = require('../../pool/index');
 
 var errorHandler = function (err,conn,res) {
 
