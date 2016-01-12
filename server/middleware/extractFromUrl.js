@@ -6,7 +6,6 @@ module.exports = function () {
 
         // req.originalUrl = 'api/v1/dbname/collection
         let path = req.originalUrl.split('?')[0];
-        console.log(path);
         if (path.match(/favicon\.ico/i)) {
             return next();
         }
@@ -29,7 +28,8 @@ module.exports = function () {
                 throw new Error('You did not pass collection name... Try /api/databaseName/collectionName');
             }
 
-            let collection = require(`../domain/${req.collection.toLowerCase()}`);
+            //save collection config into memory
+            let collection = req.app.locals[req.collection.toLowerCase()] = require(`../domain/${req.collection.toLowerCase()}`);
             if (!_.includes(collection.pools, req.dbname.toLowerCase())) {
                 throw new Error('Incorrect path or collection not exist... Try /api/databaseName/collectionName');
             }

@@ -21,7 +21,7 @@ var errorHandler = function (err,conn, pool, res) {
 };
 
 export function index(req, res, next) {
-    var config = require('./../../domain/' + req.collection);
+    var config = req.app.locals[req.collection];
     var pool = pools(req.dbname);
 
     pool.acquire(function (err,conn) {
@@ -74,7 +74,7 @@ export function index(req, res, next) {
 }
 
 export function post(req, res, next) {
-    var config = require('./../../domain/' + req.collection);
+    var config = req.app.locals[req.collection];
     var pool = pools(req.dbname);
 
     if (_.isEmpty(req.body)) {
