@@ -55,6 +55,7 @@ module.exports = function (name) {
                             conn.busy = true;
                             callback(m.connectError, conn);
                             conn.process.kill();
+                            console.log('Process killed');
                         } else if (m.result) {
                             if (m.number == conn.requestCount) {
                                 if (conn.callback) {
@@ -88,6 +89,7 @@ module.exports = function (name) {
                 destroy: function (client) {
                     console.log('Pool destroy client:', client.number);
                     if (client.process) {
+                        console.log('Disconnected client');
                         client.process.disconnect();
                     }
                 },
