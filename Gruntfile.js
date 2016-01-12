@@ -42,7 +42,7 @@ module.exports = function (grunt) {
       dev: {
         options: {
           script: '<%= yeoman.server %>',
-          debug: false
+          debug: true
         }
       },
       prod: {

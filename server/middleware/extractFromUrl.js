@@ -10,7 +10,7 @@ module.exports = function () {
             return next();
         }
 
-        if (!path.match(/api/i)) {
+        if (!path.match(/\/api\//i)) {
             return next();
         }
 
@@ -33,7 +33,8 @@ module.exports = function () {
                 throw new Error('Incorrect path or collection not exist... Try /api/databaseName/collectionName');
             }
         } catch (err) {
-            return next(new Error(`${err}`));
+            console.log(`Path: ${path}`);
+            return next(err);
         }
         next();
     }
