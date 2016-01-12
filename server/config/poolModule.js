@@ -23,7 +23,7 @@ module.exports = function (name) {
 
                     var conn = {
 
-                        process: fork('server/config/sqlAnywhereConnect', [self.config.params]),
+                        process: fork('server/sqlAnywhere/sqlAnywhereConnect', [self.config.params]),
                         number: self.counter++,
                         requestCount: 0,
 

@@ -5,7 +5,7 @@ require('epipebomb')();
 var sqlanywhere = require('sqlanywhere');
 var connParams = process.argv[2];
 var conn = sqlanywhere.createConnection();
-var connectedAt;
+var errorHandlers = require('./errorHandlers')(conn);
 
 var parseError = function (saError) {
     var err = saError.toString();
@@ -27,7 +27,7 @@ conn.connect(connParams, function(err) {
     if (err) {
         process.send({connectError: parseError(err)});
     } else {
-        connectedAt = new Date ();
+        conn.connectedAt = new Date ();
         process.send('connected');
     }
 });
@@ -63,18 +63,3 @@ process.on('message', function(m) {
 
 });
 
-var killer = function() {
-    console.log ('Killer sqlanywhere');
-    if (connectedAt) {
-        conn.disconnect(function(){
-            process.exit();
-        });
-    } else {
-        process.exit();
-    }
-};
-
-process.on('disconnect', killer);
-
-process.on('SIGINT', killer);
-process.on('SIGTERM', killer);
