@@ -84,7 +84,6 @@ class Pool {
             destroy: function (client) {
                 console.log('Pool destroy client:', client.number);
                 if (client.process) {
-                    console.log(client.process);
                     client.process.disconnect();
                 }
             },
@@ -104,4 +103,4 @@ class Pool {
     }
 }
 
-module.exports = Pool;
+export default Pool;

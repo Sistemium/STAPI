@@ -9,7 +9,6 @@ var errorHandlers = require('./errorHandlers')(conn);
 
 var parseError = function (saError) {
     var err = saError.toString();
-    //console.log (saError);
     try {
         return {
             code: err.match(/Code: ([^ ]*)/)[1],

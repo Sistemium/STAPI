@@ -3,7 +3,7 @@ var orm = require('../../orm/orm');
 var _ = require('lodash');
 var pools = require('../../pool/index');
 
-var errorHandler = function (err,conn,res) {
+var errorHandler = function (err,conn, pool, res) {
 
     console.error('Client:', conn.number, 'exec error:', err);
 
@@ -47,7 +47,7 @@ export function index(req, res, next) {
         conn.exec(query, function (err, result) {
 
             if (err) {
-                return errorHandler(err,conn,res);
+                return errorHandler(err,conn, pool, res);
             }
 
             conn.busy = false;
@@ -99,7 +99,7 @@ export function post(req, res, next) {
         conn.exec(query, function (err, rowsAffected) {
 
             if (err) {
-               return errorHandler(err,conn,res);
+               return errorHandler(err,conn, pool, res);
             }
 
             pool.release(conn);

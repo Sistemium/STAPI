@@ -18,4 +18,4 @@ class PoolsManager {
 
 
 
-module.exports = new PoolsManager();
+export default new PoolsManager();

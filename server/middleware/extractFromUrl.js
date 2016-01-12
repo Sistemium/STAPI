@@ -5,7 +5,8 @@ module.exports = function () {
     return function (req, res, next) {
 
         // req.originalUrl = 'api/v1/dbname/collection
-        let path = req.originalUrl;
+        let path = req.originalUrl.split('?')[0];
+        console.log(path);
         if (path.match(/favicon\.ico/i)) {
             return next();
         }

@@ -5,7 +5,7 @@ let _ = require('lodash');
 let createQuery = require('./createQuery');
 let insertQuery = require('./insertQuery');
 
-let supportedHeaders = /page-size|start-page/i;
+let supportedHeaders = /x-page-size|x-start-page/i;
 
 export function headersToParams (headers) {
 
