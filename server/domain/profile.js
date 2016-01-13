@@ -1,5 +1,5 @@
 module.exports = {
-    pools: ['phatest'],
+    pools: ['phatest', 'bsd'],
     fields: {
         id: 'xid',
         ts: {

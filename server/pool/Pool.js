@@ -6,7 +6,7 @@ const _ = require('lodash');
 class Pool {
 
     constructor(config) {
-        this.config = _.clone(config);
+        this.config = config;
         this.counter = 0;
     }
 

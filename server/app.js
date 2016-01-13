@@ -7,6 +7,7 @@
 import express from 'express';
 import config from './config/environment';
 import http from 'http';
+import domainConfig from './config/domainConfig';
 
 // Setup server
 var app = express();
@@ -21,6 +22,7 @@ function startServer() {
     });
 }
 
+app.locals.domainConfig = domainConfig(`${__dirname}/domain`, {js: true, json: false});
 setImmediate(startServer);
 
 // Expose app

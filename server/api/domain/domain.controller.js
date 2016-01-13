@@ -21,9 +21,7 @@ var errorHandler = function (err,conn, pool, res) {
 };
 
 export function index(req, res, next) {
-    var config = req.app.locals[req.collection];
-    var pool = pools(req.dbname);
-
+    var pool = pools(req.pool);
     pool.acquire(function (err,conn) {
 
         conn.busy = true;
@@ -41,7 +39,7 @@ export function index(req, res, next) {
         let params = _.assign(orm.headersToParams(req.headers),req.params,req.query);
         console.log (params);
 
-        let query = orm.query(config,params);
+        let query = orm.query(req.app.locals.domain,params);
         console.log('Client:', conn.number, 'request:', query);
 
         conn.exec(query, function (err, result) {
@@ -74,8 +72,7 @@ export function index(req, res, next) {
 }
 
 export function post(req, res, next) {
-    var config = req.app.locals[req.collection];
-    var pool = pools(req.dbname);
+    var pool = pools(req.pool);
 
     if (_.isEmpty(req.body)) {
         return res.status(400) && next('Empty body');
@@ -93,7 +90,7 @@ export function post(req, res, next) {
             conn.rejectExec()
         });
 
-        let query = orm.insert(req.body, config);
+        let query = orm.insert(req.body, req.app.locals.domain);
         console.log('Client:', conn.number, 'query:', query);
 
         conn.exec(query, function (err, rowsAffected) {
