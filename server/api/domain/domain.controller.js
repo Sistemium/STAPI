@@ -38,7 +38,7 @@ export function index(req, res, next) {
 
         let params = _.assign(orm.headersToParams(req.headers),req.params,req.query);
 
-        let query = orm.query(req.app.locals.domain,params);
+        let query = orm.query(req.app.locals.domain,params, req.app.locals.domainConfig, req.pool);
         console.log('Client:', conn.number, 'request:', query);
 
         conn.exec(query, function (err, result) {

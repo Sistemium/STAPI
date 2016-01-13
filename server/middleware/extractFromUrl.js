@@ -28,7 +28,7 @@ module.exports = function () {
                 throw new Error('Incorrect path or collection not exist... Try /api/databaseName/collectionName');
             }
         } catch (err) {
-            console.log(`Path: ${path}`);
+            console.log(`Path: /api/${req.pool}/${collection}`);
             return next(err);
         }
         next();

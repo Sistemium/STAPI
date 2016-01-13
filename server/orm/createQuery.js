@@ -1,6 +1,6 @@
-var _ = require('lodash');
+const _ = require('lodash');
 
-export default function (config,params) {
+export default function (config, params, domain, pool) {
     "use strict";
 
     function parseOrderByParams(params, alias) {
@@ -26,7 +26,22 @@ export default function (config,params) {
             if (_.isString(config[n])) {
                 parsed[n] = config[n];
             } else if (_.isObject(config[n])) {
-                if (config[n]['field'] && _.isString(config[n]['field'])) {
+                let propObj = config[n];
+                if (propObj.hasOwnProperty('ref')) {
+                    let refConfig = domain.get(`${pool}/${propObj['ref'].toLowerCase()}`);
+                    if (!refConfig) {
+                        throw new Error('Invalid ref configuration...');
+                    } else {
+                        parsed[n] = {
+                            ref: propObj['ref'],
+                            property: n,
+                            field: propObj['field'],
+                            alias: refConfig['alias'],
+                            tableName: refConfig['tableName']
+                        };
+                    }
+                }
+                else if (config[n]['field'] && _.isString(config[n]['field'])) {
                     parsed[n] = config[n]['field'];
                 } else if (config[n]['expr']) {
                     parsed[n] = {expr: config[n]['expr']};
@@ -42,31 +57,50 @@ export default function (config,params) {
         return parsed;
     }
 
-    //alias is optional, if not passed tableName will be used
+    /**
+     *
+     * @param cnfg
+     * @param {string} tableName
+     * @param {string} alias
+     * @returns {string} query string
+     */
     function makeQuery(cnfg, tableName, alias) {
 
-        let pageSize = parseInt (params['x-page-size:']) || 10;
-        let startPage = ((parseInt (params['x-start-page:']) - 1) * pageSize || 0) + 1;
+        let pageSize = parseInt(params['x-page-size:']) || 10;
+        let startPage = ((parseInt(params['x-start-page:']) - 1) * pageSize || 0) + 1;
 
         let query = `SELECT TOP ${pageSize} START AT ${startPage} `;
 
         if (alias === undefined) {
             alias = 't';
         }
+        let refTableNames = new Map();
 
         _.each(Object.keys(cnfg), (v) => {
-            if (_.isObject(cnfg[v])) {
-                query += `${cnfg[v]['expr']} as [${v}]`;
+            let propObj = cnfg[v];
+                console.log(propObj);
+            if (_.isObject(propObj)) {
+                if (propObj.hasOwnProperty('ref')) {
+                    refTableNames.set(propObj['ref'], propObj);
+                    query += `[${v}].xid as [${v}]`;
+                } else if (propObj.hasOwnProperty('expr')) {
+                    query += `${propObj['expr']} as [${v}]`;
+                }
             }
-            else if (cnfg[v] == v) {
-                query += `[${alias}].[${cnfg[v]}]`;
+            else if (propObj == v) {
+                query += `[${alias}].[${propObj}]`;
             } else {
-                query += `[${alias}].[${cnfg[v]}] as [${v}]`;
+                query += `[${alias}].[${propObj}] as [${v}]`;
             }
             query += ', ';
         });
         query = query.slice(0, -2);
         query += ` FROM ${tableName} as [${alias}]`;
+        if (refTableNames.size > 0) {
+            for (let ref of refTableNames) {
+                query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = [${alias}].[${ref[1].field}]\n`;
+            }
+        }
         if (params && params.id) {
             query += ` WHERE ${alias}.xid = '${params.id}'`
         }
