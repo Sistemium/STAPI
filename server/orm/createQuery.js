@@ -3,11 +3,7 @@ var _ = require('lodash');
 export default function (config,params) {
     "use strict";
 
-    function parseOrderByParams(params, table, alias) {
-
-        if (alias === undefined) {
-            throw new Error('Alias should be defined in config');
-        }
+    function parseOrderByParams(params, alias) {
 
         let arr = params.split(',');
         let res = _.reduce(arr, (res, i) => {
@@ -55,7 +51,7 @@ export default function (config,params) {
         let query = `SELECT TOP ${pageSize} START AT ${startPage} `;
 
         if (alias === undefined) {
-            throw new Error('Alias should be defined in config');
+            alias = 't';
         }
 
         _.each(Object.keys(cnfg), (v) => {
