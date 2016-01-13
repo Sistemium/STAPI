@@ -4,25 +4,9 @@ const _ = require('lodash');
 module.exports = function () {
     return function (req, res, next) {
 
-        let path = req.originalUrl.split('?')[0];
-        if (path.match(/favicon\.ico/i)) {
-            return next();
-        }
+        req.pool = req.params.pool;
+        let collection = req.params.collection;
 
-        if (!path.match(/\/api\//i)) {
-            return next();
-        }
-
-        let arr = path.split('/');
-        let collection;
-
-        if (path.match(/api\/v[0-9]\/i/)) {
-            req.pool = arr[3];
-            collection = arr[4];
-        } else if (path.match(/api\//i)) {
-            req.pool = arr[2];
-            collection = arr[3];
-        }
         try {
             if (collection === undefined) {
                 throw new Error('You did not pass collection name... Try /api/databaseName/collectionName');

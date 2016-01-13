@@ -12,7 +12,6 @@ import bodyParser from 'body-parser';
 import errorHandler from 'errorhandler';
 import path from 'path';
 import config from './environment';
-import extractFromUrl from '../middleware/extractFromUrl';
 
 export default function (app) {
     var env = app.get('env');
@@ -22,7 +21,6 @@ export default function (app) {
     app.use(compression());
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
-    app.use(extractFromUrl());
 
     app.set('appPath', path.join(config.root, 'client'));
 
