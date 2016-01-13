@@ -23,5 +23,6 @@ module.exports = {
         maxBuild: 'maxBuild'
     },
     tableName: '[pha].[Profile]',
-    alias: 'Profile'
+    alias: 'p',
+    collection: 'profile'
 };

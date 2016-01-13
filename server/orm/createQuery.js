@@ -3,15 +3,19 @@ var _ = require('lodash');
 export default function (config,params) {
     "use strict";
 
-    function parseOrderByParams(table, params) {
+    function parseOrderByParams(params, table, alias) {
+
+        if (alias === undefined) {
+            throw new Error('Alias should be defined in config');
+        }
 
         let arr = params.split(',');
         let res = _.reduce(arr, (res, i) => {
             console.log(i);
             if (i[0] === '-') {
-                res += `${table}.${i.slice(1)} DESC`
+                res += `${alias}.${i.slice(1)} DESC`
             } else {
-                res += `${table}.${i}`
+                res += `${alias}.${i}`
             }
             res += ', ';
             return res;
@@ -42,12 +46,17 @@ export default function (config,params) {
         return parsed;
     }
 
+    //alias is optional, if not passed tableName will be used
     function makeQuery(cnfg, tableName, alias) {
 
         let pageSize = parseInt (params['x-page-size:']) || 10;
         let startPage = ((parseInt (params['x-start-page:']) - 1) * pageSize || 0) + 1;
 
         let query = `SELECT TOP ${pageSize} START AT ${startPage} `;
+
+        if (alias === undefined) {
+            throw new Error('Alias should be defined in config');
+        }
 
         _.each(Object.keys(cnfg), (v) => {
             if (_.isObject(cnfg[v])) {
@@ -61,17 +70,17 @@ export default function (config,params) {
             query += ', ';
         });
         query = query.slice(0, -2);
-        query += ` FROM ${tableName}`;
+        query += ` FROM ${tableName} as [${alias}]`;
         if (params && params.id) {
-            query += ` WHERE ${tableName}.xid = '${params.id}'`
+            query += ` WHERE ${alias}.xid = '${params.id}'`
         }
         if (params['x-order-by:']) {
-            let orderBy = parseOrderByParams(tableName, params['x-order-by:']);
+            let orderBy = parseOrderByParams(params['x-order-by:'], alias);
             query += ` ORDER BY ${orderBy}`;
         } else {
             //default order by
             if (cnfg['ts'] === 'ts') {
-                query += ` ORDER BY ${tableName}.${cnfg['ts']} DESC`;
+                query += ` ORDER BY ${alias}.${cnfg['ts']} DESC`;
             }
         }
 

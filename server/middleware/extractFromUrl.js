@@ -4,10 +4,14 @@ const _ = require('lodash');
 module.exports = function () {
     return function (req, res, next) {
 
-        req.pool = req.params.pool;
-        let collection = req.params.collection;
+        req.pool = req.params.pool.toLowerCase();
+        let collection = req.params.collection.toLowerCase();
 
         try {
+            if (req.pool === undefined) {
+                throw new Error('You did not pass pool name... Try /api/databaseName/collectionName')
+            }
+
             if (collection === undefined) {
                 throw new Error('You did not pass collection name... Try /api/databaseName/collectionName');
             }
@@ -20,7 +24,7 @@ module.exports = function () {
             }
 
             appLocals.domain = domainConfig;
-            if (!_.includes(appLocals.domain.pools, req.pool.toLowerCase())) {
+            if (!_.includes(appLocals.domain.pools, req.pool)) {
                 throw new Error('Incorrect path or collection not exist... Try /api/databaseName/collectionName');
             }
         } catch (err) {

@@ -36,5 +36,6 @@ module.exports = {
         }
     },
     tableName: '[pha].[Agent]',
-    alias: 'Agent'
+    alias: 'Agent',
+    collection: 'agent'
 };

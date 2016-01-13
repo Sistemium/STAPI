@@ -21,5 +21,6 @@ module.exports = {
         }
     },
     tableName: '[bs].[InventoryBatch]',
-    alias: 'InventoryBatch'
+    alias: 'ib',
+    collection: 'inventoryBatch'
 };
