@@ -57,9 +57,7 @@ export default function (body, config, map, pool) {
             `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
              SELECT `;
 
-        console.log(fields);
         _.each(fields, (v, k) => {
-            console.log(k);
             if (_.isObject(fields[k])) {
                 query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = '${fields[k].body}') AS [${k}],`;
             }

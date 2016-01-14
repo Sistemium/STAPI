@@ -1,7 +1,7 @@
 'use strict';
 
 const createQuery = require('../createQuery');
-const config = require('../../domain/agent');
+const config = require('../../domain/agent/oneMoreLevel/agent');
 const assert = require('assert');
 
 describe('Create query', function () {

@@ -1,17 +1,10 @@
+'use strict';
+
 module.exports = {
+
     pools: ['bsd'],
+    extends: 'bsd/defaultFields',
     fields: {
-        id: 'xid',
-        ts: {
-            type: 'timestamp',
-            readonly: true,
-            field: 'ts'
-        },
-        cts: {
-            type: 'timestamp',
-            readonly: true,
-            field: 'cts'
-        },
         code: {
             field: 'code'
         },
@@ -23,4 +16,5 @@ module.exports = {
     tableName: '[bs].[InventoryBatch]',
     alias: 'ib',
     collection: 'inventoryBatch'
+
 };

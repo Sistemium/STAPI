@@ -1,28 +1,21 @@
-module.exports = {
-    pools: ['phatest', 'bsd'],
-    fields: {
-        id: 'xid',
-        ts: {
-            type: 'timestamp',
-            readonly: true,
-            field: 'ts'
+'use strict';
+
+module.exports = (function () {
+    return {
+        pools: ['phatest', 'bsd'],
+        fields: {
+            code: {
+                field: 'id'
+            },
+            name: {
+                field: 'name',
+                type: 'string'
+            },
+            minBuild: 'minBuild',
+            maxBuild: 'maxBuild'
         },
-        cts: {
-            type: 'timestamp',
-            readonly: true,
-            field: 'cts'
-        },
-        code: {
-            field: 'id'
-        },
-        name: {
-            field: 'name',
-            type: 'string'
-        },
-        minBuild: 'minBuild',
-        maxBuild: 'maxBuild'
-    },
-    tableName: '[pha].[Profile]',
-    alias: 'p',
-    collection: 'profile'
-};
+        tableName: '[pha].[Profile]',
+        alias: 'p',
+        collection: 'profile'
+    }
+})();

@@ -78,7 +78,6 @@ export default function (config, params, domain, pool) {
 
         _.each(Object.keys(cnfg), (v) => {
             let propObj = cnfg[v];
-                console.log(propObj);
             if (_.isObject(propObj)) {
                 if (propObj.hasOwnProperty('ref')) {
                     refTableNames.set(propObj['ref'], propObj);
