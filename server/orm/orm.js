@@ -24,6 +24,6 @@ export function query (config,params, map, pool) {
     return createQuery(config,params, map, pool);
 }
 
-export function insert (body, config) {
-    return insertQuery(body, config);
+export function insert (body, config, map, pool) {
+    return insertQuery(body, config, map, pool);
 }

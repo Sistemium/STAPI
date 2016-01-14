@@ -1,24 +1,52 @@
 var _ = require('lodash');
 
-export default function (body, config) {
+export default function (body, config, map, pool) {
     "use strict";
 
     var fields = {};
 
+    function mapModelKeysToFields(config) {
+        let map = new Map();
+
+        _.each(config['fields'], (val, key) => {
+            if (_.isObject(val)) {
+                if (val.hasOwnProperty('field') && _.isString(val['field'])) {
+                    map.set(key, val['field']);
+                } else {
+                    throw new Error('Invalid model definition, check your configuration...');
+                }
+            } else if (_.isString(val)) {
+                map.set(key, val);
+            } else {
+                throw new Error('Invalid model definition, check your configuration...');
+            }
+        });
+
+        return map;
+    }
+
     _.each(Object.keys(body), (k) => {
-        if (_.isString(config['fields'][k])) {
-            fields[config['fields'][k]] = body[k];
+        let cnfProp = config['fields'][k];
+        if (_.isString(cnfProp)) {
+            fields[cnfProp] = body[k];
         }
-        else if (_.isObject(config['fields'][k])) {
-            if (config['fields'][k]['readonly']) {
+        else if (_.isObject(cnfProp)) {
+            if (cnfProp['readonly']) {
                 return;
             }
-            if (config['fields'][k]['field']) {
-                if (_.isString(config['fields'][k]['field'])) {
-                    fields[config['fields'][k]['field']] = body[k];
+
+            if (cnfProp) {
+                if (_.isString(cnfProp['ref'])) {
+                    fields[cnfProp['field']] = {
+                        body: body[k],
+                        ref: map.get(`${pool}/${cnfProp['ref'].toLowerCase()}`)
+                    };
+                }
+                else if (_.isString(cnfProp['field'])) {
+                    fields[cnfProp['field']] = body[k];
                 }
                 else {
-                    throw new Error('Field not a string');
+                    throw new Error('Field must be a string');
                 }
             }
         }
@@ -28,8 +56,14 @@ export default function (body, config) {
         let query =
             `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
              SELECT `;
+
+        console.log(fields);
         _.each(fields, (v, k) => {
-            if (v === null) {
+            console.log(k);
+            if (_.isObject(fields[k])) {
+                query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = '${fields[k].body}') AS [${k}],`;
+            }
+            else if (v === null) {
                 query += `${v} AS [${k}],`
             } else {
                 query += `'${v}' AS [${k}],`

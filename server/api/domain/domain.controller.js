@@ -89,7 +89,7 @@ export function post(req, res, next) {
             conn.rejectExec()
         });
 
-        let query = orm.insert(req.body, req.app.locals.domain);
+        let query = orm.insert(req.body, req.app.locals.domain, req.app.locals.domainConfig, req.pool);
         console.log('Client:', conn.number, 'query:', query);
 
         conn.exec(query, function (err, rowsAffected) {
