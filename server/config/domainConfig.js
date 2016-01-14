@@ -41,7 +41,7 @@ let processConfig = (cfg, filename) => {
     });
 };
 
-module.exports = function (path) {
+module.exports = function (path, cb) {
     readConfigFiles(path, (files) => {
         console.log(files);
         _.each(files, (file) => {
@@ -52,8 +52,7 @@ module.exports = function (path) {
             processConfig(cnfg, filename);
         });
 
-        console.log(map);
-        return map;
+        cb(map);
     });
 };
 

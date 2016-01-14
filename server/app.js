@@ -22,7 +22,9 @@ function startServer() {
     });
 }
 
-app.locals.domainConfig = domainConfig(`${__dirname}/domain`, {js: true, json: false});
+domainConfig(`${__dirname}/domain`, (map) => {
+    app.locals.domainConfig = map;
+});
 setImmediate(startServer);
 
 // Expose app
