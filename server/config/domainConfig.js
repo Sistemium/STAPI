@@ -5,39 +5,56 @@ const dir = require('node-dir');
 
 let map = new Map();
 
-let normalizeConfig = (cfg) => {
+let normalizeConfig = (cfg, filename) => {
     if (!cfg || !_.isObject(cfg)) throw new Error(`Config not passed...`);
 
-    let normalizedCfg = {};
+    let nCfg = _.cloneDeep(cfg);
     _.each(cfg.fields, (val, key) => {
         if (_.isString(val)) {
-            normalizedCfg[key] = {
+            nCfg.fields[key] = {
                 field: val
             }
         } else if (_.isObject(val)) {
-            normalizedCfg[key] = val
-        } else {
+            nCfg.fields[key] = val;
+        }
+        else {
             throw new Error('Invalid configuration...');
         }
     });
+    nCfg.collection = nCfg.collection ? nCfg.collection : filename;
 
-    return normalizedCfg;
+    return nCfg;
 };
 
 let processConfig = (cfg, filename) => {
-
-    var extendedCfg = normalizeConfig(cfg);
+    let extendedCfg = normalizeConfig(cfg, filename);
 
     _.forEach(cfg.pools || [''], function (pool) {
         var extendsArray = Array.isArray(cfg.extends) ? cfg.extends : [cfg.extends];
-
+        let pooledCfg = _.cloneDeep(extendedCfg);
         _.forEach(extendsArray, function (parent) {
-            var parentCfg = map.get(pool + '/' + parent) || map.get('/' + parent) || {};
-            extendedCfg = _.merge(parentCfg, extendedCfg);
-        });
 
-        let collectionName = cfg.collection ? cfg.collection : filename;
-        map.set(pool + '/' + collectionName.toLowerCase(), extendedCfg);
+            let parentCfg = {};
+            if (parent) {
+                parent = parent.toLowerCase();
+                parentCfg = _.cloneDeep (map.get(pool + '/' + parent) || map.get('/'+parent));
+                if (!parentCfg) {
+                    console.error ({
+                        pool: pool,
+                        cfg: cfg,
+                        parent2: '/'+parent,
+                        map1: map.get(pool + '/' + parent),
+                        map2: map.get('/'+parent)
+                    });
+                    throw new Error('Unknown pool:'+ pool);
+                }
+                delete parentCfg.abstract;
+                delete parentCfg.pools;
+            }
+            pooledCfg = _.merge(parentCfg, extendedCfg);
+            delete pooledCfg.pools;
+        });
+        map.set(pool + '/' + pooledCfg.collection.toLowerCase(), pooledCfg);
     });
 };
 

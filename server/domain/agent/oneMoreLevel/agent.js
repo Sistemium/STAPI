@@ -1,17 +1,7 @@
 module.exports = {
     pools: ['phatest'],
+    extends: 'defaultFields',
     fields: {
-        id: 'xid',
-        ts: {
-            type: 'timestamp',
-            readonly: true,
-            field: 'ts'
-        },
-        cts: {
-            type: 'timestamp',
-            readonly: true,
-            field: 'cts'
-        },
         code: {
             field: 'id'
         },

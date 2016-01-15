@@ -24,9 +24,6 @@ module.exports = function () {
             }
 
             appLocals.domain = domainConfig;
-            if (!_.includes(appLocals.domain.pools, req.pool)) {
-                throw new Error('Incorrect path or collection not exist... Try /api/databaseName/collectionName');
-            }
         } catch (err) {
             console.log(`Path: /api/${req.pool}/${collection}`);
             return next(err);

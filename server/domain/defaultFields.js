@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    pools: ['pha','bsd'],
+    //pools: ['phatest','bsd'],
 
     abstract: true,
     fields: {

@@ -3,7 +3,7 @@
 module.exports = {
 
     pools: ['bsd'],
-    extends: 'bsd/defaultFields',
+    extends: 'defaultFields',
     fields: {
         code: {
             field: 'code'
