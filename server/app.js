@@ -24,6 +24,7 @@ function startServer() {
 
 domainConfig(`${__dirname}/domain`, (map) => {
     app.locals.domainConfig = map;
+    console.log(map);
 });
 setImmediate(startServer);
 

@@ -37,15 +37,13 @@ let processConfig = (cfg, filename) => {
         });
 
         let collectionName = cfg.collection ? cfg.collection : filename;
-        map.set(pool + '/' + collectionName, cfg);
+        map.set(pool + '/' + collectionName.toLowerCase(), extendedCfg);
     });
 };
 
 module.exports = function (path, cb) {
     readConfigFiles(path, (files) => {
-        console.log(files);
         _.each(files, (file) => {
-            console.log(file);
             let cnfg = require(file);
 
             let filename = file.split('/').slice(-1)[0].split('.')[0];
