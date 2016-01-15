@@ -1,5 +1,4 @@
 'use strict';
-const _ = require('lodash');
 
 module.exports = function () {
     return function (req, res, next) {
@@ -22,7 +21,6 @@ module.exports = function () {
             if (!(appLocals && domainConfig)) {
                 throw new Error(`${keyInMap} not exist`);
             }
-
             appLocals.domain = domainConfig;
         } catch (err) {
             console.log(`Path: /api/${req.pool}/${collection}`);

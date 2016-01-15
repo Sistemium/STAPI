@@ -36,12 +36,10 @@ export function index(req, res, next) {
             conn.rejectExec()
         });
 
-        let params = _.assign(orm.headersToParams(req.headers),req.params,req.query);
-
-        let query = orm.query(req.app.locals.domain,params, req.app.locals.domainConfig, req.pool);
+        let query = orm.query(req.app.locals.domain, req['x-params'], req.app.locals.domainConfig, req.pool);
         console.log('Client:', conn.number, 'request:', query);
 
-        conn.exec(query, function (err, result) {
+        conn.exec(query.query, query.params, function (err, result) {
 
             if (err) {
                 return errorHandler(err,conn, pool, res);

@@ -2,11 +2,13 @@
 
 var express = require('express');
 var controller = require('./domain.controller.js');
+import headersToParams from '../../middleware/headersToParams';
+import validateParams from '../../middleware/validateParams';
 
 var router = express.Router();
 
-router.get('/:id?', controller.index);
+router.get('/:id?', headersToParams(), validateParams(), controller.index);
 //router.put('/', controller.put);
-router.post('/', controller.post);
+router.post('/', headersToParams(), validateParams(), controller.post);
 
 module.exports = router;
