@@ -88,9 +88,9 @@ export function post(req, res, next) {
         });
 
         let query = orm.insert(req.body, req.app.locals.domain, req.app.locals.domainConfig, req.pool);
-        console.log('Client:', conn.number, 'query:', query);
+        console.log('Client:', conn.number, 'query:', query.query, 'params:', query.params);
 
-        conn.exec(query, function (err, rowsAffected) {
+        conn.exec(query.query, query.params, function (err, rowsAffected) {
 
             if (err) {
                return errorHandler(err,conn, pool, res);

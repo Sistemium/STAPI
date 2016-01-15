@@ -68,13 +68,13 @@ export default function (config, params, domain, pool) {
         let escapeParams = [];
         let pageSize = parseInt(params['x-page-size:']) || 10;
         let startPage = ((parseInt(params['x-start-page:']) - 1) * pageSize || 0) + 1;
-        let response = {
+        let result = {
             query: '',
             params: []
         };
 
-        response.query += `SELECT TOP ? START AT ? \n`;
-        response.params.push(pageSize, startPage);
+        result.query += `SELECT TOP ? START AT ? \n`;
+        result.params.push(pageSize, startPage);
 
         if (alias === undefined) {
             alias = 't';
@@ -86,24 +86,24 @@ export default function (config, params, domain, pool) {
             if (_.isObject(propObj)) {
                 if (propObj.hasOwnProperty('ref')) {
                     refTableNames.set(propObj['ref'], propObj);
-                    response.query += `[${v}].xid as [${v}]`;
+                    result.query += `[${v}].xid as [${v}]`;
                 } else if (propObj.hasOwnProperty('expr')) {
-                    response.query += `${propObj.expr} as [${v}]`;
+                    result.query += `${propObj.expr} as [${v}]`;
                     escapeParams.push(propObj.expr, v);
                 }
             }
             else if (propObj == v) {
-                response.query += `[${alias}].[${propObj}]`;
+                result.query += `[${alias}].[${propObj}]`;
             } else {
-                response.query += `${alias}.${propObj} as ${v}`;
+                result.query += `${alias}.${propObj} as ${v}`;
             }
-            response.query += ',\n';
+            result.query += ',\n';
         });
-        response.query = response.query.slice(0, -2);
-        response.query += ` FROM ${tableName} as [${alias}]`;
+        result.query = result.query.slice(0, -2);
+        result.query += ` FROM ${tableName} as [${alias}]`;
         if (refTableNames.size > 0) {
             for (let ref of refTableNames) {
-                response.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field}\n`;
+                result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field}\n`;
 
             }
         }
@@ -114,26 +114,26 @@ export default function (config, params, domain, pool) {
             if (params && params[key]) {
                 withPredicate = true;
                 predicateStr += `${alias}.${cnfg[key]} = ? AND `;
-                response.params.push(params[key]);
+                result.params.push(params[key]);
             }
         });
 
         if (withPredicate) {
             predicateStr = predicateStr.replace(/ AND $/i, '');
-            response.query += predicateStr;
+            result.query += predicateStr;
         }
 
         if (params['x-order-by:']) {
             let orderBy = parseOrderByParams(params['x-order-by:'], alias);
-            response.query += ` ORDER BY ${orderBy}`;
+            result.query += ` ORDER BY ${orderBy}`;
         } else {
             //default order by
             if (cnfg['ts'] === 'ts') {
-                response.query += ` ORDER BY ${alias}.${cnfg.ts} DESC`;
+                result.query += ` ORDER BY ${alias}.${cnfg.ts} DESC`;
             }
         }
 
-        return response;
+        return result;
     }
 
     let parsedConfig = parseConfig(config.fields);

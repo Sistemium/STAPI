@@ -3,7 +3,11 @@ var _ = require('lodash');
 export default function (body, config, map, pool) {
     "use strict";
 
-    var fields = {};
+    let fields = {};
+    let result = {
+        query: '',
+        params: []
+    };
 
     function mapModelKeysToFields(config) {
         let map = new Map();
@@ -27,11 +31,8 @@ export default function (body, config, map, pool) {
 
     _.each(Object.keys(body), (k) => {
         let cnfProp = config['fields'][k];
-        if (_.isString(cnfProp)) {
-            fields[cnfProp] = body[k];
-        }
-        else if (_.isObject(cnfProp)) {
-            if (cnfProp['readonly']) {
+        if (_.isObject(cnfProp)) {
+            if (cnfProp['readonly'] || cnfProp['expr']) {
                 return;
             }
 
@@ -46,6 +47,7 @@ export default function (body, config, map, pool) {
                     fields[cnfProp['field']] = body[k];
                 }
                 else {
+                    console.log(cnfProp);
                     throw new Error('Field must be a string');
                 }
             }
@@ -53,26 +55,25 @@ export default function (body, config, map, pool) {
     });
 
     function concatQuery(fields, config) {
-        let query =
+        result.query =
             `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
              SELECT `;
 
         _.each(fields, (v, k) => {
             if (_.isObject(fields[k])) {
-                query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = '${fields[k].body}') AS [${k}],`;
+                result.query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = '${fields[k].body}') AS [${k}],`;
             }
-            else if (v === null) {
-                query += `${v} AS [${k}],`
-            } else {
-                query += `'${v}' AS [${k}],`
+            else {
+                result.query += `? AS [${k}],`;
+                result.params.push(`${v}`);
             }
         });
-        query = query.slice(0, -1);
-        query +=
+        result.query = result.query.slice(0, -1);
+        result.query +=
             `) AS m ON t.[xid] = m.[xid]
             WHEN NOT MATCHED THEN INSERT
             WHEN MATCHED THEN UPDATE`;
-        return query;
+        return result;
     }
 
     return concatQuery(fields, config);
