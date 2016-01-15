@@ -10,6 +10,7 @@ import extractFromUrl from './middleware/extractFromUrl';
 
 export default function (app) {
     // Insert routes below
+    app.use('/api/admin/map', require('./api/admin'));
     app.use('/api/:pool/:collection', extractFromUrl(), require('./api/domain'));
 
     // All undefined asset or api routes should return a 404
