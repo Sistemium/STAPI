@@ -23,11 +23,21 @@ class Pool {
                     number: self.counter++,
                     requestCount: 0,
 
-                    exec: function (sql, callback) {
-                        conn.callback = callback;
+                    exec: function (sql, params, callback) {
+
+                        var _params = params;
+
+                        if (typeof params === 'function') {
+                            conn.callback = params;
+                            _params = undefined;
+                        } else {
+                            conn.callback = callback;
+                        }
+
                         conn.process.send({
                             number: ++conn.requestCount,
-                            sql: sql.toString()
+                            sql: sql.toString(),
+                            params: _params
                         });
                     },
 

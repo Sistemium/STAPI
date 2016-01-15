@@ -34,7 +34,7 @@ conn.connect(connParams, function(err) {
 process.on('message', function(m) {
 
     if (m.sql) {
-        conn.exec(m.sql, function(err,res){
+        var cb = function(err,res){
             if (err) {
                 m.error = parseError(err);
                 process.send(m);
@@ -48,7 +48,10 @@ process.on('message', function(m) {
                     process.send(m);
                 });
             }
-        })
+        };
+
+        conn.exec (m.sql, m.params || [], cb);
+
     } else if (m === 'rollback') {
         conn.rollback(function(err){
             if (err) {
