@@ -6,17 +6,17 @@ export default function (config, params, domain, pool) {
     function parseOrderByParams(params, alias) {
 
         let arr = params.split(',');
-        let res = _.reduce(arr, (res, i) => {
-            console.log(i);
+        let result = _.reduce(arr, (res, i) => {
             if (i[0] === '-') {
-                res += `${alias}.${i.slice(1)} DESC`
+                res += `${alias}.${i.slice(1)} DESC`;
             } else {
-                res += `${alias}.${i}`
+                res += `${alias}.${i}`;
             }
             res += ', ';
             return res;
         }, '');
-        return res.slice(0, -2);
+        result = result.slice(0, -2);
+        return result;
     }
 
     function parseConfig(config) {
@@ -65,11 +65,16 @@ export default function (config, params, domain, pool) {
      * @returns {string} query string
      */
     function makeQuery(cnfg, tableName, alias) {
-
+        let escapeParams = [];
         let pageSize = parseInt(params['x-page-size:']) || 10;
         let startPage = ((parseInt(params['x-start-page:']) - 1) * pageSize || 0) + 1;
+        let response = {
+            query: '',
+            params: []
+        };
 
-        let query = `SELECT TOP ${pageSize} START AT ${startPage} `;
+        response.query += `SELECT TOP ? START AT ? \n`;
+        response.params.push(pageSize, startPage);
 
         if (alias === undefined) {
             alias = 't';
@@ -81,39 +86,54 @@ export default function (config, params, domain, pool) {
             if (_.isObject(propObj)) {
                 if (propObj.hasOwnProperty('ref')) {
                     refTableNames.set(propObj['ref'], propObj);
-                    query += `[${v}].xid as [${v}]`;
+                    response.query += `[${v}].xid as [${v}]`;
                 } else if (propObj.hasOwnProperty('expr')) {
-                    query += `${propObj['expr']} as [${v}]`;
+                    response.query += `${propObj.expr} as [${v}]`;
+                    escapeParams.push(propObj.expr, v);
                 }
             }
             else if (propObj == v) {
-                query += `[${alias}].[${propObj}]`;
+                response.query += `[${alias}].[${propObj}]`;
             } else {
-                query += `[${alias}].[${propObj}] as [${v}]`;
+                response.query += `${alias}.${propObj} as ${v}`;
             }
-            query += ', ';
+            response.query += ',\n';
         });
-        query = query.slice(0, -2);
-        query += ` FROM ${tableName} as [${alias}]`;
+        response.query = response.query.slice(0, -2);
+        response.query += ` FROM ${tableName} as [${alias}]`;
         if (refTableNames.size > 0) {
             for (let ref of refTableNames) {
-                query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = [${alias}].[${ref[1].field}]\n`;
-            }
-        }
-        if (params && params.id) {
-            query += ` WHERE ${alias}.xid = '${params.id}'`
-        }
-        if (params['x-order-by:']) {
-            let orderBy = parseOrderByParams(params['x-order-by:'], alias);
-            query += ` ORDER BY ${orderBy}`;
-        } else {
-            //default order by
-            if (cnfg['ts'] === 'ts') {
-                query += ` ORDER BY ${alias}.${cnfg['ts']} DESC`;
+                response.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field}\n`;
+
             }
         }
 
-        return query;
+        let withPredicate = false;
+        let predicateStr = ` WHERE `;
+        _.each(cnfg, (val, key) => {
+            if (params && params[key]) {
+                withPredicate = true;
+                predicateStr += `${alias}.${cnfg[key]} = ? AND `;
+                response.params.push(params[key]);
+            }
+        });
+
+        if (withPredicate) {
+            predicateStr = predicateStr.replace(/ AND $/i, '');
+            response.query += predicateStr;
+        }
+
+        if (params['x-order-by:']) {
+            let orderBy = parseOrderByParams(params['x-order-by:'], alias);
+            response.query += ` ORDER BY ${orderBy}`;
+        } else {
+            //default order by
+            if (cnfg['ts'] === 'ts') {
+                response.query += ` ORDER BY ${alias}.${cnfg.ts} DESC`;
+            }
+        }
+
+        return response;
     }
 
     let parsedConfig = parseConfig(config.fields);
