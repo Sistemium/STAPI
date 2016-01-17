@@ -3,6 +3,7 @@ const poolModule = require('generic-pool');
 const fork = require('child_process').fork;
 const _ = require('lodash');
 
+
 class Pool {
 
     constructor(config) {
@@ -16,6 +17,28 @@ class Pool {
 
             name: this.config.name,
             create: function (callback) {
+
+                var connAuth = {};
+
+                var authenticator = function (conn, token) {
+                    return function (resolve, reject) {
+
+                        if (connAuth[token]) {
+                            resolve(connAuth[token]);
+                        } else {
+                            var sql = `select * from uac.authorizedAccount ('${token}')`;
+
+                            conn.exec (sql,function(err,res){
+                                if (err || !res.length) {
+                                    reject (err || 'not authorized');
+                                } else {
+                                    resolve (connAuth[token] = res[0]);
+                                }
+                            });
+                        }
+
+                    };
+                };
 
                 var conn = {
 
@@ -51,6 +74,14 @@ class Pool {
                             conn.busy = false;
                             pool.release(conn);
                         };
+                    },
+
+                    authData: function (token) {
+                        return connAuth [token];
+                    },
+
+                    authorize: function (token) {
+                        return new Promise (authenticator(conn,token));
                     }
                 };
 
@@ -108,6 +139,34 @@ class Pool {
                 }
             }
         });
+
+        var poolAcquire = pool.acquire;
+
+        pool.acquire = function (callback, token) {
+            poolAcquire (function (err,acquiredConn){
+                if (!err && token) {
+
+                    var connAuthData = acquiredConn.authData(token);
+
+                    if (acquiredConn.authData(token)) {
+                        callback (err, acquiredConn, connAuthData);
+                    } else {
+                        acquiredConn.authorize(token).then(
+                            function (connAuthData) {
+                                callback(err, acquiredConn, connAuthData);
+                            },
+                            function (err) {
+                                pool.release(acquiredConn);
+                                callback (err);
+                            }
+                        );
+                    }
+
+                } else {
+                    callback (err, acquiredConn);
+                }
+            });
+        };
 
         return pool;
     }
