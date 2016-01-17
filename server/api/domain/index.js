@@ -12,4 +12,6 @@ router.get('/:id?', auth(), headersToParams(), validateParams(), controller.inde
 //router.put('/', controller.put);
 router.post('/', headersToParams(), validateParams(), controller.post);
 
+router.head('/:id?', auth(), headersToParams(), validateParams(), controller.index);
+
 module.exports = router;
