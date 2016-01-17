@@ -17,7 +17,7 @@ module.exports = {
         code: {
             field: 'code'
         },
-        inventoryBa: {
+        inventoryBatch: {
             field: 'inventoryBatch',
             ref: 'inventoryBatch'
         }
