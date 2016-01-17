@@ -73,34 +73,42 @@ export default function (config, params, domain, pool) {
             params: []
         };
 
-        result.query += `SELECT TOP ? START AT ? \n`;
-        result.params.push(pageSize, startPage);
+        if (!params['agg:']) {
+            result.query += `SELECT TOP ? START AT ? \n`;
+            result.params.push(pageSize, startPage);
+        } else {
+            result.query += 'SELECT COUNT (*) as cnt';
+        }
 
         if (alias === undefined) {
             alias = 't';
         }
         let refTableNames = new Map();
 
-        _.each(Object.keys(cnfg), (v) => {
-            let propObj = cnfg[v];
-            if (_.isObject(propObj)) {
-                if (propObj.hasOwnProperty('ref')) {
-                    refTableNames.set(propObj['ref'], propObj);
-                    result.query += `[${v}].xid as [${v}]`;
-                } else if (propObj.hasOwnProperty('expr')) {
-                    result.query += `${propObj.expr} as [${v}]`;
-                    escapeParams.push(propObj.expr, v);
+        if (!params['agg:']) {
+            _.each(Object.keys(cnfg), (v) => {
+                let propObj = cnfg[v];
+                if (_.isObject(propObj)) {
+                    if (propObj.hasOwnProperty('ref')) {
+                        refTableNames.set(propObj['ref'], propObj);
+                        result.query += `[${v}].xid as [${v}]`;
+                    } else if (propObj.hasOwnProperty('expr')) {
+                        result.query += `${propObj.expr} as [${v}]`;
+                        escapeParams.push(propObj.expr, v);
+                    }
                 }
-            }
-            else if (propObj == v) {
-                result.query += `[${alias}].[${propObj}]`;
-            } else {
-                result.query += `${alias}.${propObj} as ${v}`;
-            }
-            result.query += ',\n';
-        });
-        result.query = result.query.slice(0, -2);
+                else if (propObj == v) {
+                    result.query += `[${alias}].[${propObj}]`;
+                } else {
+                    result.query += `${alias}.${propObj} as ${v}`;
+                }
+                result.query += ',\n';
+            });
+            result.query = result.query.slice(0, -2);
+        }
+
         result.query += ` FROM ${tableName} as [${alias}]`;
+
         if (refTableNames.size > 0) {
             for (let ref of refTableNames) {
                 result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field}\n`;
@@ -123,13 +131,15 @@ export default function (config, params, domain, pool) {
             result.query += predicateStr;
         }
 
-        if (params['x-order-by:']) {
-            let orderBy = parseOrderByParams(params['x-order-by:'], alias);
-            result.query += ` ORDER BY ${orderBy}`;
-        } else {
-            //default order by
-            if (cnfg['ts'] === 'ts') {
-                result.query += ` ORDER BY ${alias}.${cnfg.ts} DESC`;
+        if (!params['agg:']) {
+            if (params['x-order-by:']) {
+                let orderBy = parseOrderByParams(params['x-order-by:'], alias);
+                result.query += ` ORDER BY ${orderBy}`;
+            } else {
+                //default order by
+                if (cnfg['ts'] === 'ts') {
+                    result.query += ` ORDER BY ${alias}.${cnfg.ts} DESC`;
+                }
             }
         }
 
