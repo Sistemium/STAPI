@@ -8,7 +8,8 @@ module.exports = {
     fields: {
         id: 'xid',
         ts: 'ts',
-        cts: 'cts'
+        cts: 'cts',
+        author: 'author'
     }
 
 };
