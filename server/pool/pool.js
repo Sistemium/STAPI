@@ -150,7 +150,19 @@ class Pool {
 
         var poolAcquire = pool.acquire;
 
-        pool.acquire = function (onAcquireCallback, token) {
+        pool.acquirePromise = function () {
+            return new Promise(function(resolve,reject){
+                poolAcquire (function(err,conn){
+                    if (err) {
+                        reject (err)
+                    } else {
+                        resolve(conn);
+                    }
+                });
+            });
+        };
+
+        pool.acquireOld = function (onAcquireCallback, token) {
             poolAcquire (function (err,acquiredConn){
                 if (!err && token) {
 

@@ -1,7 +1,7 @@
 "use strict";
 var orm = require('../../orm/orm');
 var _ = require('lodash');
-var pools = require('../../pool/index');
+var pools = require('../../pool');
 
 var errorHandler = function (err,conn, pool, res) {
 
@@ -73,7 +73,7 @@ export function index(req, res) {
 
         req.on('close', function() {
             console.error ('Client:', conn.number, 'request closed unexpectedly');
-            conn.rejectExec()
+            conn.rejectExec();
         });
 
         console.log ('Conn', conn.number, 'auth:', auth);
