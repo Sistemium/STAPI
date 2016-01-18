@@ -66,7 +66,7 @@ export default function (body, config, map, pool) {
       }
       else {
         result.query += `? AS [${k}],`;
-        result.params.push(`${v}`);
+        result.params.push(v);
       }
     });
     result.query = result.query.slice(0, -1);
