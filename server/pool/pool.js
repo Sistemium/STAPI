@@ -18,28 +18,6 @@ class Pool {
             name: self.config.name,
             create: function (onCreateCallback) {
 
-                var connAuth = {};
-
-                var authenticator = function (conn, token) {
-                    return function (resolve, reject) {
-
-                        if (connAuth[token]) {
-                            resolve(connAuth[token]);
-                        } else {
-                            var sql = `select * from uac.authorizedAccount ('${token}')`;
-
-                            conn.exec (sql,function(err,res){
-                                if (err || !res.length) {
-                                    reject (err || 'not authorized');
-                                } else {
-                                    resolve (connAuth[token] = res[0]);
-                                }
-                            });
-                        }
-
-                    };
-                };
-
                 var conn = {
 
                     process: fork('server/sqlAnywhere/sqlAnywhereConnect', [self.config.params]),
@@ -74,14 +52,6 @@ class Pool {
                             conn.busy = false;
                             pool.release(conn);
                         };
-                    },
-
-                    authData: function (token) {
-                        return connAuth [token];
-                    },
-
-                    authorize: function (token) {
-                        return new Promise (authenticator(conn,token));
                     }
                 };
 
@@ -159,36 +129,6 @@ class Pool {
                         resolve(conn);
                     }
                 });
-            });
-        };
-
-        pool.acquireOld = function (onAcquireCallback, token) {
-            poolAcquire (function (err,acquiredConn){
-                if (!err && token) {
-
-                    var connAuthData = acquiredConn.authData(token);
-
-                    if (acquiredConn.authData(token)) {
-                        acquiredConn.exec (`set @@UACAccount = ${connAuthData.id}`,function(){
-                            onAcquireCallback (err, acquiredConn, connAuthData);
-                        });
-                    } else {
-                        acquiredConn.authorize(token).then(
-                            function (connAuthData) {
-                                acquiredConn.exec (`set @@UACAccount = ${connAuthData.id}`,function(){
-                                    onAcquireCallback (err, acquiredConn, connAuthData);
-                                });
-                            },
-                            function (err) {
-                                pool.release(acquiredConn);
-                                onAcquireCallback (err);
-                            }
-                        );
-                    }
-
-                } else {
-                    onAcquireCallback (err, acquiredConn);
-                }
             });
         };
 
