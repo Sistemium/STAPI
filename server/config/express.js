@@ -12,6 +12,7 @@ import bodyParser from 'body-parser';
 import errorHandler from 'errorhandler';
 import path from 'path';
 import config from './environment';
+import cors from 'cors';
 
 export default function (app) {
     var env = app.get('env');
@@ -19,6 +20,9 @@ export default function (app) {
     app.set('views', config.root + '/server/views');
     app.set('view engine', 'jade');
     app.use(compression());
+    app.use(cors({
+        allowedHeaders: ['X-Page-Size','X-Start-Page','Authorization','Content-Type']
+    }));
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(bodyParser.json());
 
