@@ -86,21 +86,13 @@ export function post(req, res, next) {
         return res.status(400) && next('Empty body');
     }
 
-    pool.customAcquire(function (err, conn, auth) {
-
-        if (err) {
-            console.log('acquire err:', err);
-            return res.status(err === 'not authorized' ? 401 : 500).end(err.text);
-        }
-
+    pool.customAcquire(req.headers.authorization).then(function (conn) {
         req.on('close', function () {
             console.error('Client:', conn.number, 'request closed unexpectedly');
             conn.rejectExec()
         });
 
         console.log(req.body);
-
-        req.body.author = auth.id;
 
         let query = orm.insert(req.body, req.app.locals.domain, req.app.locals.domainConfig, req.pool);
         console.log('Client:', conn.number, 'query:', query.query, 'params:', query.params);
@@ -120,5 +112,5 @@ export function post(req, res, next) {
             }
 
         });
-    }, req.headers.authorization);
+    });
 }

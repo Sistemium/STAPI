@@ -54,6 +54,13 @@ function authenticator(conn, token) {
 }
 
 function authDb(req, res, next) {
+
+    function setAuthor(id) {
+        if (req.method === 'POST') {
+            req.body.author = id;
+        }
+    }
+
     console.log('authDb start');
     let token = req.headers.authorization;
 
@@ -64,10 +71,12 @@ function authDb(req, res, next) {
     let auth = authMap.get(token);
 
     if (auth) {
+        setAuthor(auth.id);
         next();
     } else {
         doAuth(pool, token).then(function (authData) {
             authMap.set(token, authData);
+            setAuthor(authData.id);
             next();
         }, function (err) {
             res.status(401).end(err);
