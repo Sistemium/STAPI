@@ -2,10 +2,39 @@
 
 const pools = require('../../pool/poolManager');
 
-export default function () {
+export function dbAuth() {
     return function (req, res, next) {
         authDb(req, res, next);
     }
+}
+
+export function onConnect() {
+    var conn = this;
+    return new Promise(function (resolve, reject) {
+        conn.exec('create variable @@UACToken string', function (err, res) {
+            console.error(err, res);
+            if (!err) {
+                console.log('@@UACToken create success');
+                resolve(conn);
+            } else {
+                console.error(err);
+                reject(err);
+            }
+        });
+    });
+}
+
+export function onAcquire(token) {
+    var conn = this;
+    return new Promise(function (resolve, reject) {
+        conn.exec(`set @@UACToken = '${token}'`, function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(conn);
+            }
+        });
+    });
 }
 
 function authenticator(conn, token) {
