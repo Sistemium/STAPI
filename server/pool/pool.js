@@ -16,7 +16,7 @@ class Pool {
         let pool = poolModule.Pool({
 
             name: self.config.name,
-            create: function (callback) {
+            create: function (onCreateCallback) {
 
                 var connAuth = {};
 
@@ -87,10 +87,18 @@ class Pool {
 
                 conn.process.on('message', function (m) {
                     if (m === 'connected') {
-                        callback(null, conn);
+                        conn.exec('create variable @@UACAccount string',function (err,res){
+                            console.error (err,res);
+                            if (!err) {
+                                console.log ('@@UACAccount create success');
+                                onCreateCallback(null, conn);
+                            } else {
+                                console.error (err);
+                            }
+                        });
                     } else if (m.connectError) {
                         conn.busy = true;
-                        callback(m.connectError, conn);
+                        onCreateCallback(m.connectError, conn);
                         conn.process.kill();
                     } else if (m.result) {
                         if (m.number == conn.requestCount) {
@@ -142,28 +150,32 @@ class Pool {
 
         var poolAcquire = pool.acquire;
 
-        pool.acquire = function (callback, token) {
+        pool.acquire = function (onAcquireCallback, token) {
             poolAcquire (function (err,acquiredConn){
                 if (!err && token) {
 
                     var connAuthData = acquiredConn.authData(token);
 
                     if (acquiredConn.authData(token)) {
-                        callback (err, acquiredConn, connAuthData);
+                        acquiredConn.exec (`set @@UACAccount = ${connAuthData.id}`,function(){
+                            onAcquireCallback (err, acquiredConn, connAuthData);
+                        });
                     } else {
                         acquiredConn.authorize(token).then(
                             function (connAuthData) {
-                                callback(err, acquiredConn, connAuthData);
+                                acquiredConn.exec (`set @@UACAccount = ${connAuthData.id}`,function(){
+                                    onAcquireCallback (err, acquiredConn, connAuthData);
+                                });
                             },
                             function (err) {
                                 pool.release(acquiredConn);
-                                callback (err);
+                                onAcquireCallback (err);
                             }
                         );
                     }
 
                 } else {
-                    callback (err, acquiredConn);
+                    onAcquireCallback (err, acquiredConn);
                 }
             });
         };
