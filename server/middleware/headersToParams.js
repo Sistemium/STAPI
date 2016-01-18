@@ -3,6 +3,8 @@ const _ = require('lodash');
 
 export default function () {
     return function (req, res, next) {
+
+        console.log (req.headers);
         let supportedHeaders = /x-page-size|x-start-page|x-order-by/i;
 
         function headersToParams (headers) {

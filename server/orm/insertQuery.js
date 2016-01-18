@@ -61,7 +61,8 @@ export default function (body, config, map, pool) {
 
         _.each(fields, (v, k) => {
             if (_.isObject(fields[k])) {
-                result.query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = '${fields[k].body}') AS [${k}],`;
+                result.query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = ?) AS [${k}],`;
+                result.params.push(fields[k].body);
             }
             else {
                 result.query += `? AS [${k}],`;
