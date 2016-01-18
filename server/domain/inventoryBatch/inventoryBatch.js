@@ -2,7 +2,7 @@
 
 module.exports = {
 
-    pools: ['bsd'],
+    pools: ['dev'],
     extends: 'defaultFields',
     fields: {
         code: {
@@ -13,7 +13,7 @@ module.exports = {
             type: 'boolean'
         }
     },
-    tableName: '[bs].[InventoryBatch]',
+    tableName: '[stg].[InventoryBatch]()',
     alias: 'ib',
     collection: 'inventoryBatch'
 
