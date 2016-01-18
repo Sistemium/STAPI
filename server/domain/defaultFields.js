@@ -7,7 +7,10 @@ module.exports = {
   abstract: true,
   fields: {
     id: 'xid',
-    ts: 'ts',
+    ts: {
+      field:'ts',
+      readonly: true
+    },
     //cts: 'cts',
     author: 'author'
   }
