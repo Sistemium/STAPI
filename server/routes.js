@@ -7,11 +7,12 @@
 import errors from './components/errors';
 import path from 'path';
 import extractFromUrl from './middleware/extractFromUrl';
+import auth from './middleware/auth';
 
 export default function (app) {
     // Insert routes below
     app.use('/api/admin/map', require('./api/admin'));
-    app.use('/api/:pool/:collection', extractFromUrl(), require('./api/domain'));
+    app.use('/api/:pool/:collection', extractFromUrl(), auth(), require('./api/domain'));
 
     // All undefined asset or api routes should return a 404
     app.route('/:url(api|auth|components|app|bower_components|assets)/*')
