@@ -15,7 +15,7 @@ class Pool {
         let self = this;
         let pool = poolModule.Pool({
 
-            name: this.config.name,
+            name: self.config.name,
             create: function (callback) {
 
                 var connAuth = {};
@@ -167,6 +167,8 @@ class Pool {
                 }
             });
         };
+
+        pool.config = self.config;
 
         return pool;
     }

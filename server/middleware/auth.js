@@ -1,95 +1,17 @@
 'use strict';
 
-import config from '../config/environment';
-const authUrl = config.stAuthUrl;
-var request = require('request');
-
-// переделать на хранение в redis с автоочисткой по expiresAt
-var authorizedTokens = {};
-var badTokens = {};
-
-var authByToken = function (token) {
-
-    var options = {
-        url: authUrl,
-        headers: {
-            authorization: token
-        }
-    };
-
-    return new Promise (function (resolve,reject) {
-
-        request.get(options,function(err,res,body){
-
-            var jsonBody;
-
-            try {
-                jsonBody = JSON.parse(body);
-            } catch (x) {
-                jsonBody = false;
-            }
-
-            if (!err && res.statusCode == 200 && jsonBody) {
-                resolve (jsonBody);
-            } else {
-                reject (res.statusCode || err);
-            }
-
-        });
-
-    });
-
-};
-
-var checkOrgAuth = function (org,auth) {
-
-    try {
-        if (auth.account.org === org || auth.roles.admin) {
-            return true;
-        }
-    } catch (e) {
-        return false;
-    }
-
-    return false;
-
-};
+import poolManager from '../pool/poolManager.js';
 
 export default function () {
+    return function (req,res,next) {
+        let pool = poolManager.getPoolByName(req.pool);
 
-    if (!authUrl) {
-        return function (req, res, next) {
-            next();
-        }
-    }
+        console.log ('Auth: ', !!pool.config.preAuth);
 
-    return function (req, res, next) {
-
-        var checkRoles = function (auth) {
-
-            if (checkOrgAuth(req.pool,auth)) {
-                req.auth = auth;
-                next();
-            } else {
-                res.status(403).end();
-            }
-
-        };
-
-        var token = req.headers.authorization;
-
-        if (!token || badTokens[token]) {
-            res.status(401).end();
-        } else if (authorizedTokens[token]) {
-            checkRoles(authorizedTokens[token]);
+        if (pool.config.preAuth) {
+            pool.config.preAuth (req,res,next);
         } else {
-            authByToken(token).then(function (res) {
-                console.log ('Auth account success:', res.account);
-                checkRoles (authorizedTokens[token] = res);
-            },function (){
-                badTokens[token] = true;
-                res.status(401).end();
-            });
+            next();
         }
 
     }
