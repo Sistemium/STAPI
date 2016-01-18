@@ -74,7 +74,7 @@ export default function (config, params, domain, pool) {
     };
 
     if (!params['agg:']) {
-      result.query += `SELECT TOP ? START AT ? \n`;
+      result.query += `SELECT TOP ? START AT ?  `;
       result.params.push(pageSize, startPage);
     } else {
       result.query += 'SELECT COUNT (*) as cnt';
@@ -102,7 +102,7 @@ export default function (config, params, domain, pool) {
         } else {
           result.query += `${alias}.${propObj} as ${v}`;
         }
-        result.query += ',\n';
+        result.query += ', ';
       });
       result.query = result.query.slice(0, -2);
     }
@@ -111,7 +111,7 @@ export default function (config, params, domain, pool) {
 
     if (refTableNames.size > 0) {
       for (let ref of refTableNames) {
-        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field}\n`;
+        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
 
       }
     }
