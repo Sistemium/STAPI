@@ -3,11 +3,11 @@ var orm = require('../../orm/orm');
 var _ = require('lodash');
 var pools = require('../../pool');
 
-var errorHandler = function (err,conn, pool, res) {
+var errorHandler = function (err, conn, pool, res) {
 
     console.error('Client:', conn.number, 'exec error:', err);
 
-    if (err.code.match(/(-308)(-2005)/ig)) {
+    if (err.code.match(/(-308)(-2005)(-121)/ig)) {
         console.log('Pool will destroy conn:', conn.number);
         pool.destroy(conn);
     } else {
@@ -61,26 +61,22 @@ var doSelect = function (pool, conn, req, res) {
 };
 
 export function index(req, res) {
+    let pool = pools(req.pool);
 
-    var pool = pools(req.pool);
-
-    pool.acquire(function (err,conn,auth) {
-
-        if (err) {
-            console.log('acquire err:', err);
-            return res.status(err === 'not authorized' ? 401 : 500).end(err.text);
-        }
-
-        req.on('close', function() {
-            console.error ('Client:', conn.number, 'request closed unexpectedly');
+    pool.customAcquire(req.headers.authorization).then(function (conn) {
+        req.on('close', function () {
+            console.error('Client:', conn.number, 'request closed unexpectedly');
             conn.rejectExec();
         });
 
-        console.log ('Conn', conn.number, 'auth:', auth);
+        console.log('Conn', conn.number);
 
-        doSelect (pool, conn, req, res);
+        doSelect(pool, conn, req, res);
+    }, function (err) {
+        console.log(err);
 
-    },req.headers.authorization);
+        res.status(500).end(err);
+    });
 }
 
 export function post(req, res, next) {
@@ -90,19 +86,19 @@ export function post(req, res, next) {
         return res.status(400) && next('Empty body');
     }
 
-    pool.acquire(function (err,conn,auth) {
+    pool.customAcquire(function (err, conn, auth) {
 
         if (err) {
             console.log('acquire err:', err);
             return res.status(err === 'not authorized' ? 401 : 500).end(err.text);
         }
 
-        req.on('close', function() {
-            console.error ('Client:', conn.number, 'request closed unexpectedly');
+        req.on('close', function () {
+            console.error('Client:', conn.number, 'request closed unexpectedly');
             conn.rejectExec()
         });
 
-        console.log (req.body);
+        console.log(req.body);
 
         req.body.author = auth.id;
 
@@ -112,17 +108,17 @@ export function post(req, res, next) {
         conn.exec(query.query, query.params, function (err, rowsAffected) {
 
             if (err) {
-               return errorHandler(err,conn, pool, res);
+                return errorHandler(err, conn, pool, res);
             }
 
             pool.release(conn);
 
             if (rowsAffected) {
-                return res.status(200).set('X-Rows-Affected',rowsAffected).end();
+                return res.status(200).set('X-Rows-Affected', rowsAffected).end();
             } else {
                 return res.status(404).end();
             }
 
         });
-    },req.headers.authorization);
+    }, req.headers.authorization);
 }

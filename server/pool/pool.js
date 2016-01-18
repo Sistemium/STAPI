@@ -57,15 +57,15 @@ class Pool {
 
                 conn.process.on('message', function (m) {
                     if (m === 'connected') {
-                        conn.exec('create variable @@UACAccount string',function (err,res){
-                            console.error (err,res);
-                            if (!err) {
-                                console.log ('@@UACAccount create success');
+                        if (self.config.onConnect) {
+                            self.config.onConnect.apply(conn).then(function () {
                                 onCreateCallback(null, conn);
-                            } else {
-                                console.error (err);
-                            }
-                        });
+                            }, function (err) {
+                                onCreateCallback(err);
+                            })
+                        } else {
+                            onCreateCallback(null, conn);
+                        }
                     } else if (m.connectError) {
                         conn.busy = true;
                         onCreateCallback(m.connectError, conn);
@@ -120,11 +120,12 @@ class Pool {
 
         var poolAcquire = pool.acquire;
 
+
         pool.acquirePromise = function () {
-            return new Promise(function(resolve,reject){
-                poolAcquire (function(err,conn){
+            return new Promise(function (resolve, reject) {
+                poolAcquire(function (err, conn) {
                     if (err) {
-                        reject (err)
+                        reject(err)
                     } else {
                         resolve(conn);
                     }
@@ -132,7 +133,24 @@ class Pool {
             });
         };
 
+        pool.customAcquire = function () {
+            var args = arguments;
+            return new Promise(function (resolve, reject) {
+                pool.acquirePromise().then(function (conn) {
+                    if (pool.config.onAcquire) {
+                        pool.config.onAcquire.apply(conn, args)
+                            .then(function () {
+                                resolve(conn);
+                            }, reject);
+                    } else {
+                        resolve(conn);
+                    }
+                }, reject);
+            });
+        };
+
         pool.config = self.config;
+
 
         return pool;
     }
