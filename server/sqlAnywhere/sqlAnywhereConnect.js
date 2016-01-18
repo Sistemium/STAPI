@@ -43,7 +43,7 @@ process.on('message', function(m) {
                     if (err) {
                         m.error = parseError(err);
                     } else {
-                        m.result = res;
+                        m.result = res || true;
                     }
                     process.send(m);
                 });
