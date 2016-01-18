@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function () {
+export default function () {
     return function (req, res, next) {
 
         req.pool = req.params.pool.toLowerCase();
