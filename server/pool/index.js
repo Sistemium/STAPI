@@ -5,5 +5,5 @@ const poolManager = require('./poolManager');
 poolManager.initPools(connections);
 
 export default function (name) {
-    return poolManager.getPoolByName(name);
+  return poolManager.getPoolByName(name);
 };

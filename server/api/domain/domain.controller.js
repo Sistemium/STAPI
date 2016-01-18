@@ -5,112 +5,112 @@ var pools = require('../../pool');
 
 var errorHandler = function (err, conn, pool, res) {
 
-    console.error('Client:', conn.number, 'exec error:', err);
+  console.error('Client:', conn.number, 'exec error:', err);
 
-    if (err.code.match(/(-308)(-2005)(-121)/ig)) {
-        console.log('Pool will destroy conn:', conn.number);
-        pool.destroy(conn);
-    } else {
-        conn.busy = false;
-        conn.rollback(function () {
-            pool.release(conn);
-        });
-    }
+  if (err.code.match(/(-308)(-2005)(-121)/ig)) {
+    console.log('Pool will destroy conn:', conn.number);
+    pool.destroy(conn);
+  } else {
+    conn.busy = false;
+    conn.rollback(function () {
+      pool.release(conn);
+    });
+  }
 
-    return res.status(500).json(err);
+  return res.status(500).json(err);
 };
 
 
 var doSelect = function (pool, conn, req, res) {
 
-    if (req.method === 'HEAD') {
-        req['x-params']['agg:'] = true;
+  if (req.method === 'HEAD') {
+    req['x-params']['agg:'] = true;
+  }
+
+  let query = orm.select(req.app.locals.domain, req['x-params'], req.app.locals.domainConfig, req.pool);
+  console.log('Client:', conn.number, 'request:', query);
+
+  conn.exec(query.query, query.params, function (err, result) {
+
+    if (err) {
+      return errorHandler(err, conn, pool, res);
     }
 
-    let query = orm.select(req.app.locals.domain, req['x-params'], req.app.locals.domainConfig, req.pool);
-    console.log('Client:', conn.number, 'request:', query);
+    conn.busy = false;
+    pool.release(conn);
 
-    conn.exec(query.query, query.params, function (err, result) {
+    if (req.params.id) {
+      result = result.length ? result [0] : undefined;
+    }
 
-        if (err) {
-            return errorHandler(err, conn, pool, res);
-        }
+    if (!result) {
+      return res.status(404).json();
+    } else if (req.params.id || result.length) {
+      if (req.method === 'HEAD') {
+        res.set('X-Aggregate-Count', result[0].cnt);
+        return res.status(200).end();
+      } else if (result.length) {
+        res.set('X-Rows-Count', result.length);
+      }
+      return res.status(200).json(result);
+    } else {
+      return res.status(204).json();
+    }
 
-        conn.busy = false;
-        pool.release(conn);
-
-        if (req.params.id) {
-            result = result.length ? result [0] : undefined;
-        }
-
-        if (!result) {
-            return res.status(404).json();
-        } else if (req.params.id || result.length) {
-            if (req.method === 'HEAD') {
-                res.set('X-Aggregate-Count', result[0].cnt);
-                return res.status(200).end();
-            } else if (result.length) {
-                res.set('X-Rows-Count', result.length);
-            }
-            return res.status(200).json(result);
-        } else {
-            return res.status(204).json();
-        }
-
-    });
+  });
 };
 
 export function index(req, res) {
-    let pool = pools(req.pool);
+  let pool = pools(req.pool);
 
-    pool.customAcquire(req.headers.authorization).then(function (conn) {
-        req.on('close', function () {
-            console.error('Client:', conn.number, 'request closed unexpectedly');
-            conn.rejectExec();
-        });
-
-        console.log('Conn', conn.number);
-
-        doSelect(pool, conn, req, res);
-    }, function (err) {
-        console.log(err);
-
-        res.status(500).end(err);
+  pool.customAcquire(req.headers.authorization).then(function (conn) {
+    req.on('close', function () {
+      console.error('Client:', conn.number, 'request closed unexpectedly');
+      conn.rejectExec();
     });
+
+    console.log('Conn', conn.number);
+
+    doSelect(pool, conn, req, res);
+  }, function (err) {
+    console.log(err);
+
+    res.status(500).end(err);
+  });
 }
 
 export function post(req, res, next) {
-    var pool = pools(req.pool);
+  var pool = pools(req.pool);
 
-    if (_.isEmpty(req.body)) {
-        return res.status(400) && next('Empty body');
-    }
+  if (_.isEmpty(req.body)) {
+    return res.status(400) && next('Empty body');
+  }
 
-    pool.customAcquire(req.headers.authorization).then(function (conn) {
-        req.on('close', function () {
-            console.error('Client:', conn.number, 'request closed unexpectedly');
-            conn.rejectExec()
-        });
-
-        console.log(req.body);
-
-        let query = orm.insert(req.body, req.app.locals.domain, req.app.locals.domainConfig, req.pool);
-        console.log('Client:', conn.number, 'query:', query.query, 'params:', query.params);
-
-        conn.exec(query.query, query.params, function (err, rowsAffected) {
-
-            if (err) {
-                return errorHandler(err, conn, pool, res);
-            }
-
-            pool.release(conn);
-
-            if (rowsAffected) {
-                return res.status(200).set('X-Rows-Affected', rowsAffected).end();
-            } else {
-                return res.status(404).end();
-            }
-
-        });
+  pool.customAcquire(req.headers.authorization).then(function (conn) {
+    req.on('close', function () {
+      console.error('Client:', conn.number, 'request closed unexpectedly');
+      conn.rejectExec()
     });
+
+    console.log(req.body);
+
+    let query = orm.insert(req.body, req.app.locals.domain, req.app.locals.domainConfig, req.pool);
+    console.log('Client:', conn.number, 'query:', query.query, 'params:', query.params);
+
+    conn.exec(query.query, query.params, function (err, rowsAffected) {
+
+      if (err) {
+        return errorHandler(err, conn, pool, res);
+      }
+
+      pool.release(conn);
+
+      if (rowsAffected) {
+        return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+      } else {
+        return res.status(404).end();
+      }
+
+    });
+  });
 }

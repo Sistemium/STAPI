@@ -5,17 +5,16 @@ var pools = {};
 
 class PoolsManager {
 
-    initPools(connections) {
-        _.each(connections, (o) => {
-           pools[o.name] = new Pool(o).createPool();
-        });
-    }
+  initPools(connections) {
+    _.each(connections, (o) => {
+      pools[o.name] = new Pool(o).createPool();
+    });
+  }
 
-    getPoolByName(name) {
-        return pools[name];
-    }
+  getPoolByName(name) {
+    return pools[name];
+  }
 }
-
 
 
 export default new PoolsManager();

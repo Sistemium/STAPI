@@ -15,33 +15,33 @@ import config from './environment';
 import cors from 'cors';
 
 export default function (app) {
-    var env = app.get('env');
+  var env = app.get('env');
 
-    app.set('views', config.root + '/server/views');
-    app.set('view engine', 'jade');
-    app.use(compression());
-    app.use(cors({
-        allowedHeaders: ['X-Page-Size','X-Start-Page','Authorization','Content-Type']
-    }));
-    app.use(bodyParser.urlencoded({extended: false}));
-    app.use(bodyParser.json());
+  app.set('views', config.root + '/server/views');
+  app.set('view engine', 'jade');
+  app.use(compression());
+  app.use(cors({
+    allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type']
+  }));
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(bodyParser.json());
 
-    app.set('appPath', path.join(config.root, 'client'));
+  app.set('appPath', path.join(config.root, 'client'));
 
-    if ('production' === env) {
-        //app.use(favicon(path.join(config.root, 'client', 'favicon.ico')));
-        app.use(express.static(app.get('appPath')));
-        app.use(morgan('dev'));
-    }
+  if ('production' === env) {
+    //app.use(favicon(path.join(config.root, 'client', 'favicon.ico')));
+    app.use(express.static(app.get('appPath')));
+    app.use(morgan('dev'));
+  }
 
-    if ('development' === env) {
-        app.use(require('connect-livereload')());
-    }
+  if ('development' === env) {
+    app.use(require('connect-livereload')());
+  }
 
-    if ('development' === env || 'test' === env) {
-        app.use(express.static(path.join(config.root, '.tmp')));
-        app.use(express.static(app.get('appPath')));
-        app.use(morgan('dev'));
-        app.use(errorHandler()); // Error handler - has to be last
-    }
+  if ('development' === env || 'test' === env) {
+    app.use(express.static(path.join(config.root, '.tmp')));
+    app.use(express.static(app.get('appPath')));
+    app.use(morgan('dev'));
+    app.use(errorHandler()); // Error handler - has to be last
+  }
 }

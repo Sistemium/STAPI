@@ -2,19 +2,19 @@
 
 module.exports = {
 
-    pools: ['dev'],
-    extends: 'defaultFields',
-    fields: {
-        code: {
-            field: 'code'
-        },
-        isDone: {
-            field: 'isDone',
-            type: 'boolean'
-        }
+  pools: ['dev'],
+  extends: 'defaultFields',
+  fields: {
+    code: {
+      field: 'code'
     },
-    tableName: '[stg].[InventoryBatch]()',
-    alias: 'ib',
-    collection: 'inventoryBatch'
+    isDone: {
+      field: 'isDone',
+      type: 'boolean'
+    }
+  },
+  tableName: '[stg].[InventoryBatch]()',
+  alias: 'ib',
+  collection: 'inventoryBatch'
 
 };

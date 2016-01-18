@@ -4,7 +4,7 @@
 // ==================================
 module.exports = {
 
-    // set to false to auth everything
-    stAuthUrl: 'https://api.sistemium.com/pha/roles'
+  // set to false to auth everything
+  stAuthUrl: 'https://api.sistemium.com/pha/roles'
 
 };
