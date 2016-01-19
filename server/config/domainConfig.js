@@ -5,6 +5,36 @@ const dir = require('node-dir');
 
 let map = new Map();
 
+function parseFields(fields) {
+  let parsed = {};
+  if (!_.isObject(fields)) throw new Error('Model definition must be an object');
+  _.each(Object.keys(fields), (n) => {
+    if (_.isObject(fields[n])) {
+      let propObj = fields[n];
+
+      if (propObj.hasOwnProperty('ref')) {
+        parsed[n] = {
+          ref: propObj['ref'],
+          property: n,
+          field: propObj['field']
+        };
+      }
+      else if (propObj['field'] && _.isString(propObj['field'])) {
+        parsed[n] = propObj;
+      } else if (propObj['expr']) {
+        parsed[n] = {expr: propObj['expr']};
+      }
+      else {
+        throw new Error('Invalid model definition');
+      }
+    } else {
+      throw new Error('Invalid model definition');
+    }
+  });
+
+  return parsed;
+}
+
 let normalizeConfig = (cfg, filename) => {
   if (!cfg || !_.isObject(cfg)) throw new Error(`Config not passed...`);
 
@@ -21,6 +51,7 @@ let normalizeConfig = (cfg, filename) => {
       throw new Error('Invalid configuration...');
     }
   });
+  nCfg.fields = parseFields(nCfg.fields);
   nCfg.collection = nCfg.collection ? nCfg.collection : filename;
 
   return nCfg;

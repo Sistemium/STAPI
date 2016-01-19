@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-export default function (config, params, domain, pool) {
+export default function (config, params, map, pool) {
   "use strict";
 
   function parseOrderByParams(params, alias) {
@@ -19,42 +19,6 @@ export default function (config, params, domain, pool) {
     return result;
   }
 
-  function parseConfig(config) {
-    let parsed = {};
-    if (!_.isObject(config)) throw new Error('Model definition must be an object');
-    _.each(Object.keys(config), (n) => {
-      if (_.isObject(config[n])) {
-        let propObj = config[n];
-        if (propObj.hasOwnProperty('ref')) {
-          let refConfig = domain.get(`${pool}/${propObj['ref'].toLowerCase()}`);
-          if (!refConfig) {
-            throw new Error('Invalid ref configuration...');
-          } else {
-            parsed[n] = {
-              ref: propObj['ref'],
-              property: n,
-              field: propObj['field'],
-              alias: refConfig['alias'],
-              tableName: refConfig['tableName']
-            };
-          }
-        }
-        else if (config[n]['field'] && _.isString(config[n]['field'])) {
-          parsed[n] = config[n]['field'];
-        } else if (config[n]['expr']) {
-          parsed[n] = {expr: config[n]['expr']};
-        }
-        else {
-          throw new Error('Invalid model definition');
-        }
-      } else {
-        throw new Error('Invalid model definition');
-      }
-    });
-
-    return parsed;
-  }
-
   /**
    *
    * @param cnfg
@@ -62,7 +26,9 @@ export default function (config, params, domain, pool) {
    * @param {string} alias
    * @returns {string} query string
    */
-  function makeQuery(cnfg, tableName, alias) {
+  function makeQuery(cnfg) {
+    let tableName = cnfg.tableName;
+    let alias = cnfg.alias;
     let escapeParams = [];
     let pageSize = parseInt(params['x-page-size:']) || 10;
     let startPage = ((parseInt(params['x-start-page:']) - 1) * pageSize || 0) + 1;
@@ -84,21 +50,19 @@ export default function (config, params, domain, pool) {
     let refTableNames = new Map();
 
     if (!params['agg:']) {
-      _.each(Object.keys(cnfg), (v) => {
-        let propObj = cnfg[v];
-        if (_.isObject(propObj)) {
-          if (propObj.hasOwnProperty('ref')) {
-            refTableNames.set(propObj['ref'], propObj);
-            result.query += `[${v}].xid as [${v}]`;
-          } else if (propObj.hasOwnProperty('expr')) {
-            result.query += `${propObj.expr} as [${v}]`;
-            escapeParams.push(propObj.expr, v);
-          }
-        }
-        else if (propObj == v) {
-          result.query += `[${alias}].[${propObj}]`;
+      let fields = cnfg.fields;
+
+      _.each(Object.keys(fields), (v) => {
+
+        let propObj = fields[v];
+        if (propObj.hasOwnProperty('ref')) {
+          refTableNames.set(propObj['ref'], propObj);
+          result.query += `[${v}].xid as [${v}]`;
+        } else if (propObj.hasOwnProperty('expr')) {
+          result.query += `${propObj.expr} as [${v}]`;
+          escapeParams.push(propObj.expr, v);
         } else {
-          result.query += `${alias}.${propObj} as ${v}`;
+          result.query += `[${alias}].[${propObj['field']}] as ${v}`;
         }
         result.query += ', ';
       });
@@ -144,6 +108,14 @@ export default function (config, params, domain, pool) {
     return result;
   }
 
-  let parsedConfig = parseConfig(config.fields);
-  return makeQuery(parsedConfig, config.tableName, config.alias);
+  //link ref config to config with ref fields
+  _.each(config.fields, (val, field) => {
+    if (val.hasOwnProperty('ref')) {
+      let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
+      config.fields[field].alias = refConfig.alias;
+      config.fields[field].tableName = refConfig.tableName;
+    }
+  });
+
+  return makeQuery(config);
 };
