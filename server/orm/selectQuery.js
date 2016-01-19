@@ -21,9 +21,7 @@ export default function (config, params, map, pool) {
 
   /**
    *
-   * @param cnfg
-   * @param {string} tableName
-   * @param {string} alias
+   * @param cnfg {object} configuration object
    * @returns {string} query string
    */
   function makeQuery(cnfg) {
@@ -74,8 +72,12 @@ export default function (config, params, map, pool) {
     if (refTableNames.size > 0) {
       for (let ref of refTableNames) {
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
-
       }
+    }
+
+    //if join in config
+    if (cnfg.join) {
+      result.query += ` ${cnfg.join} `
     }
 
     let withPredicate = false;
@@ -87,6 +89,12 @@ export default function (config, params, map, pool) {
         result.params.push(params[key]);
       }
     });
+
+    //if predicate exist in config
+    if (cnfg.predicate) {
+      withPredicate = true;
+      predicateStr += `${cnfg.predicate} AND `;
+    }
 
     if (withPredicate) {
       predicateStr = predicateStr.replace(/ AND $/i, '');
@@ -105,6 +113,8 @@ export default function (config, params, map, pool) {
       }
     }
 
+
+    result.query = result.query.replace(/\n/g, '');
     return result;
   }
 
