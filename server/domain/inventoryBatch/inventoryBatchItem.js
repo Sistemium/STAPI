@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  pools: ['bsd'],
+  pools: ['dev'],
   fields: {
     id: 'xid',
     ts: {
