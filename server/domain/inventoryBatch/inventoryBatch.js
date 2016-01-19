@@ -13,7 +13,7 @@ module.exports = {
       type: 'boolean'
     }
   },
-  tableName: '[stg].[InventoryBatch]()',
+  tableName: '[bs].[InventoryBatch]',
   alias: 'ib',
   collection: 'inventoryBatch'
 
