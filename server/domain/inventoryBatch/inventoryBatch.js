@@ -28,7 +28,7 @@ module.exports = {
         )`
     }
   },
-  tableName: '[stg].[InventoryBatch]',
+  tableName: '[bs].[InventoryBatch]',
   alias: 'ib',
   collection: 'inventoryBatch',
   join: 'JOIN uac.account a on a.id = ib.author',

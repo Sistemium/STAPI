@@ -11,10 +11,10 @@ export function dbAuth() {
 export function onConnect() {
   var conn = this;
   return new Promise(function (resolve, reject) {
-    conn.exec('create variable @@UACToken string', function (err, res) {
+    conn.exec('create variable @UACToken string', function (err, res) {
       console.error(err, res);
       if (!err) {
-        console.log('@@UACToken create success');
+        console.log('@UACToken create success');
         resolve(conn);
       } else {
         console.error(err);
@@ -27,7 +27,7 @@ export function onConnect() {
 export function onAcquire(token) {
   var conn = this;
   return new Promise(function (resolve, reject) {
-    conn.exec(`set @@UACToken = '${token}'`, function (err) {
+    conn.exec(`set @UACToken = '${token}'`, function (err) {
       if (err) {
         reject(err);
       } else {
