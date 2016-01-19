@@ -9,26 +9,6 @@ export default function (body, config, map, pool) {
     params: []
   };
 
-  function mapModelKeysToFields(config) {
-    let map = new Map();
-
-    _.each(config['fields'], (val, key) => {
-      if (_.isObject(val)) {
-        if (val.hasOwnProperty('field') && _.isString(val['field'])) {
-          map.set(key, val['field']);
-        } else {
-          throw new Error('Invalid model definition, check your configuration...');
-        }
-      } else if (_.isString(val)) {
-        map.set(key, val);
-      } else {
-        throw new Error('Invalid model definition, check your configuration...');
-      }
-    });
-
-    return map;
-  }
-
   _.each(Object.keys(body), (k) => {
     let cnfProp = config['fields'][k];
     if (_.isObject(cnfProp)) {
