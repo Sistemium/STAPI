@@ -8,7 +8,7 @@ export default function () {
 
     try {
       if (req.pool === undefined) {
-        throw new Error('You did not pass pool name... Try /api/databaseName/collectionName')
+        throw new Error('You did not pass pool name... Try /api/databaseName/collectionName');
       }
 
       if (collection === undefined) {
@@ -19,7 +19,7 @@ export default function () {
       let appLocals = req.app.locals;
       let domainConfig = appLocals.domainConfig.get(keyInMap);
       if (!(appLocals && domainConfig)) {
-        throw new Error(`${keyInMap} not exist`);
+        return res.status(404).end();
       }
       appLocals.domain = domainConfig;
     } catch (err) {
