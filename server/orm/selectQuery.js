@@ -107,8 +107,8 @@ export default function (config, params, map, pool) {
         result.query += ` ORDER BY ${orderBy}`;
       } else {
         //default order by
-        if (cnfg['ts'] === 'ts') {
-          result.query += ` ORDER BY ${alias}.${cnfg.ts} DESC`;
+        if (cnfg.fields['ts'].field === 'ts') {
+          result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field} DESC`;
         }
       }
     }
