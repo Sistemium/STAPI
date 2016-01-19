@@ -96,6 +96,40 @@ export default function (config, params, map, pool) {
       predicateStr += `${cnfg.predicate} AND `;
     }
 
+    if (!params['agg:']) {
+
+      if (params['q:']) {
+        withPredicate = true;
+        let q = params['q:'];
+        if (q) {
+          try {
+            let parsed = JSON.parse(q);
+            var searchFields = parsed.searchFields;
+            var searchFor = parsed.searchFor;
+            if (_.isString(searchFields)) {
+              searchFields = searchFields.split(',');
+              _.each(searchFields, (field) => {
+                //check that passed field is in config
+                if (cnfg.fields[field]) {
+                  predicateStr += ` ${field} LIKE '%${searchFor}%' AND `;
+                } else {
+                  console.log(`No such field ${field} defined...`);
+                  throw new Error(`No such field ${field} defined...`);
+                }
+              });
+            }
+            if (_.isArray(searchFields)) {
+              _.each(searchFields, (field) => {
+                predicateStr += ` ${field} LIKE '%${searchFor}%' AND `;
+              });
+            }
+          } catch (err) {
+            throw new Error(err);
+          }
+        }
+      }
+    }
+
     if (withPredicate) {
       predicateStr = predicateStr.replace(/ AND $/i, '');
       result.query += predicateStr;

@@ -27,7 +27,12 @@ var doSelect = function (pool, conn, req, res) {
     req['x-params']['agg:'] = true;
   }
 
-  let query = orm.select(req.app.locals.domain, req['x-params'], req.app.locals.domainConfig, req.pool);
+  let query;
+  try {
+    query = orm.select(req.app.locals.domain, req['x-params'], req.app.locals.domainConfig, req.pool);
+  } catch (err) {
+    return res.status(400).end();
+  }
   console.log('Client:', conn.number, 'request:', query);
 
   conn.exec(query.query, query.params, function (err, result) {
