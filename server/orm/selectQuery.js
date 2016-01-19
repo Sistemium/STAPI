@@ -23,9 +23,7 @@ export default function (config, params, domain, pool) {
     let parsed = {};
     if (!_.isObject(config)) throw new Error('Model definition must be an object');
     _.each(Object.keys(config), (n) => {
-      if (_.isString(config[n])) {
-        parsed[n] = config[n];
-      } else if (_.isObject(config[n])) {
+      if (_.isObject(config[n])) {
         let propObj = config[n];
         if (propObj.hasOwnProperty('ref')) {
           let refConfig = domain.get(`${pool}/${propObj['ref'].toLowerCase()}`);
