@@ -1,9 +1,9 @@
 'use strict';
 
 var debug = require('debug')('stapi:domain:controller');
-var orm = require('../../orm/orm');
+var orm = require('../../components/orm/orm');
 var _ = require('lodash');
-var pools = require('../../pool');
+var pools = require('../../components/pool');
 
 var errorHandler = function (err, conn, pool, res) {
 
@@ -33,7 +33,7 @@ var doSelect = function (pool, conn, req, res) {
 
   let query;
   try {
-    query = orm.select(req.app.locals.domain, req['x-params'], req.app.locals.domainConfig, req.pool);
+    query = orm.select(res.locals.config, req['x-params'], req.app.locals.domainConfig, req.pool);
   } catch (err) {
     return res.status(400).end();
   }

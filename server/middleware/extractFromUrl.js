@@ -21,7 +21,8 @@ export default function () {
       if (!(appLocals && domainConfig)) {
         return res.status(404).end();
       }
-      appLocals.domain = domainConfig;
+      //expose request-level config
+      res.locals.config = domainConfig;
     } catch (err) {
       console.log(`Path: /api/${req.pool}/${collection}`);
       return next(err);

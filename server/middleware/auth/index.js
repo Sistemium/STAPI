@@ -1,6 +1,6 @@
 'use strict';
 
-import poolManager from '../../pool/poolManager';
+import poolManager from '../../components/pool/poolManager';
 
 export default function () {
   return function (req, res, next) {

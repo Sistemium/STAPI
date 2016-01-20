@@ -3,6 +3,7 @@ const poolModule = require('generic-pool');
 const fork = require('child_process').fork;
 const _ = require('lodash');
 
+const sqlAnywhereConnect = 'server/components/sqlAnywhere/sqlAnywhereConnect';
 
 class Pool {
 
@@ -20,7 +21,7 @@ class Pool {
 
         var conn = {
 
-          process: fork('server/sqlAnywhere/sqlAnywhereConnect', [self.config.params]),
+          process: fork(sqlAnywhereConnect, [self.config.params]),
           number: self.counter++,
           requestCount: 0,
 
