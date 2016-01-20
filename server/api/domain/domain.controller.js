@@ -55,7 +55,7 @@ var doSelect = function (pool, conn, req, res) {
       _.each(result[0], (val, key) => {
         debug('conn exec done', `${config['fields'][key]}`);
         if (config['fields'][key].parser) {
-          val = config['fields'][key].parser.fromARObject(val);
+          result[0][key] = config['fields'][key].parser(val);
         }
       });
       result = result.length ? result [0] : undefined;
@@ -75,7 +75,7 @@ var doSelect = function (pool, conn, req, res) {
         _.each(item, (val, key) => {
           debug('index', `before parsing ${key}: ${JSON.stringify(config['fields'][key])}`);
           if (config['fields'][key].parser) {
-            item[key] = config['fields'][key].parser.fromARObject(val);
+            item[key] = config['fields'][key].parser(val);
           }
         });
       });

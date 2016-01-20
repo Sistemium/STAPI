@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const plugins = require('../components/plugins')();
+const plugins = require('../components/plugins');
 const dir = require('node-dir');
 
 let map = new Map();
@@ -25,7 +25,7 @@ function parseFields(fields) {
       } else if (propObj['expr']) {
         parsed[n] = {expr: propObj['expr']};
         if (propObj['parser']) {
-          parsed[n].parser = plugins.get(propObj['parser']);
+          parsed[n].parser = plugins().get(propObj['parser']);
         }
       }
       else {
@@ -86,7 +86,7 @@ let processConfig = (cfg, filename) => {
   });
 };
 
-module.exports = function (path, cb) {
+export default function (path, cb) {
   readConfigFiles(path, (files) => {
     _.each(files, (file) => {
       let cnfg = require(file);

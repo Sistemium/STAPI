@@ -8,7 +8,7 @@ import express from 'express';
 import config from './config/environment';
 import http from 'http';
 import domainConfig from './config/domainConfig';
-
+import registerPlugins from './components/plugins/registerPlugins';
 // Setup server
 var app = express();
 var server = http.createServer(app);
