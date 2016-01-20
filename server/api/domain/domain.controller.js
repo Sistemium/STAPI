@@ -53,7 +53,6 @@ var doSelect = function (pool, conn, req, res) {
 
     if (req.params.id) {
       _.each(result[0], (val, key) => {
-        debug('conn exec done', `${config['fields'][key]}`);
         if (config['fields'][key].parser) {
           result[0][key] = config['fields'][key].parser(val);
         }
@@ -73,13 +72,11 @@ var doSelect = function (pool, conn, req, res) {
 
       _.each(result, (item) => {
         _.each(item, (val, key) => {
-          debug('index', `before parsing ${key}: ${JSON.stringify(config['fields'][key])}`);
           if (config['fields'][key].parser) {
             item[key] = config['fields'][key].parser(val);
           }
         });
       });
-      debug('index', 'after parsing');
 
       return res.status(200).json(result);
     } else {
