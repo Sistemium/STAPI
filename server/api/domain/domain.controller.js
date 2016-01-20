@@ -1,4 +1,6 @@
-"use strict";
+'use strict';
+
+var debug = require('debug')('stapi:domain:controller');
 var orm = require('../../orm/orm');
 var _ = require('lodash');
 var pools = require('../../pool');
@@ -23,6 +25,8 @@ var errorHandler = function (err, conn, pool, res) {
 
 var doSelect = function (pool, conn, req, res) {
 
+  debug ('index','start');
+
   if (req.method === 'HEAD') {
     req['x-params']['agg:'] = true;
   }
@@ -36,6 +40,8 @@ var doSelect = function (pool, conn, req, res) {
   console.log('Client:', conn.number, 'request:', query);
 
   conn.exec(query.query, query.params, function (err, result) {
+
+    debug ('index','exec done');
 
     if (err) {
       return errorHandler(err, conn, pool, res);
@@ -73,8 +79,6 @@ export function index(req, res) {
       console.error('Client:', conn.number, 'request closed unexpectedly');
       conn.rejectExec();
     });
-
-    console.log('Conn', conn.number);
 
     doSelect(pool, conn, req, res);
   }, function (err) {

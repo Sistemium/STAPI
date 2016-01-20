@@ -1,5 +1,6 @@
 'use strict';
 
+var debug = require('debug')('stapi:dbAuth');
 const pools = require('../../pool/poolManager');
 
 export function dbAuth() {
@@ -9,12 +10,14 @@ export function dbAuth() {
 }
 
 export function onConnect() {
+
   var conn = this;
+  debug ('onConnect', 'start conn:', conn.number);
+
   return new Promise(function (resolve, reject) {
-    conn.exec('create variable @UACToken string', function (err, res) {
-      console.error(err, res);
+    conn.exec('create variable @UACToken string', function (err) {
       if (!err) {
-        console.log('@UACToken create success');
+        debug('onConnect', 'success conn:', conn.number);
         resolve(conn);
       } else {
         console.error(err);
@@ -22,22 +25,29 @@ export function onConnect() {
       }
     });
   });
+
 }
 
 export function onAcquire(token) {
+
   var conn = this;
+  debug ('onAcquire', 'start conn:', conn.number);
+
   return new Promise(function (resolve, reject) {
     conn.exec(`set @UACToken = '${token}'`, function (err) {
       if (err) {
         reject(err);
       } else {
+        debug ('onAcquire', 'success conn:', conn.number);
         resolve(conn);
       }
     });
   });
+
 }
 
 function authenticator(conn, token) {
+
   return function (resolve, reject) {
 
     var sql = `select * from uac.authorizedAccount ('${token}')`;
@@ -61,7 +71,6 @@ function authDb(req, res, next) {
     }
   }
 
-  console.log('authDb start');
   let token = req.headers.authorization;
 
   let pool = pools.getPoolByName(req.pool);
@@ -74,7 +83,9 @@ function authDb(req, res, next) {
     setAuthor(auth.id);
     next();
   } else {
+    debug ('doAuth', 'start');
     doAuth(pool, token).then(function (authData) {
+      debug ('doAuth', 'success account.id:', authData.id);
       authMap.set(token, authData);
       setAuthor(authData.id);
       next();

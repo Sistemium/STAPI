@@ -85,7 +85,7 @@ export default function () {
       checkRoles(authorizedTokens[token]);
     } else {
       authByToken(token).then(function (res) {
-        console.log('Auth account success:', res.account);
+        console.log('Auth account success:', res.account && res.account.name);
         checkRoles(authorizedTokens[token] = res);
       }, function () {
         badTokens[token] = true;
