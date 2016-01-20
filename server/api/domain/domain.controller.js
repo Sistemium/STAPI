@@ -65,7 +65,6 @@ var doSelect = function (pool, conn, req, res) {
       _.each(result, (item) => {
         _.each(item, (val, key) => {
           if (config['fields'][key].parser) {
-            debug('index.doSelect', `${val}`);
             if (val) {
               item[key] = config['fields'][key].parser(val);
             }
