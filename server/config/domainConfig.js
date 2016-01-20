@@ -22,6 +22,9 @@ function parseFields(fields) {
       }
       else if (propObj['field'] && _.isString(propObj['field'])) {
         parsed[n] = propObj;
+        if (propObj['parser']) {
+          parsed[n].parser = plugins().get(propObj['parser']);
+        }
       } else if (propObj['expr']) {
         parsed[n] = {expr: propObj['expr']};
         if (propObj['parser']) {
@@ -91,7 +94,7 @@ export default function (path, cb) {
     _.each(files, (file) => {
       let cnfg = require(file);
 
-      let filename = file.split('/').slice(-1)[0].split('.')[0];
+      let filename = file.split('/').slice(-1)[0].match(/([^\/]+)(?=\.\w+$)/)[0];
       processConfig(cnfg, filename);
     });
 

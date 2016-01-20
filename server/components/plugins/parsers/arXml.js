@@ -1,40 +1,60 @@
 'use strict';
 
-let _ = require('lodash');
-let xml2js = require('xml2js');
+const _ = require('lodash');
+const parseString = require('xml2js').parseString;
+const debug = require('debug')('stapi:parsers:arXml');
+
+let dtConvert = function (type){
+  if (type.match (/^(decimal)$/)) {
+    return parseFloat;
+  } else if (type.match(/^(i|integer|int)$/)) {
+    return parseInt;
+  } else {
+    return function(v) {
+      return v;
+    };
+  }
+};
 
 exports.fromARObject = function fromARObject (xml) {
 
   var result = {};
 
-  xml2js.parseString (xml, function (err,res) {
-    // {"Object":{"i":{"_":"20","$":{"name":"cnt"}},"decimal":{"_":"2.5","$":{"name":"avgSeconds"}}}}
+  // {"Object":{"i":{"_":"20","$":{"name":"cnt"}},"decimal":{"_":"2.5","$":{"name":"avgSeconds"}}}}
 
-    xml2js.parseString (xml, {explicitChildren:false, explicitArray:false}, function (err,res) {
+  parseString (xml, {explicitChildren:false}, function (err,res) {
 
-      if (err) {
-        return false;
-      }
+    if (err) {
+      return false;
+    }
 
-      try {
-        _.each(res.Object, function (val) {
-          result[val.$.name] = val._;
+    try {
+      _.each(res.Object, function (val,key) {
+        _.each (val,function (item) {
+          result[item.$.name] = dtConvert(key)(item._);
         });
-      } catch (e) {
-        console.error('fromARObject:', e);
-        return false;
-      }
-    });
-
+      });
+    } catch (e) {
+      console.error('fromARObject:', e);
+      return false;
+    }
   });
 
+
+  debug('fromARObject', result);
   return result;
 
 };
 
 exports.fromARArray = function fromARArray (xml) {
+
   var result = [];
-  xml2js.parseString (xml, {explicitChildren:true}, function (err,res) {
+
+  if (!xml.match (/^<Array>/)) {
+    xml = `<Array>${xml}</Array>`;
+  }
+
+  parseString (xml, {explicitChildren:true}, function (err,res) {
 
     if (err) {
       return false;
@@ -54,8 +74,10 @@ exports.fromARArray = function fromARArray (xml) {
           }
         });
 
-        _.each(d.$$.s, function (s) {
-          obj[s.$.name] = s._;
+        _.each(d.$$, function (val,key) {
+          _.each (val,function (item) {
+            obj[item.$.name] = dtConvert(key)(item._);
+          });
         });
 
         result.push (obj);
@@ -70,5 +92,8 @@ exports.fromARArray = function fromARArray (xml) {
     }
 
   });
+
+  debug('fromARArray', result);
   return result;
+
 };

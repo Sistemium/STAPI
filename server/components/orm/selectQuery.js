@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const debug = require('debug')('stapi:orm:selectQuery');
 
 export default function (config, params, map, pool) {
   "use strict";

@@ -12,7 +12,7 @@ module.exports = {
       readonly: true
     },
     //cts: 'cts',
-    author: 'author'
+    //author: 'author'
   }
 
 };

@@ -25,7 +25,7 @@ var errorHandler = function (err, conn, pool, res) {
 
 var doSelect = function (pool, conn, req, res) {
 
-  debug('index', 'start');
+  debug('index.doStart', 'start');
 
   if (req.method === 'HEAD') {
     req['x-params']['agg:'] = true;
@@ -36,6 +36,7 @@ var doSelect = function (pool, conn, req, res) {
   try {
     query = orm.select(config, req['x-params'], req.app.locals.domainConfig, req.pool);
   } catch (err) {
+    debug('doSelect', `exception ${err.stack} `);
     return res.status(400).end();
   }
   console.log('Client:', conn.number, 'request:', query);
@@ -54,10 +55,23 @@ var doSelect = function (pool, conn, req, res) {
     if (req.params.id) {
       _.each(result[0], (val, key) => {
         if (config['fields'][key].parser) {
-          result[0][key] = config['fields'][key].parser(val);
+          if (val) {
+            result[0][key] = config['fields'][key].parser(val);
+          }
         }
       });
       result = result.length ? result [0] : undefined;
+    } else if (_.isArray(result)) {
+      _.each(result, (item) => {
+        _.each(item, (val, key) => {
+          if (config['fields'][key].parser) {
+            debug('index.doSelect', `${val}`);
+            if (val) {
+              item[key] = config['fields'][key].parser(val);
+            }
+          }
+        });
+      });
     }
 
     if (!result) {
@@ -69,14 +83,6 @@ var doSelect = function (pool, conn, req, res) {
       } else if (result.length) {
         res.set('X-Rows-Count', result.length);
       }
-
-      _.each(result, (item) => {
-        _.each(item, (val, key) => {
-          if (config['fields'][key].parser) {
-            item[key] = config['fields'][key].parser(val);
-          }
-        });
-      });
 
       return res.status(200).json(result);
     } else {
