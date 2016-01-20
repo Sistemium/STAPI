@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const parseString = require('xml2js').parseString;
-const debug = require('debug')('stapi:parsers:arXml');
 
 let dtConvert = function (type){
   if (type.match (/^(decimal)$/)) {
@@ -40,8 +39,6 @@ exports.fromARObject = function fromARObject (xml) {
     }
   });
 
-
-  debug('fromARObject', result);
   return result;
 
 };
@@ -93,7 +90,6 @@ exports.fromARArray = function fromARArray (xml) {
 
   });
 
-  debug('fromARArray', result);
   return result;
 
 };
