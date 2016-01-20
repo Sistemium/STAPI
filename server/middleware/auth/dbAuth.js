@@ -12,12 +12,12 @@ export function dbAuth() {
 export function onConnect() {
 
   var conn = this;
-  debug ('onConnect', 'start conn:', conn.number);
+  debug ('onConnect', 'start conn:', conn.name);
 
   return new Promise(function (resolve, reject) {
     conn.exec('create variable @UACToken string', function (err) {
       if (!err) {
-        debug('onConnect', 'success conn:', conn.number);
+        debug('onConnect', 'success conn:', conn.name);
         resolve(conn);
       } else {
         console.error(err);
@@ -31,14 +31,14 @@ export function onConnect() {
 export function onAcquire(token) {
 
   var conn = this;
-  debug ('onAcquire', 'start conn:', conn.number);
+  debug ('onAcquire', 'start conn:', conn.name);
 
   return new Promise(function (resolve, reject) {
     conn.exec(`set @UACToken = '${token}'`, function (err) {
       if (err) {
         reject(err);
       } else {
-        debug ('onAcquire', 'success conn:', conn.number);
+        debug ('onAcquire', 'success conn:', conn.name);
         resolve(conn);
       }
     });
