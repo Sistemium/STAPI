@@ -1,8 +1,10 @@
 'use strict';
 
+var debug = require('debug')('stapi:sa');
+
 module.exports = function (conn) {
   var killer = function () {
-    console.log('Killer sqlanywhere');
+    debug('killer', 'conn name:', conn.name);
     if (conn.connectedAt) {
       conn.disconnect(function () {
         process.exit();

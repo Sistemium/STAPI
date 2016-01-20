@@ -1,4 +1,5 @@
 'use strict';
+const debug = require('debug')('stapi:pool');
 const poolModule = require('generic-pool');
 const fork = require('child_process').fork;
 const _ = require('lodash');
@@ -19,10 +20,13 @@ class Pool {
       name: self.config.name,
       create: function (onCreateCallback) {
 
+        let connName = `${self.config.name}-${++self.counter}`;
+
         var conn = {
 
-          process: fork(sqlAnywhereConnect, [self.config.params]),
-          number: self.counter++,
+          process: fork(sqlAnywhereConnect, [self.config.params, connName]),
+          number: self.counter,
+          name: connName,
           requestCount: 0,
 
           exec: function (sql, params, callback) {
@@ -76,10 +80,10 @@ class Pool {
               if (conn.callback) {
                 conn.callback(null, m.result);
               } else {
-                console.error('Client', conn.number, 'empty callback');
+                console.error('Client', conn.name, 'empty callback');
               }
             } else {
-              console.error('Client', conn.number, 'wrong result message number');
+              console.error('Client', conn.name, 'wrong result message number');
             }
           } else if (m.error) {
             conn.callback(m.error);
@@ -89,20 +93,20 @@ class Pool {
         });
 
         conn.process.on('error', function () {
-          console.log('Client error:', conn.number);
+          console.error('Client error:', conn.name);
         });
 
       },
 
       validate: function (client) {
         if (client.busy) {
-          console.error('Client busy:', client.number);
+          console.error('Client busy:', client.name);
         }
         return !client.busy;
       },
 
       destroy: function (client) {
-        console.log('Pool destroy client:', client.number);
+        debug('destroy', 'client number:', client.name);
         if (client.process) {
           client.process.disconnect();
         }
@@ -114,7 +118,7 @@ class Pool {
       idleTimeoutMillis: this.config.idleTimeoutMillis || 60000,
       log: function (str, level) {
         if (level != 'verbose') {
-          console.log('Pool', pool.getName(), level + ':', str);
+          debug(level + ' pool: ' + pool.getName(), str);
         }
       }
     });

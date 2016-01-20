@@ -7,6 +7,8 @@ var connParams = process.argv[2];
 var conn = sqlanywhere.createConnection();
 var errorHandlers = require('./errorHandlers')(conn);
 
+conn.name = process.argv.length > 3 ? process.argv[3] : 'unnamed';
+
 var parseError = function (saError) {
   var err = saError.toString();
   try {
