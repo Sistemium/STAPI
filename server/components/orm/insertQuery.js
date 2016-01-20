@@ -24,6 +24,11 @@ export default function (body, config, map, pool) {
           };
         }
         else if (_.isString(cnfProp['field'])) {
+          if (cnfProp.hasOwnProperty('type')) {
+            if (cnfProp.type.match(/^(bool|boolean)$/i)) {
+              body[k] = body[k] === true ? '1' : '0';
+            }
+          }
           fields[cnfProp['field']] = body[k];
         }
         else {
