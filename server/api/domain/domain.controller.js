@@ -52,24 +52,32 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
-    if (req.params.id) {
-      _.each(result[0], (val, key) => {
-        if (config['fields'][key].parser) {
+    function parseObject(obj) {
+      _.each(obj, (val, key) => {
+        let configKey = config['fields'][key];
+        if (configKey.hasOwnProperty('parser')) {
           if (val) {
-            result[0][key] = config['fields'][key].parser(val);
+            obj[key] = configKey.parser(val);
+          }
+        }
+        if (configKey.hasOwnProperty('type')) {
+          if (configKey.type.match(/^(bool|boolean)$/i)) {
+            obj[key] = val !== '0';
+          } else if (configKey.type.match(/^(int|integer|number)$/i)) {
+            obj[key] = parseInt(val);
+          } else if (configKey.type.match(/^(float|decimal|double)$/i)) {
+            obj[key] = parseFloat(val);
           }
         }
       });
+    }
+
+    if (req.params.id) {
+      parseObject(result[0]);
       result = result.length ? result [0] : undefined;
     } else if (_.isArray(result)) {
       _.each(result, (item) => {
-        _.each(item, (val, key) => {
-          if (config['fields'][key].parser) {
-            if (val) {
-              item[key] = config['fields'][key].parser(val);
-            }
-          }
-        });
+        parseObject(item);
       });
     }
 
