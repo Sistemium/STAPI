@@ -1,9 +1,9 @@
 'use strict';
 
-var debug = require('debug')('stapi:domain:controller');
-var orm = require('../../components/orm/orm');
-var _ = require('lodash');
-var pools = require('../../components/pool');
+const debug = require('debug')('stapi:domain:controller');
+const orm = require('../../components/orm/orm');
+const _ = require('lodash');
+const pools = require('../../components/pool');
 
 var errorHandler = function (err, conn, pool, res) {
 
@@ -25,15 +25,16 @@ var errorHandler = function (err, conn, pool, res) {
 
 var doSelect = function (pool, conn, req, res) {
 
-  debug ('index','start');
+  debug('index', 'start');
 
   if (req.method === 'HEAD') {
     req['x-params']['agg:'] = true;
   }
 
   let query;
+  let config = res.locals.config;
   try {
-    query = orm.select(res.locals.config, req['x-params'], req.app.locals.domainConfig, req.pool);
+    query = orm.select(config, req['x-params'], req.app.locals.domainConfig, req.pool);
   } catch (err) {
     return res.status(400).end();
   }
@@ -41,7 +42,7 @@ var doSelect = function (pool, conn, req, res) {
 
   conn.exec(query.query, query.params, function (err, result) {
 
-    debug ('index','exec done');
+    debug('index', 'exec done');
 
     if (err) {
       return errorHandler(err, conn, pool, res);
@@ -51,6 +52,12 @@ var doSelect = function (pool, conn, req, res) {
     pool.release(conn);
 
     if (req.params.id) {
+      _.each(result[0], (val, key) => {
+        debug('conn exec done', `${config['fields'][key]}`);
+        if (config['fields'][key].parser) {
+          val = config['fields'][key].parser.fromARObject(val);
+        }
+      });
       result = result.length ? result [0] : undefined;
     }
 
@@ -63,6 +70,17 @@ var doSelect = function (pool, conn, req, res) {
       } else if (result.length) {
         res.set('X-Rows-Count', result.length);
       }
+
+      _.each(result, (item) => {
+        _.each(item, (val, key) => {
+          debug('index', `before parsing ${key}: ${JSON.stringify(config['fields'][key])}`);
+          if (config['fields'][key].parser) {
+            item[key] = config['fields'][key].parser.fromARObject(val);
+          }
+        });
+      });
+      debug('index', 'after parsing');
+
       return res.status(200).json(result);
     } else {
       return res.status(204).json();

@@ -25,7 +25,8 @@ module.exports = {
             )
             from bs.InventoryBatchItem ibi
             where ibi.inventoryBatch = ib.id
-        )`
+        )`,
+      parser: 1
     }
   },
   tableName: '[bs].[InventoryBatch]',

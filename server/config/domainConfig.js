@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const plugins = require('../components/plugins')();
 const dir = require('node-dir');
 
 let map = new Map();
@@ -23,6 +24,9 @@ function parseFields(fields) {
         parsed[n] = propObj;
       } else if (propObj['expr']) {
         parsed[n] = {expr: propObj['expr']};
+        if (propObj['parser']) {
+          parsed[n].parser = plugins.get(propObj['parser']);
+        }
       }
       else {
         throw new Error('Invalid model definition');
@@ -70,13 +74,6 @@ let processConfig = (cfg, filename) => {
         parent = parent.toLowerCase();
         parentCfg = _.cloneDeep(map.get(pool + '/' + parent) || map.get('/' + parent));
         if (!parentCfg) {
-          console.error({
-            pool: pool,
-            cfg: cfg,
-            parent2: '/' + parent,
-            map1: map.get(pool + '/' + parent),
-            map2: map.get('/' + parent)
-          });
           throw new Error('Unknown pool:' + pool);
         }
         delete parentCfg.abstract;
