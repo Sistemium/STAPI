@@ -8,6 +8,14 @@ let dtConvert = function (type){
     return parseFloat;
   } else if (type.match(/^(i|integer|int)$/)) {
     return parseInt;
+  } else if (type.match(/^(bool)$/g)) {
+    return function (v) {
+      if (v === '0') {
+        return false;
+      } else {
+        return true;
+      }
+    }
   } else {
     return function(v) {
       return v;
