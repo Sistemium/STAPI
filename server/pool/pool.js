@@ -141,7 +141,10 @@ class Pool {
             pool.config.onAcquire.apply(conn, args)
               .then(function () {
                 resolve(conn);
-              }, reject);
+              }, function (err) {
+                pool.release(conn);
+                reject(err);
+              })
           } else {
             resolve(conn);
           }
