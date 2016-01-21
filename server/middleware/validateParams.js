@@ -6,9 +6,9 @@ export default function () {
 
     _.each(req['x-params'], (param, key) => {
       if (key) {
-        if (key.match(/[^-_$@a-z0-9 :]/i)) {
+        if (key.match(/[^-_$@a-z0-9 :]/ig)) {
           console.log(`Invalid key in params: ${key}`);
-          next(new Error(`Param value cannot contain such symbols: "[", "]", "-", "_", "space"`));
+          res.status(400).end(`Param value cannot contain symbols except: "-_$@a-z0-9 :"`);
         }
       }
     });
