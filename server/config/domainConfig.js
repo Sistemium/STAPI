@@ -70,7 +70,8 @@ let normalizeConfig = (cfg, filename) => {
   _.assign (nCfg,{
     fields: parseFields(nCfg.fields),
     collection: nCfg.collection || filename,
-    selectFrom: nCfg.selectFrom || nCfg.tableName
+    selectFrom: nCfg.selectFrom || nCfg.tableName,
+    alias: nCfg.alias || 't'
   });
 
   return nCfg;

@@ -20,14 +20,15 @@ export default function (config, params) {
     return result;
   }
 
-  function concatSearchStr(searchFields, searchFor, params, fields) {
+  function concatSearchStr(searchFields, searchFor, params, cfg) {
 
     let likeStr = '';
+    let fields = cfg.fields;
 
     _.each(searchFields, (field) => {
       //check that passed field is in config
       if (fields[field]) {
-        likeStr += `${field} LIKE ? OR `;
+        likeStr += `${cfg.alias}.${fields[field].field} LIKE ? OR `;
         params.push(`%${searchFor}%`);
       } else {
         console.log(`No such field ${field} defined...`);
@@ -46,7 +47,7 @@ export default function (config, params) {
   function makeQuery(cnfg) {
 
     let tableName = cnfg.selectFrom;
-    let alias = cnfg.alias || 't';
+    let alias = cnfg.alias;
     let escapeParams = [];
     let pageSize = parseInt(params['x-page-size:']) || 10;
     let startPage = ((parseInt(params['x-start-page:']) - 1) * pageSize || 0) + 1;
@@ -113,12 +114,12 @@ export default function (config, params) {
       let predicateStr = ` WHERE `;
       let fields = cnfg.fields;
 
-      _.each(fields, (val, key) => {
+      _.each(fields, (field, key) => {
         if (params && params[key]) {
-          if (fields[key].ref) {
-            predicateStr += `[${fields[key].ref}].[${fields[key].id}] = ? AND `;
+          if (field.ref) {
+            predicateStr += `[${field.ref}].[${field.id}] = ? AND `;
           } else {
-            predicateStr += `${alias}.${fields[key].field} = ? AND `;
+            predicateStr += `${alias}.${field.field} = ? AND `;
           }
           result.params.push(params[key]);
           withPredicate = true;
@@ -143,7 +144,7 @@ export default function (config, params) {
           if (_.isString(searchFields)) {
             searchFields = searchFields.split(',');
           }
-          predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg.fields) + ')';
+          predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg) + ')';
         } catch (err) {
           throw new Error(err);
         }
