@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const plugins = require('../components/plugins');
 const dir = require('node-dir');
+const debug = require('debug')('stapi:domainConfig');
 
 let map = new Map();
 
@@ -92,19 +93,42 @@ let processConfig = (cfg, filename) => {
       pooledCfg = _.merge(parentCfg, extendedCfg);
       delete pooledCfg.pools;
     });
+    pooledCfg.pool = pool;
     map.set(pool + '/' + pooledCfg.collection.toLowerCase(), pooledCfg);
   });
 };
+
+function addRefsToConfigs (map) {
+
+  map.forEach((config) => {
+
+    let pool = config.pool;
+
+    if (!config.abstract) {
+      _.each(config.fields, (val, key) => {
+          if (val.ref) {
+            let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
+            _.assign (config.fields[key],{
+              alias: refConfig.alias,
+              tableName: refConfig.tableName
+            });
+            map.set(`${pool}/${config.collection.toLowerCase()}`, config);
+          }
+      });
+    }
+
+  });
+}
 
 export default function (path, cb) {
   readConfigFiles(path, (files) => {
     _.each(files, (file) => {
       let cnfg = require(file);
-
       let filename = file.split('/').slice(-1)[0].match(/([^\/]+)(?=\.\w+$)/)[0];
       processConfig(cnfg, filename);
     });
 
+    addRefsToConfigs(map);
     cb(map);
   });
 };

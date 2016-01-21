@@ -173,15 +173,6 @@ export default function (config, params, map, pool) {
     return result;
   }
 
-//link ref config to config with ref fields
-  _.each(config.fields, (val, field) => {
-    if (val.hasOwnProperty('ref')) {
-      let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
-      config.fields[field].alias = refConfig.alias;
-      config.fields[field].tableName = refConfig.tableName;
-    }
-  });
-
   return makeQuery(config);
 }
 ;
