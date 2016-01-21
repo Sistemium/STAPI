@@ -61,13 +61,17 @@ let normalizeConfig = (cfg, filename) => {
       throw new Error('Invalid configuration...');
     }
 
-    if (!val.field) {
+    if (!nCfg.fields[key].field) {
       nCfg.fields[key].field = key;
     }
 
   });
-  nCfg.fields = parseFields(nCfg.fields);
-  nCfg.collection = nCfg.collection ? nCfg.collection : filename;
+
+  _.assign (nCfg,{
+    fields: parseFields(nCfg.fields),
+    collection: nCfg.collection || filename,
+    selectFrom: nCfg.selectFrom || nCfg.tableName
+  });
 
   return nCfg;
 };

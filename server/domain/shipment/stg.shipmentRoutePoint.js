@@ -6,7 +6,6 @@ module.exports = {
   extends: 'defaultFields',
   fields: {
     isReached: {
-      field: 'isReached',
       type: 'boolean'
     },
     ord: {
@@ -14,18 +13,16 @@ module.exports = {
     },
     name: 'name',
     locationPoint: {
-      field: 'locationPoint',
       parser: 'ar.fromARObject'
     },
     pictures: {
-      field: 'pictures',
       parser: 'ar.fromARArray'
     },
     shipment: {
-      field: 'shipment',
       parser: 'ar.fromARObject'
     }
   },
-  tableName: '[stg].[ShipmentRoutePoint](${@shipmentRoute})',
+  tableName: '[bs].[ShipmentRoutePoint]',
+  selectFrom: '[stg].[ShipmentRoutePoint](${@shipmentRoute})',
   alias: 'sr'
 };
