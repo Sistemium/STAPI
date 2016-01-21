@@ -118,7 +118,7 @@ export default function (config, params) {
       _.each(fields, (val, key) => {
         if (params && params[key]) {
           if (fields[key].ref) {
-            predicateStr += `[${fields[key].ref}].[xid] = ? AND `;
+            predicateStr += `[${fields[key].ref}].[${fields[key].id}] = ? AND `;
           } else {
             predicateStr += `${alias}.${fields[key].field} = ? AND `;
           }
