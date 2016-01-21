@@ -123,16 +123,13 @@ class Pool {
       }
     });
 
-    var poolAcquire = pool.acquire;
-
-
     pool.acquirePromise = function () {
       return new Promise(function (resolve, reject) {
-        poolAcquire(function (err, conn) {
+        pool.acquire(function (err, aConn) {
           if (err) {
             reject(err)
           } else {
-            resolve(conn);
+            resolve(aConn);
           }
         });
       });
@@ -141,17 +138,17 @@ class Pool {
     pool.customAcquire = function () {
       var args = arguments;
       return new Promise(function (resolve, reject) {
-        pool.acquirePromise().then(function (conn) {
+        pool.acquirePromise().then(function (aConn) {
           if (pool.config.onAcquire) {
-            pool.config.onAcquire.apply(conn, args)
+            pool.config.onAcquire.apply(aConn, args)
               .then(function () {
-                resolve(conn);
+                resolve(aConn);
               }, function (err) {
-                pool.release(conn);
+                pool.release(aConn);
                 reject(err);
               })
           } else {
-            resolve(conn);
+            resolve(aConn);
           }
         }, reject);
       });
