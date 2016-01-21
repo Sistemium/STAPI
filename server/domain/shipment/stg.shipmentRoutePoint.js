@@ -9,7 +9,9 @@ module.exports = {
       field: 'isReached',
       type: 'boolean'
     },
-    ord: 'ord',
+    ord: {
+      type: 'int'
+    },
     name: 'name',
     locationPoint: {
       field: 'locationPoint',
@@ -24,6 +26,6 @@ module.exports = {
       parser: 'ar.fromARObject'
     }
   },
-  tableName: '[stg].[ShipmentRoutePoint](default, 1344)',
+  tableName: '[stg].[ShipmentRoutePoint](default, 1172)',
   alias: 'sr'
 };
