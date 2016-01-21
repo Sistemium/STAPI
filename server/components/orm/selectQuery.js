@@ -26,7 +26,7 @@ export default function (config, params, map, pool) {
    * @returns {string} query string
    */
   function makeQuery(cnfg) {
-    let tableName = cnfg.tableName;
+    let tableName = cnfg.selectFrom;
     let alias = cnfg.alias;
     let escapeParams = [];
     let pageSize = parseInt(params['x-page-size:']) || 10;
