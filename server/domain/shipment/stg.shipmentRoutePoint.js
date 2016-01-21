@@ -24,6 +24,6 @@ module.exports = {
       parser: 'ar.fromARObject'
     }
   },
-  tableName: '[stg].[ShipmentRoutePoint](default, 1344)',
+  tableName: '[stg].[ShipmentRoutePoint](${@shipmentRoute})',
   alias: 'sr'
 };

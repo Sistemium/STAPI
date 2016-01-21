@@ -67,7 +67,17 @@ export default function (config, params, map, pool) {
       });
       result.query = result.query.slice(0, -2);
     }
-
+    //@shipmentRoute
+    tableName = tableName.replace(/(\${[^}]*})/g, function (p) {
+      let param = p.match(/{([^}]*)/)[1];
+      if (params[param]) {
+        result.params.push(params[param]);
+      }
+      else {
+        throw new Error(`Incorrect params passed for ${tableName}`);
+      }
+      return `[${param}] = ?`;
+    });
     result.query += ` FROM ${tableName} as [${alias}]`;
 
     if (refTableNames.size > 0) {
@@ -97,6 +107,24 @@ export default function (config, params, map, pool) {
       predicateStr += `${cnfg.predicate} AND `;
     }
 
+    function concatSearchStr(searchFields, searchFor, params) {
+
+      let likeStr = '';
+
+      _.each(searchFields, (field) => {
+        //check that passed field is in config
+        if (cnfg.fields[field]) {
+          likeStr += `${field} LIKE ? OR `;
+          params.push(`%${searchFor}%`);
+        } else {
+          console.log(`No such field ${field} defined...`);
+          throw new Error(`No such field ${field} defined...`);
+        }
+      });
+
+      return likeStr.replace(/ OR $/i, '');
+    }
+
     if (!params['agg:']) {
 
       if (params['q:']) {
@@ -107,24 +135,14 @@ export default function (config, params, map, pool) {
             let parsed = JSON.parse(q);
             var searchFields = parsed.searchFields;
             var searchFor = parsed.searchFor;
+            debug('selectQuery', `${searchFields}`);
             if (_.isString(searchFields)) {
               searchFields = searchFields.split(',');
-              _.each(searchFields, (field) => {
-                //check that passed field is in config
-                if (cnfg.fields[field]) {
-                  predicateStr += ` ${field} LIKE '%${searchFor}%' AND `;
-                } else {
-                  console.log(`No such field ${field} defined...`);
-                  throw new Error(`No such field ${field} defined...`);
-                }
-              });
             }
-            if (_.isArray(searchFields)) {
-              _.each(searchFields, (field) => {
-                predicateStr += ` ${field} LIKE '%${searchFor}%' AND `;
-              });
-            }
-          } catch (err) {
+            predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params) + ')';
+          }
+          catch
+            (err) {
             throw new Error(err);
           }
         }
@@ -153,7 +171,7 @@ export default function (config, params, map, pool) {
     return result;
   }
 
-  //link ref config to config with ref fields
+//link ref config to config with ref fields
   _.each(config.fields, (val, field) => {
     if (val.hasOwnProperty('ref')) {
       let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
@@ -163,4 +181,5 @@ export default function (config, params, map, pool) {
   });
 
   return makeQuery(config);
-};
+}
+;
