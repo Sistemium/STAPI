@@ -5,8 +5,8 @@ let _ = require('lodash');
 let selectQuery = require('./selectQuery');
 let insertQuery = require('./insertQuery');
 
-export function select(config, params, map, pool) {
-  return selectQuery(config, params, map, pool);
+export function select(config, params) {
+  return selectQuery(config, params);
 }
 
 export function insert(body, config, map, pool) {

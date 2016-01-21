@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-export default function (body, config, map, pool) {
+export default function (body, config) {
   "use strict";
 
   let fields = {};
@@ -20,7 +20,9 @@ export default function (body, config, map, pool) {
         if (_.isString(cnfProp['ref'])) {
           fields[cnfProp['field']] = {
             body: body[k],
-            ref: map.get(`${pool}/${cnfProp['ref'].toLowerCase()}`)
+            ref: {
+              tableName: cnfProp.ref.tableName
+            }
           };
         }
         else if (_.isString(cnfProp['field'])) {
