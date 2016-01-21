@@ -25,7 +25,7 @@
     "request": ">=2.67.0",
     "require-new": ">=1.1.0",
     "serve-favicon": ">=2.3.0",
-    "sqlanywhere": "https://github.com/sqlanywhere/node-sqlanywhere",
+    "sqlanywhere": ">=1.0.7",
     "xml2js": ">=0.4.16"
   },
   "devDependencies": {
