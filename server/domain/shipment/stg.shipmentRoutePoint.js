@@ -9,7 +9,9 @@ module.exports = {
       field: 'isReached',
       type: 'boolean'
     },
-    ord: 'ord',
+    ord: {
+      type: 'int'
+    },
     name: 'name',
     locationPoint: {
       field: 'locationPoint',

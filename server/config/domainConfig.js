@@ -19,21 +19,23 @@ function parseFields(fields) {
           property: n,
           field: propObj['field']
         };
-      }
-      else if (propObj['field'] && _.isString(propObj['field'])) {
+      } else if (propObj['field']) {
         parsed[n] = propObj;
-        if (propObj['parser']) {
-          parsed[n].parser = plugins().get(propObj['parser']);
-        }
       } else if (propObj['expr']) {
         parsed[n] = {expr: propObj['expr']};
-        if (propObj['parser']) {
-          parsed[n].parser = plugins().get(propObj['parser']);
-        }
-      }
-      else {
+      } else {
         throw new Error('Invalid model definition');
       }
+
+      if (propObj['parser']) {
+        parsed[n].parser = plugins().get(propObj['parser']);
+      } else {
+        let typeParser = plugins().get('parse.'+propObj.type);
+        if (typeParser) {
+          parsed[n].parser = typeParser;
+        }
+      }
+
     } else {
       throw new Error('Invalid model definition');
     }
@@ -57,6 +59,11 @@ let normalizeConfig = (cfg, filename) => {
     else {
       throw new Error('Invalid configuration...');
     }
+
+    if (!val.field) {
+      nCfg.fields[key].field = key;
+    }
+
   });
   nCfg.fields = parseFields(nCfg.fields);
   nCfg.collection = nCfg.collection ? nCfg.collection : filename;

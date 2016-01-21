@@ -25,7 +25,7 @@ var errorHandler = function (err, conn, pool, res) {
 
 var doSelect = function (pool, conn, req, res) {
 
-  debug('index.doStart', 'start');
+  debug('index.doSelect', 'start');
 
   if (req.method === 'HEAD') {
     req['x-params']['agg:'] = true;
@@ -39,11 +39,11 @@ var doSelect = function (pool, conn, req, res) {
     debug('doSelect', `exception ${err.stack} `);
     return res.status(400).end();
   }
-  console.log('Client:', conn.number, 'request:', query);
+  debug('index.doSelect', 'conn:', conn.name, 'request:', query);
 
   conn.exec(query.query, query.params, function (err, result) {
 
-    debug('index', 'exec done');
+    debug('index.doSelect', 'exec done');
 
     if (err) {
       return errorHandler(err, conn, pool, res);
@@ -56,17 +56,8 @@ var doSelect = function (pool, conn, req, res) {
       _.each(obj, (val, key) => {
         let configKey = config['fields'][key];
         if (configKey.hasOwnProperty('parser')) {
-          if (val) {
+          if (!(val == null || val == undefined)) {
             obj[key] = configKey.parser(val);
-          }
-        }
-        if (configKey.hasOwnProperty('type')) {
-          if (configKey.type.match(/^(bool|boolean)$/i)) {
-            obj[key] = val !== '0';
-          } else if (configKey.type.match(/^(int|integer|number)$/i)) {
-            obj[key] = parseInt(val);
-          } else if (configKey.type.match(/^(float|decimal|double)$/i)) {
-            obj[key] = parseFloat(val);
           }
         }
       });
@@ -80,6 +71,8 @@ var doSelect = function (pool, conn, req, res) {
         parseObject(item);
       });
     }
+
+    debug('index', 'parseObject done');
 
     if (!result) {
       return res.status(404).json();
