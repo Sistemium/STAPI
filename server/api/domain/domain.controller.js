@@ -37,7 +37,7 @@ var doSelect = function (pool, conn, req, res) {
     query = orm.select(config, req['x-params'], req.app.locals.domainConfig, req.pool);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);
-    return res.status(400).end();
+    return res.status(400).end(err.message);
   }
   debug('index.doSelect', 'conn:', conn.name, 'request:', query);
 

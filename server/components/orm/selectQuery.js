@@ -69,14 +69,16 @@ export default function (config, params, map, pool) {
     }
     //@shipmentRoute
     tableName = tableName.replace(/(\${[^}]*})/g, function (p) {
-      let param = p.match(/{([^}]*)/)[1];
+      let param = p.match(/{([^\?}]*)/)[1];
       if (params[param]) {
         result.params.push(params[param]);
+        return `[${param}] = ?`;
       }
-      else {
-        throw new Error(`Incorrect params passed for ${tableName}`);
+      else if (p.match(/\?}$/)) {
+        return '';
+      } else {
+        throw new Error(`Required parameter missing: "${param}"`);
       }
-      return `[${param}] = ?`;
     });
     result.query += ` FROM ${tableName} as [${alias}]`;
 
