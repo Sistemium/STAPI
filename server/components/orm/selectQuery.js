@@ -44,8 +44,9 @@ export default function (config, params) {
    * @returns {string} query string
    */
   function makeQuery(cnfg) {
+
     let tableName = cnfg.selectFrom;
-    let alias = cnfg.alias;
+    let alias = cnfg.alias || 't';
     let escapeParams = [];
     let pageSize = parseInt(params['x-page-size:']) || 10;
     let startPage = ((parseInt(params['x-start-page:']) - 1) * pageSize || 0) + 1;
@@ -54,38 +55,32 @@ export default function (config, params) {
       params: []
     };
 
-    if (!params['agg:']) {
-      result.query += `SELECT TOP ? START AT ?  `;
-      result.params.push(pageSize, startPage);
-    } else {
-      result.query += 'SELECT COUNT (*) as cnt';
-    }
-
-    if (alias === undefined) {
-      alias = 't';
-    }
     let refTableNames = new Map();
+    let fields = cnfg.fields;
 
-    if (!params['agg:']) {
-      let fields = cnfg.fields;
+    _.each(cnfg.fields, (propObj,v) => {
 
-      _.each(Object.keys(fields), (v) => {
+      if (propObj.ref) {
+        refTableNames.set(propObj['ref'], propObj);
+        result.query += `[${v}].xid as [${v}]`;
+      } else if (propObj.expr) {
+        result.query += `${propObj.expr} as [${v}]`;
+        escapeParams.push(propObj.expr, v);
+      } else {
+        result.query += `[${alias}].[${propObj['field']}] as ${v}`;
+      }
 
-        let propObj = fields[v];
-        if (propObj.hasOwnProperty('ref')) {
-          refTableNames.set(propObj['ref'], propObj);
-          result.query += `[${v}].xid as [${v}]`;
-        } else if (propObj.hasOwnProperty('expr')) {
-          result.query += `${propObj.expr} as [${v}]`;
-          escapeParams.push(propObj.expr, v);
-        } else {
-          result.query += `[${alias}].[${propObj['field']}] as ${v}`;
-        }
-        result.query += ', ';
-      });
-      result.query = result.query.slice(0, -2);
+      result.query += ', ';
+
+    });
+
+    if (params['agg:']) {
+      result.query = 'SELECT COUNT (*) as cnt';
+    } else {
+      result.query = 'SELECT TOP ? START AT ? ' + result.query.slice(0, -2);
+      result.params.push(pageSize, startPage);
     }
-    //@shipmentRoute
+
     tableName = tableName.replace(/(\${[^}]*})/g, function (p) {
       let param = p.match(/{([^\?}]*)/)[1];
       if (params[param]) {
@@ -98,6 +93,7 @@ export default function (config, params) {
         throw new Error(`Required parameter missing: "${param}"`);
       }
     });
+
     result.query += ` FROM ${tableName} as [${alias}]`;
 
     if (refTableNames.size > 0) {
@@ -112,9 +108,11 @@ export default function (config, params) {
     }
 
     function makePredicate() {
+
       let withPredicate = false;
       let predicateStr = ` WHERE `;
       let fields = cnfg.fields;
+
       _.each(fields, (val, key) => {
         if (params && params[key]) {
           if (fields[key].ref) {
@@ -123,37 +121,33 @@ export default function (config, params) {
             predicateStr += `${alias}.${fields[key].field} = ? AND `;
           }
           result.params.push(params[key]);
+          withPredicate = true;
         }
-        withPredicate = true;
       });
 
-      //if predicate exist in config
       if (cnfg.predicate) {
         withPredicate = true;
         predicateStr += `${cnfg.predicate} AND `;
       }
 
-      if (!params['agg:']) {
+      let q = params['q:'];
 
-        if (params['q:']) {
-          withPredicate = true;
-          let q = params['q:'];
-          if (q) {
-            try {
-              let parsed = JSON.parse(q);
-              var searchFields = parsed.searchFields;
-              var searchFor = parsed.searchFor;
-              if (_.isString(searchFields)) {
-                searchFields = searchFields.split(',');
-              }
-              predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg.fields) + ')';
-            }
-            catch
-              (err) {
-              throw new Error(err);
-            }
+      if (q) {
+
+        withPredicate = true;
+
+        try {
+          let parsed = JSON.parse(q);
+          var searchFields = parsed.searchFields;
+          var searchFor = parsed.searchFor;
+          if (_.isString(searchFields)) {
+            searchFields = searchFields.split(',');
           }
+          predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg.fields) + ')';
+        } catch (err) {
+          throw new Error(err);
         }
+
       }
 
       if (withPredicate) {
@@ -176,8 +170,6 @@ export default function (config, params) {
       }
     }
 
-
-    result.query = result.query.replace(/\n/g, '');
     return result;
   }
 

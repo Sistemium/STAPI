@@ -27,10 +27,6 @@ var doSelect = function (pool, conn, req, res) {
 
   debug('index.doSelect', 'start');
 
-  if (req.method === 'HEAD') {
-    req['x-params']['agg:'] = true;
-  }
-
   let query;
   let config = res.locals.config;
   try {
@@ -55,7 +51,7 @@ var doSelect = function (pool, conn, req, res) {
     function parseObject(obj) {
       _.each(obj, (val, key) => {
         let configKey = config['fields'][key];
-        if (configKey.hasOwnProperty('parser')) {
+        if (configKey && configKey.parser) {
           if (!(val == null || val == undefined)) {
             obj[key] = configKey.parser(val);
           }
@@ -77,7 +73,7 @@ var doSelect = function (pool, conn, req, res) {
     if (!result) {
       return res.status(404).json();
     } else if (req.params.id || result.length) {
-      if (req.method === 'HEAD') {
+      if (req['x-params']['agg:']) {
         res.set('X-Aggregate-Count', result[0].cnt);
         return res.status(200).end();
       } else if (result.length) {
