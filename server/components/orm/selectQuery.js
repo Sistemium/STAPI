@@ -20,6 +20,24 @@ export default function (config, params, map, pool) {
     return result;
   }
 
+  function concatSearchStr(searchFields, searchFor, params, fields) {
+
+    let likeStr = '';
+
+    _.each(searchFields, (field) => {
+      //check that passed field is in config
+      if (fields[field]) {
+        likeStr += `${field} LIKE ? OR `;
+        params.push(`%${searchFor}%`);
+      } else {
+        console.log(`No such field ${field} defined...`);
+        throw new Error(`No such field ${field} defined...`);
+      }
+    });
+
+    return likeStr.replace(/ OR $/i, '');
+  }
+
   /**
    *
    * @param cnfg {object} configuration object
@@ -93,68 +111,57 @@ export default function (config, params, map, pool) {
       result.query += ` ${cnfg.join} `
     }
 
-    let withPredicate = false;
-    let predicateStr = ` WHERE `;
-    _.each(cnfg, (val, key) => {
-      if (params && params[key]) {
-        withPredicate = true;
-        predicateStr += `${alias}.${cnfg[key]} = ? AND `;
-        result.params.push(params[key]);
-      }
-    });
-
-    //if predicate exist in config
-    if (cnfg.predicate) {
-      withPredicate = true;
-      predicateStr += `${cnfg.predicate} AND `;
-    }
-
-    function concatSearchStr(searchFields, searchFor, params) {
-
-      let likeStr = '';
-
-      _.each(searchFields, (field) => {
-        //check that passed field is in config
-        if (cnfg.fields[field]) {
-          likeStr += `${field} LIKE ? OR `;
-          params.push(`%${searchFor}%`);
-        } else {
-          console.log(`No such field ${field} defined...`);
-          throw new Error(`No such field ${field} defined...`);
+    function makePredicate() {
+      let withPredicate = false;
+      let predicateStr = ` WHERE `;
+      let fields = cnfg.fields;
+      _.each(fields, (val, key) => {
+        console.log('params', params, 'key', key);
+        if (params && params[key]) {
+          withPredicate = true;
+          predicateStr += `${alias}.${fields[key].field} = ? AND `;
+          result.params.push(params[key]);
         }
       });
 
-      return likeStr.replace(/ OR $/i, '');
-    }
-
-    if (!params['agg:']) {
-
-      if (params['q:']) {
+      //if predicate exist in config
+      if (cnfg.predicate) {
         withPredicate = true;
-        let q = params['q:'];
-        if (q) {
-          try {
-            let parsed = JSON.parse(q);
-            var searchFields = parsed.searchFields;
-            var searchFor = parsed.searchFor;
-            debug('selectQuery', `${searchFields}`);
-            if (_.isString(searchFields)) {
-              searchFields = searchFields.split(',');
+        predicateStr += `${cnfg.predicate} AND `;
+      }
+
+      if (!params['agg:']) {
+
+        if (params['q:']) {
+          withPredicate = true;
+          let q = params['q:'];
+          if (q) {
+            try {
+              let parsed = JSON.parse(q);
+              var searchFields = parsed.searchFields;
+              var searchFor = parsed.searchFor;
+              debug('selectQuery', `${searchFields}`);
+              if (_.isString(searchFields)) {
+                searchFields = searchFields.split(',');
+              }
+              predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg.fields) + ')';
             }
-            predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params) + ')';
-          }
-          catch
-            (err) {
-            throw new Error(err);
+            catch
+              (err) {
+              throw new Error(err);
+            }
           }
         }
       }
+
+      console.log(withPredicate);
+      if (withPredicate) {
+        predicateStr = predicateStr.replace(/ AND $/i, '');
+        result.query += predicateStr;
+      }
     }
 
-    if (withPredicate) {
-      predicateStr = predicateStr.replace(/ AND $/i, '');
-      result.query += predicateStr;
-    }
+    makePredicate();
 
     if (!params['agg:']) {
       if (params['x-order-by:']) {
@@ -174,5 +181,4 @@ export default function (config, params, map, pool) {
   }
 
   return makeQuery(config);
-}
-;
+};

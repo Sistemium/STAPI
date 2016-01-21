@@ -33,7 +33,6 @@ var doSelect = function (pool, conn, req, res) {
 
   let query;
   let config = res.locals.config;
-  console.log(config);
   try {
     query = orm.select(config, req['x-params'], req.app.locals.domainConfig, req.pool);
   } catch (err) {
