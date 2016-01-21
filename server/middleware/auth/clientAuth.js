@@ -69,7 +69,6 @@ export default function () {
 
       if (checkOrgAuth(req.pool, auth)) {
         req.auth = auth;
-        console.log('checkOrgAuth');
         next();
       } else {
         res.status(403).end();
