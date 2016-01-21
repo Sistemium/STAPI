@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const debug = require('debug')('stapi:orm:selectQuery');
 
-export default function (config, params, map, pool) {
+export default function (config, params) {
   "use strict";
 
   function parseOrderByParams(params, alias) {
