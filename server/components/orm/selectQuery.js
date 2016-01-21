@@ -116,12 +116,15 @@ export default function (config, params) {
       let predicateStr = ` WHERE `;
       let fields = cnfg.fields;
       _.each(fields, (val, key) => {
-        console.log('params', params, 'key', key);
         if (params && params[key]) {
-          withPredicate = true;
-          predicateStr += `${alias}.${fields[key].field} = ? AND `;
+          if (fields[key].ref) {
+            predicateStr += `[${fields[key].ref}].[xid] = ? AND `;
+          } else {
+            predicateStr += `${alias}.${fields[key].field} = ? AND `;
+          }
           result.params.push(params[key]);
         }
+        withPredicate = true;
       });
 
       //if predicate exist in config
@@ -140,7 +143,6 @@ export default function (config, params) {
               let parsed = JSON.parse(q);
               var searchFields = parsed.searchFields;
               var searchFor = parsed.searchFor;
-              debug('selectQuery', `${searchFields}`);
               if (_.isString(searchFields)) {
                 searchFields = searchFields.split(',');
               }
@@ -154,7 +156,6 @@ export default function (config, params) {
         }
       }
 
-      console.log(withPredicate);
       if (withPredicate) {
         predicateStr = predicateStr.replace(/ AND $/i, '');
         result.query += predicateStr;
