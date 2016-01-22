@@ -7,7 +7,8 @@
 import express from 'express';
 import config from './config/environment';
 import http from 'http';
-
+import domainConfig from './config/domainConfig';
+import registerPlugins from './components/plugins/registerPlugins';
 // Setup server
 var app = express();
 var server = http.createServer(app);
@@ -16,11 +17,14 @@ require('./routes')(app);
 
 // Start server
 function startServer() {
-    server.listen(config.port, config.ip, function () {
-        console.log('Express server listening on %d, in %s mode', config.port, app.get('env'));
-    });
+  server.listen(config.port, config.ip, function () {
+    console.log('Express server listening on %d, in %s mode', config.port, app.get('env'));
+  });
 }
 
+domainConfig(`${__dirname}/domain`, (map) => {
+  app.locals.domainConfig = map;
+});
 setImmediate(startServer);
 
 // Expose app

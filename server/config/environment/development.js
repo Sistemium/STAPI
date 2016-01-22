@@ -4,6 +4,7 @@
 // ==================================
 module.exports = {
 
-    // Seed database on startup
-    seedDB: true
+  // set to false to auth everything
+  stAuthUrl: 'https://api.sistemium.com/pha/roles'
+
 };

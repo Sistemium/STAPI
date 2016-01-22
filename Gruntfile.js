@@ -379,7 +379,6 @@ module.exports = function (grunt) {
           src: [
             '*.{ico,png,txt}',
             '.htaccess',
-            'bower_components/**/*',
             'assets/images/{,*/}*.{webp}',
             'assets/fonts/**/*',
             'index.html'
@@ -394,7 +393,9 @@ module.exports = function (grunt) {
           dest: '<%= yeoman.dist %>',
           src: [
             'package.json',
-            '<%= yeoman.server %>/**/*'
+            '<%= yeoman.server %>/**/*',
+            '!server/config/local.env.js',
+            '!server/config/sqlanywhere/*'
           ]
         }]
       },
@@ -564,10 +565,7 @@ module.exports = function (grunt) {
     // Compiles ES6 to JavaScript using Babel
     babel: {
       options: {
-        sourceMap: true,
-        optional: [
-          'es7.classProperties'
-        ]
+        sourceMap: true
       },
       client: {
         files: [{
@@ -579,12 +577,12 @@ module.exports = function (grunt) {
       },
       server: {
         options: {
-          optional: ['runtime']
+          sourceMap: true
         },
         files: [{
           expand: true,
           cwd: '<%= yeoman.server %>',
-          src: ['**/*.{js,json}'],
+          src: ['**/*.{js,json}', '!config/local.env.js', '!config/sqlanywhere/*', '!domain/**'],
           dest: '<%= yeoman.dist %>/<%= yeoman.server %>'
         }]
       }
@@ -694,7 +692,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('serve', function (target) {
     if (target === 'dist') {
-      return grunt.task.run(['build', 'env:all', 'env:prod', 'express:prod', 'wait', 'open', 'express-keepalive']);
+      return grunt.task.run(['build', 'env:all', 'env:prod', 'express:prod', 'wait', 'express-keepalive']);
     }
 
     if (target === 'debug') {
@@ -720,7 +718,6 @@ module.exports = function (grunt) {
       'postcss',
       'express:dev',
       'wait',
-      'open',
       'watch'
     ]);
   });
