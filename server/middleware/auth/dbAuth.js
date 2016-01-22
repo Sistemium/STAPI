@@ -67,7 +67,13 @@ function authDb(req, res, next) {
 
   function setAuthor(id) {
     if (req.method === 'POST') {
-      req.body.author = id;
+      if (typeof req.body === 'array') {
+        _.each(req.body, (body) => {
+          body.author = id;
+        })
+      } else {
+        req.body.author = id;
+      }
     }
   }
 
