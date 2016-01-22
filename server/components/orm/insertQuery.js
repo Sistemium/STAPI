@@ -1,6 +1,7 @@
 var _ = require('lodash');
+const debug = require('debug')('stapi:orm:insertQuery');
 
-export default function (body, config) {
+export default function (config, body) {
   "use strict";
 
   let fields = {};
@@ -9,39 +10,33 @@ export default function (body, config) {
     params: []
   };
 
-  _.each(Object.keys(body), (k) => {
-    let cnfProp = config['fields'][k];
-    if (_.isObject(cnfProp)) {
-      if (cnfProp['readonly'] || cnfProp['expr']) {
-        return;
-      }
 
-      if (cnfProp) {
-        if (_.isString(cnfProp['ref'])) {
-          fields[cnfProp['field']] = {
-            body: body[k],
-            ref: {
-              tableName: cnfProp.ref.tableName
-            }
-          };
-        }
-        else if (_.isString(cnfProp['field'])) {
-          if (cnfProp.hasOwnProperty('type')) {
-            if (cnfProp.type.match(/^(bool|boolean)$/i)) {
-              body[k] = body[k] === true ? '1' : '0';
-            }
-          }
-          fields[cnfProp['field']] = body[k];
-        }
-        else {
-          console.log(cnfProp);
-          throw new Error('Field must be a string');
-        }
-      }
+  _.each(body, (val,k) => {
+
+    let cnfProp = config.fields [k];
+
+    if (!cnfProp || cnfProp.readonly || cnfProp.expr) {
+      return true;
     }
+
+    if (cnfProp.ref) {
+      fields[cnfProp.field] = {
+        body: val,
+        ref: {
+          tableName: cnfProp.tableName
+        }
+      };
+    } else {
+      if (cnfProp.type && cnfProp.type.match(/^(bool|boolean)$/i)) {
+        val = !(val === '0' || !val);
+      }
+      fields[cnfProp.field] = val;
+    }
+
   });
 
   function concatQuery(fields, config) {
+
     result.query =
       `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
              SELECT `;
@@ -56,11 +51,13 @@ export default function (body, config) {
         result.params.push(v);
       }
     });
+    
     result.query = result.query.slice(0, -1);
     result.query +=
       `) AS m ON t.[xid] = m.[xid]
             WHEN NOT MATCHED THEN INSERT
             WHEN MATCHED THEN UPDATE`;
+
     return result;
   }
 

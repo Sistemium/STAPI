@@ -75,7 +75,7 @@ var doSelect = function (pool, conn, req, res) {
     } else if (req.params.id || result.length) {
       if (req['x-params']['agg:']) {
         res.set('X-Aggregate-Count', result[0].cnt);
-        return res.status(200).end();
+        return res.status(204).end();
       } else if (result.length) {
         res.set('X-Rows-Count', result.length);
       }
@@ -113,15 +113,17 @@ export function post(req, res, next) {
   }
 
   pool.customAcquire(req.headers.authorization).then(function (conn) {
+
     req.on('close', function () {
       console.error('Client:', conn.number, 'request closed unexpectedly');
       conn.rejectExec()
     });
 
-    console.log(req.body);
+    debug ('post', req.body);
 
-    let query = orm.insert(req.body, req.app.locals.domain, req.app.locals.domainConfig, req.pool);
-    console.log('Client:', conn.number, 'query:', query.query, 'params:', query.params);
+    let query = orm.insert(res.locals.config, req.body);
+
+    debug ('connection', conn.name, 'query:', query.query, 'params:', query.params);
 
     conn.exec(query.query, query.params, function (err, rowsAffected) {
 
@@ -138,5 +140,6 @@ export function post(req, res, next) {
       }
 
     });
+
   });
 }

@@ -9,6 +9,6 @@ export function select(config, params) {
   return selectQuery(config, params);
 }
 
-export function insert(body, config, map, pool) {
-  return insertQuery(body, config, map, pool);
+export function insert(config, body) {
+  return insertQuery(config, body);
 }
