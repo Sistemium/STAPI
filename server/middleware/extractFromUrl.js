@@ -3,28 +3,29 @@
 export default function () {
   return function (req, res, next) {
 
-    req.pool = req.params.pool.toLowerCase();
     let collection = req.params.collection.toLowerCase();
 
     try {
-      if (req.pool === undefined) {
-        throw new Error('You did not pass pool name... Try /api/databaseName/collectionName');
-      }
 
       if (collection === undefined) {
-        throw new Error('You did not pass collection name... Try /api/databaseName/collectionName');
+        res.status(404).end('no collection');
       }
 
       let keyInMap = `${req.pool}/${collection}`;
       let appLocals = req.app.locals;
       let domainConfig = appLocals.domainConfig.get(keyInMap);
-      if (!(appLocals && domainConfig)) {
-        return res.status(404).end();
+
+      if (!appLocals) {
+        return res.status(404).end('no appLocals');
+      } else if (!domainConfig) {
+        return res.status(404).end('no domainConfig');
       }
+
       //expose request-level config
       res.locals.config = domainConfig;
+
     } catch (err) {
-      console.log(`Path: /api/${req.pool}/${collection}`);
+      console.error(`extractFormUrl error at path: /api/${req.pool}/${collection}`);
       return next(err);
     }
     next();
