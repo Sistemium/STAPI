@@ -119,27 +119,42 @@ export function post(req, res, next) {
       conn.rejectExec()
     });
 
-    debug ('post', req.body);
 
-    let query = orm.insert(res.locals.config, req.body);
+    let rowsAffected = 0;
 
-    debug ('connection', conn.name, 'query:', query.query, 'params:', query.params);
+    popConnection(req.body, pool);
 
-    conn.exec(query.query, query.params, function (err, rowsAffected) {
+    function popConnection (arr, pool) {
 
-      if (err) {
-        return errorHandler(err, conn, pool, res);
-      }
+      let body = arr.pop();
+      if (body) {
+        let query = orm.insert(res.locals.config, body);
 
-      pool.release(conn);
+        debug ('connection', conn.name, 'query:', query.query, 'params:', query.params);
 
-      if (rowsAffected) {
-        return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+        conn.execWithoutCommit(query.query, query.params, (err, affected) => {
+          if (err) {
+            return errorHandler(err, conn, pool, res);
+          }
+
+          console.log(affected);
+          if (affected) {
+            rowsAffected += affected;
+          }
+
+          popConnection(arr, pool);
+        });
       } else {
-        return res.status(404).end();
+        conn.commit(() => {
+          pool.release(conn);
+
+          if (rowsAffected) {
+            return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+          } else {
+            return res.status(404).end();
+          }
+        });
       }
-
-    });
-
+    }
   });
 }

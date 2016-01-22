@@ -29,8 +29,7 @@ class Pool {
           name: connName,
           requestCount: 0,
 
-          exec: function (sql, params, callback) {
-
+          exec: function (sql, params, callback, autoCommit = true) {
             var _params = params;
 
             if (typeof params === 'function') {
@@ -43,7 +42,8 @@ class Pool {
             conn.process.send({
               number: ++conn.requestCount,
               sql: sql.toString(),
-              params: _params
+              params: _params,
+              autoCommit: autoCommit
             });
           },
 
@@ -52,10 +52,21 @@ class Pool {
             conn.process.send('rollback');
           },
 
+          execWithoutCommit: function (sql, params, callback) {
+            conn.exec(sql, params, callback, false);
+          },
+
+          commit: function (callback) {
+            conn.callback = callback;
+            conn.process.send('commit');
+          },
+
           rejectExec: function () {
-            conn.callback = function () {
-              conn.busy = false;
-              pool.release(conn);
+            conn.callback = () => {
+              conn.rollback (() =>{
+                conn.busy = false;
+                pool.release(conn);
+              })
             };
           }
         };
@@ -87,7 +98,7 @@ class Pool {
             }
           } else if (m.error) {
             conn.callback(m.error);
-          } else if (m === 'rolled back') {
+          } else if (m === 'rolled back' || m === 'committed') {
             conn.callback();
           }
         });
