@@ -28,7 +28,7 @@ export default function (config, body) {
       };
     } else {
       if (cnfProp.type && cnfProp.type.match(/^(bool|boolean)$/i)) {
-        val = !(val === '0' || !val);
+        val = (val === '0' || !val) ? 0 : 1;
       }
       fields[cnfProp.field] = val;
     }
@@ -51,7 +51,7 @@ export default function (config, body) {
         result.params.push(v);
       }
     });
-    
+
     result.query = result.query.slice(0, -1);
     result.query +=
       `) AS m ON t.[xid] = m.[xid]
