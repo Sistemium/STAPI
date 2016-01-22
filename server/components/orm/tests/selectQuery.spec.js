@@ -9,7 +9,7 @@ RegExp.escape = function(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
-describe('Create query', () => {
+describe('Create select query', () => {
   let map;
   before(function (done) {
     domainConfig(path.join(__dirname, 'testDomain'), (m) => {
@@ -62,5 +62,4 @@ describe('Create query', () => {
     expect(res.params.length).equal(3);
     expect(res.params[2]).equal('1');
   });
-
 });
