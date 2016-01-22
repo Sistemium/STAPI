@@ -10,7 +10,6 @@ export default function (config, body) {
     params: []
   };
 
-
   _.each(body, (val,k) => {
 
     let cnfProp = config.fields [k];
