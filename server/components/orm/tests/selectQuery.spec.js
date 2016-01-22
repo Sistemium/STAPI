@@ -58,5 +58,9 @@ describe('Create query', () => {
     let configPredicateRegex = new RegExp(RegExp.escape(config.predicate), 'i');
     let configPredicateExist = res.query.match(configPredicateRegex) ? true : false;
     expect(configPredicateExist).equal(true);
+    expect(res.params).to.be.an('array');
+    expect(res.params.length).equal(3);
+    expect(res.params[2]).equal('1');
   });
+
 });

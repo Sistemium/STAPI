@@ -122,7 +122,7 @@ export default function (config, params) {
             predicateStr += `${alias}.${field.field} = ? AND `;
           }
           //TODO: make converters for fields with type boolean
-          if (field.type.match(/^(bool|boolean)$/i)) {
+          if (field.type && field.type.match(/^(bool|boolean)$/i)) {
             params[key] = params[key] ? '1':'0';
           }
           result.params.push(params[key]);
