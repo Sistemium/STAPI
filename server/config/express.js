@@ -35,7 +35,9 @@ export default function (app) {
   }
 
   if ('development' === env) {
-    app.use(require('connect-livereload')());
+    app.use(require('connect-livereload')({
+      port: 35731
+    }));
   }
 
   if ('development' === env || 'test' === env) {
