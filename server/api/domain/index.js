@@ -5,13 +5,14 @@ var controller = require('./domain.controller.js');
 import headersToParams from '../../middleware/headersToParams';
 import validateParams from '../../middleware/validateParams';
 import extractFromUrl from '../../middleware/extractFromUrl';
+import modifyBody from '../../middleware/modifyBody';
 
 var router = express.Router();
 var mw = [extractFromUrl(), headersToParams(), validateParams()];
 
 router
   .get('/:collection/:id?', mw, controller.index)
-  .post('/:collection', mw, controller.post)
+  .post('/:collection', mw, modifyBody(), controller.post)
   .get('/:filterCollection/:filterCollectionId/:collection', mw, controller.index)
 ;
 
