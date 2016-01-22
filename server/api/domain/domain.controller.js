@@ -30,7 +30,7 @@ var doSelect = function (pool, conn, req, res) {
   let query;
   let config = res.locals.config;
   try {
-    query = orm.select(config, req['x-params'], req.app.locals.domainConfig, req.pool);
+    query = orm.select(config, req['x-params']);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);
     return res.status(400).end(err.message);
