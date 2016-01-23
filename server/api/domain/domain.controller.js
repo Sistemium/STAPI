@@ -4,6 +4,8 @@ const debug = require('debug')('stapi:domain:controller');
 const orm = require('../../components/orm/orm');
 const _ = require('lodash');
 const pools = require('../../components/pool');
+const each = require('co-each');
+const co = require('co');
 
 var errorHandler = function (err, conn, pool, res) {
 
@@ -56,7 +58,7 @@ var doSelect = function (pool, conn, req, res) {
 
         if (field.fields) {
           parsed [key] = {};
-          _.each (field.fields, function(parentProp){
+          _.each(field.fields, function (parentProp) {
             parsed [key] [parentProp] = obj [key + '.' + parentProp];
           });
         } else {
@@ -127,54 +129,49 @@ export function post(req, res, next) {
     return res.status(400) && next('Empty body');
   }
 
-  pool.customAcquire(req.headers.authorization).then(function (conn) {
+  co(function* () {
+
+    let rowsAffected = 0;
+
+    function execReqBody(body) {
+
+      return (done) => {
+        let query = orm.insert(res.locals.config, body);
+
+        debug('connection', conn.name, 'query:', query.query, 'params:', query.params);
+
+        conn.execWithoutCommit(query.query, query.params, (err, affected) => {
+          if (err) {
+            return errorHandler(err, conn, pool, res);
+          }
+
+          if (affected) {
+            rowsAffected += affected;
+          }
+
+          done();
+        });
+      };
+    }
+
+    let conn = yield pool.customAcquire(req.headers.authorization);
 
     req.on('close', function () {
       console.error('Client:', conn.number, 'request closed unexpectedly');
       conn.rejectExec()
     });
 
-    execReqBody(req.body, pool).then(() => {
-      conn.commit(() => {
-        pool.release(conn);
+    yield each(req.body, execReqBody);
+    conn.commit(() => {
+      pool.release(conn);
 
-        if (rowsAffected) {
-          return res.status(200).set('X-Rows-Affected', rowsAffected).end();
-        } else {
-          return res.status(404).end();
-        }
-      });
+      if (rowsAffected) {
+        return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+      } else {
+        return res.status(404).end();
+      }
     });
-
-    let rowsAffected = 0;
-
-    function execReqBody(arr, pool) {
-
-      return new Promise((resolve) => {
-        let arrLength = arr.length;
-        let counter = 0;
-        _.each(arr, (body) => {
-          let query = orm.insert(res.locals.config, body);
-
-          debug('connection', conn.name, 'query:', query.query, 'params:', query.params);
-
-          conn.execWithoutCommit(query.query, query.params, (err, affected) => {
-            if (err) {
-              return errorHandler(err, conn, pool, res);
-            }
-
-            if (affected) {
-              rowsAffected += affected;
-            }
-
-            counter++;
-            if (arrLength === counter) {
-              resolve();
-            }
-          });
-        });
-      });
-    }
+  }).catch((err) => {
+    console.log(err);
   });
 }
-
