@@ -14,7 +14,10 @@ module.exports = {
     },
     author: {
       ref: 'uac.account',
-      insertRaw: true
+      insertRaw: true,
+      fields: {
+        name: 'name'
+      }
     },
     items: {
       expr: `(select xmlelement('Object',

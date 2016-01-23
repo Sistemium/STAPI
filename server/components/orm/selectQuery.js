@@ -9,9 +9,9 @@ export default function (config, params) {
     let arr = params.split(',');
     let result = _.reduce(arr, (res, i) => {
       if (i[0] === '-') {
-        res += `${alias}.${i.slice(1)} DESC`;
+        res += `[${i.slice(1)}] DESC`;
       } else {
-        res += `${alias}.${i}`;
+        res += `[${i}]`;
       }
       res += ', ';
       return res;
@@ -59,16 +59,24 @@ export default function (config, params) {
     let refTableNames = new Map();
     let fields = cnfg.fields;
 
-    _.each(cnfg.fields, (propObj,v) => {
+    _.each(cnfg.fields, (prop,key) => {
 
-      if (propObj.ref) {
-        refTableNames.set(propObj['ref'], propObj);
-        result.query += `[${v}].xid as [${v}]`;
-      } else if (propObj.expr) {
-        result.query += `${propObj.expr} as [${v}]`;
-        escapeParams.push(propObj.expr, v);
+      if (prop.ref) {
+        refTableNames.set(prop.ref, prop);
+        let fields = prop.fields;
+        if (!fields) {
+          result.query += `[${key}].xid as [${key}]`;
+        } else {
+          _.each(fields,function(refField, refProp){
+            result.query += `[${key}].[${refField}] as [${key}.${refProp}], `;
+          });
+          result.query = result.query.slice(0, -2);
+        }
+      } else if (prop.expr) {
+        result.query += `${prop.expr} as [${key}]`;
+        escapeParams.push(prop.expr, key);
       } else {
-        result.query += `[${alias}].[${propObj['field']}] as ${v}`;
+        result.query += `[${alias}].[${prop.field}] as [${key}]`;
       }
 
       result.query += ', ';

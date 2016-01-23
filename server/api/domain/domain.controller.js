@@ -49,22 +49,36 @@ var doSelect = function (pool, conn, req, res) {
     pool.release(conn);
 
     function parseObject(obj) {
-      _.each(obj, (val, key) => {
-        let configKey = config['fields'][key];
-        if (configKey && configKey.parser) {
-          if (!(val == null || val == undefined)) {
-            obj[key] = configKey.parser(val);
+
+      let parsed = {};
+
+      _.each(config.fields, (field, key) => {
+
+        if (field.fields) {
+          parsed [key] = {};
+          _.each (field.fields, function(parentProp){
+            parsed [key] [parentProp] = obj [key + '.' + parentProp];
+          });
+        } else {
+          let val = (parsed [key] = obj [key]);
+          if (field.parser) {
+            if (!(val == null || val == undefined)) {
+              parsed [key] = field.parser(val);
+            }
           }
         }
+
       });
+
+      return parsed;
+
     }
 
     if (req.params.id) {
-      parseObject(result[0]);
-      result = result.length ? result [0] : undefined;
-    } else if (_.isArray(result)) {
-      _.each(result, (item) => {
-        parseObject(item);
+      result = result.length ? parseObject(result[0]) : undefined;
+    } else if (Array.isArray(result)) {
+      _.each(result, (item, i) => {
+        result [i] = parseObject(item);
       });
     }
 
