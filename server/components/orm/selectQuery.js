@@ -61,20 +61,28 @@ export default function (config, params) {
 
     _.each(cnfg.fields, (prop,key) => {
 
-      if (prop.ref) {
-        refTableNames.set(prop.ref, prop);
+      if (prop.ref || prop.fields) {
+
+        if (prop.ref) {
+          refTableNames.set(prop.ref, prop);
+        }
+
         let fields = prop.fields;
+
         if (!fields) {
           result.query += `[${key}].xid as [${key}]`;
         } else {
           _.each(fields,function(refField, refProp){
-            result.query += `[${key}].[${refField}] as [${key}.${refProp}], `;
+            result.query += `[${key}].[${refField.field}] as [${key}.${refProp}], `;
           });
           result.query = result.query.slice(0, -2);
         }
+
       } else if (prop.expr) {
+
         result.query += `${prop.expr} as [${key}]`;
         escapeParams.push(prop.expr, key);
+
       } else {
         result.query += `[${alias}].[${prop.field}] as [${key}]`;
       }

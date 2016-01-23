@@ -29,6 +29,11 @@ function parseFields(fields) {
         }
       }
 
+      if (field.fields) {
+        field.fields = parseFields (field.fields);
+        debug (key, field.fields);
+      }
+
       parsed[key] = field;
 
     } else {
@@ -43,21 +48,28 @@ let normalizeConfig = (cfg, filename) => {
   if (!cfg || !_.isObject(cfg)) throw new Error(`Config not passed...`);
 
   let nCfg = _.cloneDeep(cfg);
+
   _.each(cfg.fields, (val, key) => {
+
     if (_.isString(val)) {
       nCfg.fields[key] = {
         field: val
       }
     } else if (_.isObject(val)) {
       nCfg.fields[key] = val;
-    }
-    else {
+    } else {
       throw new Error('Invalid configuration...');
     }
 
     if (!nCfg.fields[key].field) {
       nCfg.fields[key].field = key;
     }
+
+    _.each (nCfg.fields[key].fields,(subField,subKey)=>{
+      nCfg.fields[key].fields[subKey] = _.assign({
+        field: subKey
+      },_.isString(subField) ? {field: subField} : subField);
+    })
 
   });
 
