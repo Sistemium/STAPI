@@ -76,7 +76,7 @@ var doSelect = function (pool, conn, req, res) {
 
     if (req.params.id) {
       result = result.length ? parseObject(result[0]) : undefined;
-    } else if (Array.isArray(result)) {
+    } else if (!req['x-params']['agg:'] && Array.isArray(result)) {
       _.each(result, (item, i) => {
         result [i] = parseObject(item);
       });
