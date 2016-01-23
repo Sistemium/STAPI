@@ -148,7 +148,6 @@ export function post(req, res, next) {
         let query = orm.insert(res.locals.config, item);
 
         debug('connection', conn.name, 'query:', query.query, 'params:', query.params);
-        console.log(query);
 
         conn.execWithoutCommit(query.query, query.params, (err, affected) => {
           if (err) {
@@ -175,7 +174,6 @@ export function post(req, res, next) {
     conn.commit(() => {
       pool.release(conn);
 
-      console.log('rowsAffected:', rowsAffected);
       if (rowsAffected) {
         return res.status(200).set('X-Rows-Affected', rowsAffected).end();
       } else {
