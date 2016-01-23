@@ -50,6 +50,15 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
+    function parseScalar (field, val) {
+      if (field.parser) {
+        if (!(val == null || val == undefined)) {
+          return field.parser(val);
+        }
+      }
+      return val;
+    }
+
     function parseObject(obj) {
 
       let parsed = {};
@@ -58,14 +67,14 @@ var doSelect = function (pool, conn, req, res) {
 
         if (field.fields) {
           parsed [key] = {};
-          _.each(field.fields, function (parentProp) {
-            parsed [key] [parentProp] = obj [key + '.' + parentProp];
+          _.each (field.fields, function(f,prop){
+            parsed [key] [prop] = parseScalar (f, obj [key + '.' + prop]);
           });
         } else {
           let val = (parsed [key] = obj [key]);
           if (field.parser) {
             if (!(val == null || val == undefined)) {
-              parsed [key] = field.parser(val);
+              parsed [key] = parseScalar(field,val);
             }
           }
         }
