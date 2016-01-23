@@ -2,6 +2,7 @@
 
 var debug = require('debug')('stapi:dbAuth');
 const pools = require('../../components/pool/poolManager');
+var _ = require ('lodash');
 
 export function dbAuth() {
   return function (req, res, next) {
@@ -67,7 +68,8 @@ function authDb(req, res, next) {
 
   function setAuthor(id) {
     if (req.method === 'POST') {
-      if (typeof req.body === 'array') {
+      if (Array.isArray (req.body)) {
+        debug ('body:', req.body);
         _.each(req.body, (body) => {
           body.author = id;
         })
