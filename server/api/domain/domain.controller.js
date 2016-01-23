@@ -119,42 +119,48 @@ export function post(req, res, next) {
       conn.rejectExec()
     });
 
+    execReqBody(req.body, pool).then(() => {
+      conn.commit(() => {
+        pool.release(conn);
+
+        if (rowsAffected) {
+          return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+        } else {
+          return res.status(404).end();
+        }
+      });
+    });
 
     let rowsAffected = 0;
 
-    popConnection(req.body, pool);
+    function execReqBody(arr, pool) {
 
-    function popConnection (arr, pool) {
+      return new Promise((resolve) => {
+        let arrLength = arr.length;
+        let counter = 0;
+        _.each(arr, (body) => {
+          let query = orm.insert(res.locals.config, body);
 
-      let body = arr.pop();
-      if (body) {
-        let query = orm.insert(res.locals.config, body);
+          debug('connection', conn.name, 'query:', query.query, 'params:', query.params);
 
-        debug ('connection', conn.name, 'query:', query.query, 'params:', query.params);
+          conn.execWithoutCommit(query.query, query.params, (err, affected) => {
+            if (err) {
+              return errorHandler(err, conn, pool, res);
+            }
 
-        conn.execWithoutCommit(query.query, query.params, (err, affected) => {
-          if (err) {
-            return errorHandler(err, conn, pool, res);
-          }
+            console.log(affected);
+            if (affected) {
+              rowsAffected += affected;
+            }
 
-          console.log(affected);
-          if (affected) {
-            rowsAffected += affected;
-          }
-
-          popConnection(arr, pool);
+            counter++;
+            if (arrLength === counter) {
+              resolve();
+            }
+          });
         });
-      } else {
-        conn.commit(() => {
-          pool.release(conn);
-
-          if (rowsAffected) {
-            return res.status(200).set('X-Rows-Affected', rowsAffected).end();
-          } else {
-            return res.status(404).end();
-          }
-        });
-      }
+      });
     }
   });
 }
+
