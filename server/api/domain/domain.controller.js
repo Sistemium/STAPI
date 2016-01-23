@@ -4,7 +4,7 @@ const debug = require('debug')('stapi:domain:controller');
 const orm = require('../../components/orm/orm');
 const _ = require('lodash');
 const pools = require('../../components/pool');
-const each = require('co-each');
+var each = require('co-each');
 const co = require('co');
 
 var errorHandler = function (err, conn, pool, res) {
@@ -142,12 +142,13 @@ export function post(req, res, next) {
 
     let rowsAffected = 0;
 
-    function execReqBody(body) {
+    function execReqBody(item) {
 
       return (done) => {
-        let query = orm.insert(res.locals.config, body);
+        let query = orm.insert(res.locals.config, item);
 
         debug('connection', conn.name, 'query:', query.query, 'params:', query.params);
+        console.log(query);
 
         conn.execWithoutCommit(query.query, query.params, (err, affected) => {
           if (err) {
@@ -174,6 +175,7 @@ export function post(req, res, next) {
     conn.commit(() => {
       pool.release(conn);
 
+      console.log('rowsAffected:', rowsAffected);
       if (rowsAffected) {
         return res.status(200).set('X-Rows-Affected', rowsAffected).end();
       } else {

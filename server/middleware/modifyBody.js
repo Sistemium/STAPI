@@ -10,19 +10,20 @@ export default function () {
 
     let requestBody = req.body;
     if (req.method === 'POST') {
-      if (typeof requestBody === 'object') {
-        req.body = [requestBody];
-      }
-
       let queryString = req.query;
-      if (queryString) {
-        _.each(queryString, (qStrParam) => {
-          if (qStrParam.match(/[^:]/)) {
-            _.each(requestBody, (arrElement) => {
-              arrElement[qStrParam] = queryString[qStrParam];
-            })
-          }
-        });
+      if (Array.isArray(requestBody)) {
+        if (queryString) {
+          _.each(queryString, (qStrParam) => {
+            if (qStrParam.match(/[^:]/)) {
+              _.each(requestBody, (arrElement) => {
+                arrElement[qStrParam] = queryString[qStrParam];
+              })
+            }
+          });
+        }
+      }
+      else if (typeof requestBody === 'object') {
+        req.body = [requestBody];
       }
     }
 
