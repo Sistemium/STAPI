@@ -148,7 +148,6 @@ export function post(req, res, next) {
               return errorHandler(err, conn, pool, res);
             }
 
-            console.log(affected);
             if (affected) {
               rowsAffected += affected;
             }
