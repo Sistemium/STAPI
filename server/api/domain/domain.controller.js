@@ -73,6 +73,7 @@ var doSelect = function (pool, conn, req, res) {
     if (!result) {
       return res.status(404).json();
     } else if (req.params.id || result.length) {
+
       if (req['x-params']['agg:']) {
         res.set('X-Aggregate-Count', result[0].cnt);
         return res.status(204).end();

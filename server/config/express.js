@@ -21,7 +21,8 @@ export default function (app) {
   app.set('view engine', 'jade');
   app.use(compression());
   app.use(cors({
-    allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type']
+    allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type'],
+    exposedHeaders: ['X-Aggregate-Count']
   }));
   app.use(bodyParser.urlencoded({extended: false}));
   app.use(bodyParser.json());
