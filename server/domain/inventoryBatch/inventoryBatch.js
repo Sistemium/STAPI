@@ -5,12 +5,16 @@ module.exports = {
   pools: ['dev'],
   extends: 'defaultFields',
   fields: {
+    deviceCts: 'deviceCts',
     code: {
       field: 'code'
     },
     isDone: {
-      field: 'isDone',
       type: 'boolean'
+    },
+    author: {
+      ref: 'uac.account',
+      insertRaw: true
     },
     items: {
       expr: `(select xmlelement('Object',
@@ -32,7 +36,7 @@ module.exports = {
   tableName: '[bs].[InventoryBatch]',
   alias: 'ib',
   collection: 'inventoryBatch',
-  join: 'JOIN uac.account a on a.id = ib.author',
+  //join: 'JOIN uac.account a on a.id = ib.author',
   predicate: `(ib.site in (
         select [data] from uac.tokenRole ('site',@UACToken)
     ) or exists (
