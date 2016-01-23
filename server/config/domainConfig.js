@@ -8,34 +8,28 @@ const debug = require('debug')('stapi:domainConfig');
 let map = new Map();
 
 function parseFields(fields) {
-  let parsed = {};
-  if (!_.isObject(fields)) throw new Error('Model definition must be an object');
-  _.each(Object.keys(fields), (n) => {
-    if (_.isObject(fields[n])) {
-      let propObj = fields[n];
 
-      if (propObj.hasOwnProperty('ref')) {
-        parsed[n] = {
-          ref: propObj['ref'],
-          property: n,
-          field: propObj['field']
-        };
-      } else if (propObj['field']) {
-        parsed[n] = propObj;
-      } else if (propObj['expr']) {
-        parsed[n] = {expr: propObj['expr']};
-      } else {
-        throw new Error('Invalid model definition');
+  let parsed = {};
+
+  if (!_.isObject(fields)) throw new Error('Model definition must be an object');
+
+  _.each(fields, (field,key) => {
+    if (_.isObject(field)) {
+
+      if (field.ref) {
+        field.property = key;
       }
 
-      if (propObj['parser']) {
-        parsed[n].parser = plugins().get(propObj['parser']);
+      if (field.parser) {
+        field.parser = plugins().get(field.parser);
       } else {
-        let typeParser = plugins().get('parse.'+propObj.type);
+        let typeParser = plugins().get('parse.'+field.type);
         if (typeParser) {
-          parsed[n].parser = typeParser;
+          field.parser = typeParser;
         }
       }
+
+      parsed[key] = field;
 
     } else {
       throw new Error('Invalid model definition');
@@ -99,7 +93,9 @@ let processConfig = (cfg, filename) => {
       delete pooledCfg.pools;
     });
     pooledCfg.pool = pool;
-    map.set(pool + '/' + pooledCfg.collection.toLowerCase(), pooledCfg);
+    let mapKey = pool + '/' + pooledCfg.collection.toLowerCase();
+    debug ('added', mapKey);
+    map.set(mapKey, pooledCfg);
   });
 };
 
@@ -114,7 +110,7 @@ function addRefsToConfigs (map) {
           if (val.ref) {
             let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
             _.assign (config.fields[key],{
-              alias: refConfig.alias,
+              //alias: refConfig.alias,
               tableName: refConfig.tableName,
               //TODO: ref id hardcoded for now, change it that id will have some special property
               id: refConfig.fields.id.field

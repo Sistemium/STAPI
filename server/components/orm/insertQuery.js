@@ -18,7 +18,7 @@ export default function (config, body) {
       return true;
     }
 
-    if (cnfProp.ref) {
+    if (cnfProp.ref && !cnfProp.insertRaw) {
       fields[cnfProp.field] = {
         body: val,
         ref: {
@@ -41,9 +41,9 @@ export default function (config, body) {
              SELECT `;
 
     _.each(fields, (v, k) => {
-      if (_.isObject(fields[k])) {
-        result.query += `(SELECT id FROM ${fields[k].ref.tableName} WHERE xid = ?) AS [${k}],`;
-        result.params.push(fields[k].body);
+      if (v && v.ref) {
+        result.query += `(SELECT id FROM ${v.ref.tableName} WHERE xid = ?) AS [${k}],`;
+        result.params.push(v.body);
       }
       else {
         result.query += `? AS [${k}],`;
