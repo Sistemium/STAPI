@@ -35,8 +35,9 @@ export function onAcquire(token) {
   debug ('onAcquire', 'start conn:', conn.name);
 
   return new Promise(function (resolve, reject) {
-    conn.exec(`set @UACToken = '${token}'`, function (err) {
+    conn.exec(`select '${token}' into @UACToken from uac.authorizedAccount ('${token}')`, function (err) {
       if (err) {
+        debug ('onAcquire', 'error conn:', conn.name, err);
         reject(err);
       } else {
         debug ('onAcquire', 'success conn:', conn.name);
