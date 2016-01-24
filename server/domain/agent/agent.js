@@ -4,7 +4,7 @@ module.exports = {
   extends: 'defaultFields',
   tableName: '[pha].[Agent]',
   alias: 'Agent',
-  collection: 'agent',
+  collection: 'account',
 
   fields: {
     code: 'id',
@@ -13,7 +13,7 @@ module.exports = {
       expr: 'substring(mobile_number,2)',
       field: 'mobile_number',
       converter: function (mobileNumber) {
-        return mobileNumber ? '8' + mobileNumber.replace(/(8|^)([0-9]{10,11}).*$/,'$2') : null;
+        return mobileNumber ? '8' + mobileNumber.replace(/(8|^)([0-9]{10,11}).*$/, '$2') : null;
       }
     },
     org: true,
@@ -26,6 +26,11 @@ module.exports = {
     lastAuth: {
       expr: '(select max([lastAuth]) from [pha].[accesstoken] where [agent] = [Agent].[id])'
     }
-  }
+  },
+
+  predicate: `(
+    Agent.org in (select [data] from uac.tokenRole ('pha.org',@UACToken))
+    OR exists (select * from uac.tokenRole ('pha.org',@UACToken) where [data] = '*')
+  )`
 
 };
