@@ -22,7 +22,7 @@ export default function () {
       return params;
     }
 
-    let xParams = _.assign(headersToParams(req.headers), {id: req.params.id}, req.query);
+    let xParams = _.assign(headersToParams(req.headers), req.params.id && {id: req.params.id}, req.query);
 
     if (req.params.filterCollection && req.params.filterCollectionId) {
       xParams [req.params.filterCollection] = req.params.filterCollectionId;

@@ -12,7 +12,7 @@ var mw = [extractFromUrl(), headersToParams(), validateParams()];
 
 router
   .get('/:collection/:id?', mw, controller.index)
-  .post('/:collection', mw, modifyBody(), controller.post)
+  .post('/:collection/:id?', mw, modifyBody(), controller.post)
   .put('/:collection/:id?', mw, modifyBody(), controller.post)
   .get('/:filterCollection/:filterCollectionId/:collection', mw, controller.index)
 ;
