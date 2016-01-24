@@ -114,7 +114,7 @@ var doSelect = function (pool, conn, req, res) {
   });
 };
 
-export function index(req, res) {
+export function index(req, res, next) {
   let pool = pools(req.pool);
 
   pool.customAcquire(req.headers.authorization).then(function (conn) {
@@ -125,9 +125,8 @@ export function index(req, res) {
 
     doSelect(pool, conn, req, res);
   }, function (err) {
-    console.log(err);
-
-    res.status(500).end(err);
+    console.error('index:customAcquire', err);
+    res.status(500) && next (new Error (err.text));
   });
 }
 
@@ -188,6 +187,9 @@ export function post(req, res, next) {
 
     });
 
+  },function (err){
+    console.error ('post:customAcquire', err);
+    res.status(500) && next (new Error (err.text));
   });
 
 }
