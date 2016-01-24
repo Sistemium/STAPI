@@ -25,7 +25,7 @@ export default function (app) {
     exposedHeaders: ['X-Aggregate-Count']
   }));
   app.use(bodyParser.urlencoded({extended: false}));
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({limit: process.env.JSON_LIMIT || '100kb'}));
 
   app.set('appPath', path.join(config.root, 'client'));
 
