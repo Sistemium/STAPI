@@ -67,24 +67,14 @@ function authenticator(conn, token) {
 function authDb(req, res, next) {
 
   function setAuthor(id) {
-    if (req.method === 'POST') {
-      if (Array.isArray (req.body)) {
-        debug ('body:', req.body);
-        _.each(req.body, (body) => {
-          body.author = id;
-        })
-      } else {
-        req.body.author = id;
-      }
+    if (req.method === 'POST' || req.method === 'PUT') {
+      req.query.author = id;
     }
   }
 
   let token = req.headers.authorization;
-
   let pool = pools.getPoolByName(req.pool);
-
   let authMap = (pool.authMap = pool.authMap || new Map());
-
   let auth = authMap.get(token);
 
   if (auth) {
