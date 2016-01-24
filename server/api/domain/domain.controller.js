@@ -158,6 +158,8 @@ export function post(req, res, next) {
           rowsAffected += affected;
         }
 
+        debug ('rowsAffected:', rowsAffected);
+
         done();
       });
     };
@@ -167,8 +169,8 @@ export function post(req, res, next) {
       conn.rejectExec()
     });
 
-    //TODO test with large pages, maybe need to wrap execReqBody with async.setImmediate
-    async.eachSeries(req.body, execReqBody, function done(err) {
+    // TODO use prepared statements
+    async.eachSeries(req.body, execReqBody, err => {
 
       if (err) {
         return errorHandler(err, conn, pool, res);
