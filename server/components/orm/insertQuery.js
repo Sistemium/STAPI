@@ -14,7 +14,7 @@ export default function (config, body) {
 
     let cnfProp = config.fields [k];
 
-    if (!cnfProp || cnfProp.readonly || cnfProp.expr) {
+    if (!cnfProp || cnfProp.readonly) {
       return true;
     }
 
@@ -28,6 +28,8 @@ export default function (config, body) {
     } else {
       if (cnfProp.type && cnfProp.type.match(/^(bool|boolean)$/i)) {
         val = (val === '0' || !val) ? 0 : 1;
+      } else if (cnfProp.converter) {
+        val = cnfProp.converter (val);
       }
       fields[cnfProp.field] = val;
     }

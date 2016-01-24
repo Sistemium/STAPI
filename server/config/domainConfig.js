@@ -20,6 +20,10 @@ function parseFields(fields) {
         field.property = key;
       }
 
+      if (field.expr && !field.converter) {
+        field.readonly = true;
+      }
+
       if (field.parser) {
         field.parser = plugins().get(field.parser);
       } else {
