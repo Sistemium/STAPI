@@ -55,7 +55,13 @@ let normalizeConfig = (cfg, filename) => {
 
   _.each(cfg.fields, (val, key) => {
 
-    if (_.isString(val)) {
+    if (!val) {
+      return;
+    } else if (val === true) {
+      nCfg.fields[key] = {
+        field: key
+      }
+    } else if (_.isString(val)) {
       nCfg.fields[key] = {
         field: val
       }
