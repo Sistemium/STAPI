@@ -4,8 +4,7 @@ const debug = require('debug')('stapi:domain:controller');
 const orm = require('../../components/orm/orm');
 const _ = require('lodash');
 const pools = require('../../components/pool');
-var each = require('co-each');
-const co = require('co');
+var async = require('async');
 
 var errorHandler = function (err, conn, pool, res) {
 
@@ -22,6 +21,7 @@ var errorHandler = function (err, conn, pool, res) {
   }
 
   return res.status(500).json(err);
+
 };
 
 
@@ -138,49 +138,54 @@ export function post(req, res, next) {
     return res.status(400) && next('Empty body');
   }
 
-  co(function* () {
+  debug ('post:', req.body);
 
-    let rowsAffected = 0;
+  let rowsAffected = 0;
 
-    function execReqBody(item) {
+  pool.customAcquire(req.headers.authorization).then (conn => {
 
-      return (done) => {
-        let query = orm.insert(res.locals.config, item);
+    var execReqBody = (item, done) => {
+      let query = orm.insert(res.locals.config, item);
 
-        debug('connection', conn.name, 'query:', query.query, 'params:', query.params);
+      debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
 
-        conn.execWithoutCommit(query.query, query.params, (err, affected) => {
-          if (err) {
-            return errorHandler(err, conn, pool, res);
-          }
+      conn.execWithoutCommit(query.query, query.params, (err, affected) => {
+        if (err) {
+          return done (err);
+        }
 
-          if (affected) {
-            rowsAffected += affected;
-          }
+        if (affected) {
+          rowsAffected += affected;
+        }
 
-          done();
-        });
-      };
-    }
-
-    let conn = yield pool.customAcquire(req.headers.authorization);
+        done();
+      });
+    };
 
     req.on('close', function () {
       console.error('Client:', conn.number, 'request closed unexpectedly');
       conn.rejectExec()
     });
 
-    yield each(req.body, execReqBody);
-    conn.commit(() => {
-      pool.release(conn);
+    //TODO test with large pages, maybe need to wrap execReqBody with async.setImmediate
+    async.eachSeries(req.body, execReqBody, function done(err) {
 
-      if (rowsAffected) {
-        return res.status(200).set('X-Rows-Affected', rowsAffected).end();
-      } else {
-        return res.status(404).end();
+      if (err) {
+        return errorHandler(err, conn, pool, res);
       }
+
+      conn.commit(() => {
+        pool.release(conn);
+
+        if (rowsAffected) {
+          return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+        } else {
+          return res.status(404).end();
+        }
+      });
+
     });
-  }).catch((err) => {
-    console.log(err);
+
   });
+
 }
