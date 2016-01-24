@@ -72,6 +72,7 @@ class Pool {
         };
 
         conn.process.on('message', function (m) {
+          //debug ('message', m);
           if (m === 'connected') {
             if (self.config.onConnect) {
               self.config.onConnect.apply(conn).then(function () {
@@ -156,6 +157,7 @@ class Pool {
                 resolve(aConn);
               }, function (err) {
                 pool.release(aConn);
+                debug ('onAcquire', 'reject:', err);
                 reject(err);
               })
           } else {
