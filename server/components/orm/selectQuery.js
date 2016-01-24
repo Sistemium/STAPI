@@ -158,9 +158,8 @@ export default function (config, params) {
         withPredicate = true;
 
         try {
-          let parsed = JSON.parse(q);
-          var searchFields = parsed.searchFields;
-          var searchFor = parsed.searchFor;
+          var searchFields = q.searchFields;
+          var searchFor = q.searchFor;
           if (_.isString(searchFields)) {
             searchFields = searchFields.split(',');
           }

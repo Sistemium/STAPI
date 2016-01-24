@@ -18,9 +18,9 @@ export default function () {
         }
         if (queryString) {
           _.each(queryString, (qStrParam) => {
-            if (qStrParam.match(/[^:]/)) {
-              _.each(requestBody, (arrElement) => {
-                arrElement[qStrParam] = queryString[qStrParam];
+            if (!qStrParam.match(/:$/)) {
+              _.each(requestBody, item => {
+                item [qStrParam] = queryString[qStrParam];
               })
             }
           });
