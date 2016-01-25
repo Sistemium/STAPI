@@ -1,24 +1,58 @@
 'use strict';
-import domainConfig from '../../config/domainConfig';
+import makeMap from '../../config/domainConfig';
 import path from 'path';
 
 export function index(req, res) {
-  let collection = req.params.collection || req.query.collection;
-  if (collection) {
-    let config = req.app.locals.domainConfig.get(collection);
-    if (config) {
+  console.log(req.params);
+  let domainConfig = req.app.locals.domainConfig;
+  let pool = req.params.pool || req.query.pool;
+  let entity = req.params.entity || req.query.entity;
+  let configName = pool && entity ? `${pool}/${entity}` : req.query.config;
+  if (configName) {
+    if (pool && pool.match(/abstract/i)) {
+      let config = domainConfig.get('/'+entity);
+      if (!!config) {
+        return res.json(config);
+      } else {
+        return res.status(404).end('Config not found...');
+      }
+    }
+    let config = domainConfig.get(configName);
+    if (!!config) {
+      return res.json(config);
+    } else {
+      return res.status(404).end('Config not found...');
+    }
+  } else if (pool) {
+    let result = {};
+    let poolRegex = new RegExp(pool, 'i');
+    let keyPool = '';
+    domainConfig.forEach((value, key) => {
+      keyPool = key.split('/')[0];
+      if (keyPool.match(poolRegex)) {
+        result[key] = value;
+      }
+    });
+    if (!!result) {
+      return res.json(result);
+    } else {
+      return res.status(404).end('Config not found...');
+    }
+  } else if (!pool && entity) {
+    let config = domainConfig.get('/'+entity);
+    if (!!config) {
       return res.json(config);
     } else {
       return res.status(404).end('Config not found...');
     }
   }
 
-  if (req.query && req.query.reload) {
-    domainConfig(path.join(__dirname, '../..', 'domain'), map => {
-      req.app.locals.domainConfig = map;
+  if (req.query.reload) {
+    makeMap(path.join(__dirname, '../..', 'domain'), map => {
+      domainConfig = map;
       return res.json([...map]);
     });
   } else {
-    return res.json([...req.app.locals.domainConfig]);
+    return res.json([...domainConfig]);
   }
 }
