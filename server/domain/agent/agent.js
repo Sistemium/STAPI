@@ -12,9 +12,7 @@ module.exports = {
     mobileNumber: {
       expr: 'substring(mobile_number,2)',
       field: 'mobile_number',
-      converter: function (mobileNumber) {
-        return mobileNumber ? '8' + mobileNumber.replace(/(8|^)([0-9]{10,11}).*$/, '$2') : null;
-      }
+      converter: 'ar.mobileNumberConverter'
     },
     org: true,
     info: true,

@@ -1,6 +1,7 @@
 'use strict';
 
 import arXml from './parsers/arXml';
+import {mobileNumberConverter} from './converters';
 import plugins from './index';
 const debug = require('debug')('stapi:plugins/registerPlugins');
 
@@ -14,5 +15,6 @@ export default (function () {
   plugins().register('parse.float',parseFloat);
   plugins().register('parse.boolean',parseBool);
   plugins().register('parse.bool',parseBool);
+  plugins().register('ar.mobileNumberConverter', mobileNumberConverter);
   debug('registerPlugins', 'finished registering plugins');
 })()
