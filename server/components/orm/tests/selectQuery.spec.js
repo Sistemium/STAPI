@@ -12,7 +12,7 @@ RegExp.escape = function(text) {
 describe('Create select query', () => {
   let map;
   before(function (done) {
-    domainConfig(path.join(__dirname, 'testDomain'), (m) => {
+    domainConfig(path.join(__dirname, '../../..', 'domain'), (m) => {
       map = m;
       done();
     });
@@ -45,9 +45,6 @@ describe('Create select query', () => {
     //assert
     expect(res).to.be.an('object');
     expect(res).to.have.keys(['query', 'params']);
-    let itemsExprRegex = new RegExp(RegExp.escape(config.fields.items.expr), 'i');
-    let itemsExprExist = res.query.match(itemsExprRegex) ? true : false;
-    expect(itemsExprExist).equal(true);
     console.log(res.params);
     let paramPredicateRegex = new RegExp(RegExp.escape(`WHERE ${config.alias}.isDone = ? `), 'i');
     let paramPredicateExist = res.query.match(paramPredicateRegex) ? true : false;

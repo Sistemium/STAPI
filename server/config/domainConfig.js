@@ -4,7 +4,7 @@ const _ = require('lodash');
 const plugins = require('../components/plugins');
 const dir = require('node-dir');
 const debug = require('debug')('stapi:domainConfig');
-const poolman = require('../components/pool/poolManager');
+import {getPoolsKeys,getPoolByName} from '../components/pool';
 
 let map = new Map();
 
@@ -110,8 +110,8 @@ let normalizeConfig = (cfg, filename) => {
 let processConfig = (cfg, filename) => {
 
   let extendedCfg = normalizeConfig(cfg, filename);
-  let pools = cfg.pools && _.filter(poolman.getPoolsKeys(), key => {
-      let aliases = poolman.getPoolByName(key).config.aliasesRe;
+  let pools = cfg.pools && _.filter(getPoolsKeys(), key => {
+      let aliases = getPoolByName(key).config.aliasesRe;
       return key.match('^(' + cfg.pools.join('|') + ')$') || aliases && _.find(cfg.pools, function (key) {
           return key.match(aliases)
         });
