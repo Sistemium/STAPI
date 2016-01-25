@@ -1,7 +1,7 @@
 'use strict';
 
 import arXml from './parsers/arXml';
-const converters = require ('./converters');
+import {boolConverter} from './converters';
 import plugins from './index';
 const debug = require('debug')('stapi:plugins/registerPlugins');
 
@@ -15,7 +15,7 @@ export default (function () {
   plugins().register('parse.float',parseFloat);
   plugins().register('parse.boolean',parseBool);
   plugins().register('parse.bool',parseBool);
-  plugins().register('convert.bool', converters.boolConverter);
-  plugins().register('convert.boolean', converters.boolConverter);
+  plugins().register('convert.bool', boolConverter);
+  plugins().register('convert.boolean', boolConverter);
   debug('registerPlugins', 'finished registering plugins');
 })()

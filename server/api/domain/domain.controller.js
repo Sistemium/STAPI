@@ -3,7 +3,7 @@
 const debug = require('debug')('stapi:domain:controller');
 const orm = require('../../components/orm/orm');
 const _ = require('lodash');
-const pools = require('../../components/pool');
+import pools from '../../components/pool';
 var async = require('async');
 
 var errorHandler = function (err, conn, pool, res) {
