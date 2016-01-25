@@ -1,6 +1,7 @@
 'use strict';
 
 import poolManager from '../../components/pool/poolManager';
+var async = require('async');
 
 export default function () {
   return function (req, res, next) {
@@ -10,20 +11,9 @@ export default function () {
       return res.status(404).end();
     }
 
-    if (pool.config.middleware && pool.config.middleware.length > 0) {
+    async.eachSeries(pool.config.middleware,(mw,done) => {
+      mw (req, res, done);
+    }, next);
 
-      let arr = pool.config.middleware;
-      let ne = next;
-      if (arr.length > 1) {
-        ne = function () {
-          arr[1](req, res, next);
-        };
-        arr[0](req, res, ne);
-      } else {
-        arr[0](req, res, next);
-      }
-    } else {
-      next();
-    }
   }
 }
