@@ -26,9 +26,7 @@ export default function (config, body) {
         }
       };
     } else {
-      if (cnfProp.type && cnfProp.type.match(/^(bool|boolean)$/i)) {
-        val = (val === '0' || !val) ? 0 : 1;
-      } else if (cnfProp.converter) {
+      if (cnfProp.converter) {
         val = cnfProp.converter (val);
       }
       fields[cnfProp.field] = val;
