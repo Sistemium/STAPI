@@ -3,13 +3,17 @@ import makeMap from '../../config/domainConfig';
 import path from 'path';
 
 export function index(req, res) {
-  console.log(req.params);
+
   let domainConfig = req.app.locals.domainConfig;
   let pool = req.params.pool || req.query.pool;
   let entity = req.params.entity || req.query.entity;
   let configName = pool && entity ? `${pool}/${entity}` : req.query.config;
+  pool = pool ? pool.toLowerCase() : undefined;
+  entity = entity ? entity.toLowerCase() : undefined;
+  configName = configName ? configName.toLowerCase() : undefined;
+
   if (configName) {
-    if (pool && pool.match(/abstract/i)) {
+    if (pool && pool.toLowerCase() === 'abstract') {
       let config = domainConfig.get('/'+entity);
       if (!!config) {
         return res.json(config);
@@ -23,13 +27,14 @@ export function index(req, res) {
     } else {
       return res.status(404).end('Config not found...');
     }
-  } else if (pool) {
+  }
+
+  else if (pool) {
     let result = {};
-    let poolRegex = new RegExp(pool, 'i');
     let keyPool = '';
     domainConfig.forEach((value, key) => {
       keyPool = key.split('/')[0];
-      if (keyPool.match(poolRegex)) {
+      if (keyPool === pool) {
         result[key] = value;
       }
     });
@@ -38,7 +43,9 @@ export function index(req, res) {
     } else {
       return res.status(404).end('Config not found...');
     }
-  } else if (!pool && entity) {
+  }
+
+  else if (!pool && entity) {
     let config = domainConfig.get('/'+entity);
     if (!!config) {
       return res.json(config);
