@@ -12,6 +12,8 @@ import registerPlugins from './components/plugins/registerPlugins';
 // Setup server
 var app = express();
 var server = http.createServer(app);
+
+require ('debug').log = console.info.bind(console);
 require('./config/express')(app);
 require('./routes')(app);
 
