@@ -1,6 +1,6 @@
 module.exports = {
 
-  pools: ['phatest'],
+  pools: ['pha'],
   extends: 'defaultFields',
   tableName: '[pha].[Agent]',
   alias: 'Agent',
@@ -12,7 +12,9 @@ module.exports = {
     mobileNumber: {
       expr: 'substring(mobile_number,2)',
       field: 'mobile_number',
-      converter: 'ar.mobileNumberConverter'
+      converter: mobileNumber => {
+        return mobileNumber ? '8' + mobileNumber.replace(/(8|^)([0-9]{10,11}).*$/, '$2') : null;
+      }
     },
     org: true,
     info: true,
