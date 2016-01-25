@@ -2,6 +2,7 @@
 
 require('epipebomb')();
 
+const debug = require('debug')('stapi:sqlAnywhere');
 var sqlanywhere = require('sqlanywhere');
 var connParams = process.argv[2];
 var conn = sqlanywhere.createConnection();
@@ -34,6 +35,8 @@ conn.connect(connParams, function (err) {
 });
 
 process.on('message', function (m) {
+
+  //debug ('message',m);
 
   if (m.sql) {
     var cb = function (err, res) {
