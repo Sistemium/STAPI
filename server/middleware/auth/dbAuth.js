@@ -55,6 +55,7 @@ function authenticator(conn, token) {
     var sql = `select * from uac.authorizedAccount ('${token}')`;
 
     conn.exec(sql, function (err, res) {
+      debug ('authenticator', 'res:', res);
       if (err || !res.length) {
         reject(err || 'not authorized');
       } else {
