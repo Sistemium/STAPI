@@ -14,6 +14,11 @@ class PoolsManager {
   getPoolByName(name) {
     return pools[name];
   }
+
+  getPoolsKeys () {
+    return Object.keys (pools);
+  }
+
 }
 
 
