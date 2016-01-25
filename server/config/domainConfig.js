@@ -4,7 +4,7 @@ const _ = require('lodash');
 const plugins = require('../components/plugins');
 const dir = require('node-dir');
 const debug = require('debug')('stapi:domainConfig');
-const poolman = require ('../components/pool/poolManager');
+const poolman = require('../components/pool/poolManager');
 
 let map = new Map();
 
@@ -14,7 +14,7 @@ function parseFields(fields) {
 
   if (!_.isObject(fields)) throw new Error('Model definition must be an object');
 
-  _.each(fields, (field,key) => {
+  _.each(fields, (field, key) => {
     if (_.isObject(field)) {
 
       if (field.ref) {
@@ -26,16 +26,29 @@ function parseFields(fields) {
       }
 
       if (field.parser) {
-        field.parser = plugins().get(field.parser);
+        if (!(typeof field.parser === 'function')) {
+          field.parser = plugins().get(field.parser);
+        }
       } else {
-        let typeParser = plugins().get('parse.'+field.type);
+        let typeParser = plugins().get('parse.' + field.type);
         if (typeParser) {
           field.parser = typeParser;
         }
       }
 
+      if (field.converter) {
+        if (!(typeof field.converter === 'function')) {
+          field.converter = plugins().get(field.converter);
+        }
+      } else {
+        let typeConverter = plugins().get('convert.' + field.type);
+        if (typeConverter) {
+          field.converter = typeConverter;
+        }
+      }
+
       if (field.fields) {
-        field.fields = parseFields (field.fields);
+        field.fields = parseFields(field.fields);
         //debug (key, field.fields);
       }
 
@@ -76,15 +89,15 @@ let normalizeConfig = (cfg, filename) => {
       nCfg.fields[key].field = key;
     }
 
-    _.each (nCfg.fields[key].fields,(subField,subKey)=>{
+    _.each(nCfg.fields[key].fields, (subField, subKey)=> {
       nCfg.fields[key].fields[subKey] = _.assign({
         field: subKey
-      },_.isString(subField) ? {field: subField} : subField);
+      }, _.isString(subField) ? {field: subField} : subField);
     })
 
   });
 
-  _.assign (nCfg,{
+  _.assign(nCfg, {
     fields: parseFields(nCfg.fields),
     collection: nCfg.collection || filename,
     selectFrom: nCfg.selectFrom || nCfg.tableName,
@@ -97,10 +110,12 @@ let normalizeConfig = (cfg, filename) => {
 let processConfig = (cfg, filename) => {
 
   let extendedCfg = normalizeConfig(cfg, filename);
-  let pools = cfg.pools && _.filter (poolman.getPoolsKeys(),key => {
-    let aliases = poolman.getPoolByName(key).config.aliasesRe;
-    return key.match ('^('+cfg.pools.join('|')+')$') || aliases && _.find (cfg.pools,function (key){return key.match (aliases)});
-  });
+  let pools = cfg.pools && _.filter(poolman.getPoolsKeys(), key => {
+      let aliases = poolman.getPoolByName(key).config.aliasesRe;
+      return key.match('^(' + cfg.pools.join('|') + ')$') || aliases && _.find(cfg.pools, function (key) {
+          return key.match(aliases)
+        });
+    });
 
   _.forEach(pools || [''], function (pool) {
     var extendsArray = Array.isArray(cfg.extends) ? cfg.extends : [cfg.extends];
@@ -122,12 +137,12 @@ let processConfig = (cfg, filename) => {
     });
     pooledCfg.pool = pool;
     let mapKey = pool + '/' + pooledCfg.collection.toLowerCase();
-    debug ('added', mapKey);
+    debug('added', mapKey);
     map.set(mapKey, pooledCfg);
   });
 };
 
-function addRefsToConfigs (map) {
+function addRefsToConfigs(map) {
 
   map.forEach((config) => {
 
@@ -135,16 +150,16 @@ function addRefsToConfigs (map) {
 
     if (!config.abstract) {
       _.each(config.fields, (val, key) => {
-          if (val.ref) {
-            let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
-            _.assign (config.fields[key],{
-              //alias: refConfig.alias,
-              tableName: refConfig.tableName,
-              //TODO: ref id hardcoded for now, change it that id will have some special property
-              id: refConfig.fields.id.field
-            });
-            map.set(`${pool}/${config.collection.toLowerCase()}`, config);
-          }
+        if (val.ref) {
+          let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
+          _.assign(config.fields[key], {
+            //alias: refConfig.alias,
+            tableName: refConfig.tableName,
+            //TODO: ref id hardcoded for now, change it that id will have some special property
+            id: refConfig.fields.id.field
+          });
+          map.set(`${pool}/${config.collection.toLowerCase()}`, config);
+        }
       });
     }
 
