@@ -4,6 +4,7 @@ const _ = require('lodash');
 const plugins = require('../components/plugins');
 const dir = require('node-dir');
 const debug = require('debug')('stapi:domainConfig');
+const poolman = require ('../components/pool/poolManager');
 
 let map = new Map();
 
@@ -35,7 +36,7 @@ function parseFields(fields) {
 
       if (field.fields) {
         field.fields = parseFields (field.fields);
-        debug (key, field.fields);
+        //debug (key, field.fields);
       }
 
       parsed[key] = field;
@@ -94,9 +95,14 @@ let normalizeConfig = (cfg, filename) => {
 };
 
 let processConfig = (cfg, filename) => {
-  let extendedCfg = normalizeConfig(cfg, filename);
 
-  _.forEach(cfg.pools || [''], function (pool) {
+  let extendedCfg = normalizeConfig(cfg, filename);
+  let pools = cfg.pools && _.filter (poolman.getPoolsKeys(),key => {
+    let aliases = poolman.getPoolByName(key).config.aliasesRe;
+    return key.match ('^('+cfg.pools.join('|')+')$') || aliases && _.find (cfg.pools,function (key){return key.match (aliases)});
+  });
+
+  _.forEach(pools || [''], function (pool) {
     var extendsArray = Array.isArray(cfg.extends) ? cfg.extends : [cfg.extends];
     let pooledCfg = _.cloneDeep(extendedCfg);
     _.forEach(extendsArray, function (parent) {
