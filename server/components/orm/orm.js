@@ -1,7 +1,8 @@
 "use strict";
 
-let selectQuery = require('./selectQuery');
-let insertQuery = require('./insertQuery');
+import selectQuery from './selectQuery';
+import insertQuery from './insertQuery';
+import deleteQuery from './deleteQuery';
 
 export function select(config, params) {
   return selectQuery(config, params);
@@ -9,4 +10,8 @@ export function select(config, params) {
 
 export function insert(config, body) {
   return insertQuery(config, body);
+}
+
+export function deleteQ(config, xid) {
+  return deleteQuery(config, xid);
 }

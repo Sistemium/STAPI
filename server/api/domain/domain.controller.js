@@ -1,7 +1,7 @@
 'use strict';
 
 const debug = require('debug')('stapi:domain:controller');
-import {select, insert} from '../../components/orm/orm';
+import {select, insert, deleteQ} from '../../components/orm/orm';
 const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
@@ -78,7 +78,6 @@ var doSelect = function (pool, conn, req, res) {
             }
           }
         }
-
       });
 
       return parsed;
@@ -144,7 +143,12 @@ export function post(req, res, next) {
   pool.customAcquire(req.headers.authorization).then (conn => {
 
     var execReqBody = (item, done) => {
-      let query = insert(res.locals.config, item);
+      try {
+        let query = insert(res.locals.config, item);
+      } catch (err) {
+        debug('post', `exception ${err.stack} `);
+        return res.status(400).end(err.message);
+      }
 
       debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
 
@@ -190,6 +194,40 @@ export function post(req, res, next) {
   },function (err){
     console.error ('post:customAcquire', err);
     res.status(500) && next (new Error (err.text));
+  });
+
+}
+
+export function del(req, res, next) {
+
+  let pool = pools(req.pool);
+
+  pool.customAcquire(req.headers.authorization).then ((conn) => {
+
+    let config = res.locals.config;
+    try {
+      let query = deleteQ(config, req.params.id);
+
+      conn.exec(query.query, query.params, (err, result) => {
+        if (err) {
+          return errorHandler(err, conn, pool, res);
+        }
+
+        if (!result) {
+          return res.status(400).end();
+        } else {
+          return res.status(200).json(result);
+        }
+      });
+
+    } catch (err) {
+      debug('del', `exception ${err.stack} `);
+      return res.status(400).end(err.message);
+    }
+
+  }, (err) => {
+    debug('post.customAcquire', err);
+    return res.status(500) && next(new Error(err.text));
   });
 
 }
