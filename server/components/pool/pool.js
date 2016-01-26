@@ -87,7 +87,7 @@ class Pool {
             conn.busy = true;
             onCreateCallback(m.connectError, conn);
             conn.process.kill();
-          } else if (m.result) {
+          } else if (m.result || m.result === 0) {
             if (m.number == conn.requestCount) {
               if (conn.callback) {
                 conn.callback(null, m.result);

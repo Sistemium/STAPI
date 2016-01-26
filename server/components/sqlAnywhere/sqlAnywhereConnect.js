@@ -52,7 +52,7 @@ process.on('message', function (m) {
           if (err) {
             m.error = parseError(err);
           } else {
-            m.result = res || true;
+            m.result = res || 0;
           }
           process.send(m);
         });
