@@ -1,7 +1,5 @@
 "use strict";
 
-let _ = require('lodash');
-
 let selectQuery = require('./selectQuery');
 let insertQuery = require('./insertQuery');
 

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const plugins = require('../plugins/index');
+import plugins from '../plugins/index';
 const dir = require('node-dir');
 const debug = require('debug')('stapi:domainConfig');
 import {getPoolsKeys,getPoolByName} from '../pool';
@@ -44,6 +44,17 @@ function parseFields(fields) {
         let typeConverter = plugins().get('convert.' + field.type);
         if (typeConverter) {
           field.converter = typeConverter;
+        }
+      }
+
+      if (field.validator) {
+        if (!(typeof field.validator === 'function')) {
+          field.validator = plugins().get(field.validator);
+        }
+      } else {
+        let typeValidator = plugins().get('validator.' + field.type);
+        if (typeValidator) {
+          field.validator = typeValidator;
         }
       }
 
@@ -161,7 +172,6 @@ function addRefsToConfigs(map) {
         }
       });
     }
-
   });
 }
 
