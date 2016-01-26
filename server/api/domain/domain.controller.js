@@ -145,26 +145,25 @@ export function post(req, res, next) {
     var execReqBody = (item, done) => {
       try {
         let query = insert(res.locals.config, item);
+
+        debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
+
+        conn.execWithoutCommit(query.query, query.params, (err, affected) => {
+          if (err) {
+            return done (err);
+          }
+
+          if (affected) {
+            rowsAffected += affected;
+          }
+
+          debug ('rowsAffected:', rowsAffected);
+
+          done();
+        });
       } catch (err) {
-        debug('post', `exception ${err.stack} `);
-        return res.status(400).end(err.message);
+        return done(err);
       }
-
-      debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
-
-      conn.execWithoutCommit(query.query, query.params, (err, affected) => {
-        if (err) {
-          return done (err);
-        }
-
-        if (affected) {
-          rowsAffected += affected;
-        }
-
-        debug ('rowsAffected:', rowsAffected);
-
-        done();
-      });
     };
 
     req.on('close', function () {
