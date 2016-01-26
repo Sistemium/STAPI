@@ -206,7 +206,7 @@ export function del(req, res, next) {
     let config = res.locals.config;
     try {
       let query = deleteQ(config, req.params.id);
-      debug('del.q', `query: ${query.query} \n params: ${query.params}`);
+      debug('del.q', 'query:', query);
 
       conn.exec(query.query, query.params, (err, result) => {
         if (err) {
@@ -214,19 +214,19 @@ export function del(req, res, next) {
         }
 
         if (!result) {
-          return res.status(400).end();
+          return res.status(404).end();
         } else {
-          return res.status(200).json(result);
+          return res.status(200).set('X-Rows-Affected', result).end();
         }
       });
 
     } catch (err) {
-      debug('del', `exception ${err.stack} `);
+      debug('del', 'exception', err.stack);
       return res.status(400).end(err.message);
     }
 
   }, (err) => {
-    debug('post.customAcquire', err);
+    debug('del', 'customAcquire error:', err);
     return res.status(500) && next(new Error(err.text));
   });
 
