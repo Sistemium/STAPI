@@ -1,6 +1,7 @@
 'use strict';
 
 import insertQuery from '../insertQuery';
+import registerPlugins from '../../plugins/registerPlugins';
 import assert from 'assert';
 const domainConfig = require('../../../config/domainConfig');
 const path = require('path');
@@ -13,6 +14,7 @@ RegExp.escape = function(text) {
 describe('Create insert query', function () {
   let map;
   before(function (done) {
+
     domainConfig(path.normalize(path.join(__dirname, '../../..', 'domain')), (m) => {
       map = m;
       done();

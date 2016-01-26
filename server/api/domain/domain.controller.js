@@ -1,7 +1,7 @@
 'use strict';
 
 const debug = require('debug')('stapi:domain:controller');
-const orm = require('../../components/orm/orm');
+import {select, insert} from '../../components/orm/orm';
 const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
@@ -32,7 +32,7 @@ var doSelect = function (pool, conn, req, res) {
   let query;
   let config = res.locals.config;
   try {
-    query = orm.select(config, req['x-params']);
+    query = select(config, req['x-params']);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);
     return res.status(400).end(err.message);
@@ -144,7 +144,7 @@ export function post(req, res, next) {
   pool.customAcquire(req.headers.authorization).then (conn => {
 
     var execReqBody = (item, done) => {
-      let query = orm.insert(res.locals.config, item);
+      let query = insert(res.locals.config, item);
 
       debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
 

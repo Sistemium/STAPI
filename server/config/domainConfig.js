@@ -137,7 +137,6 @@ let processConfig = (cfg, filename) => {
     });
     pooledCfg.pool = pool;
     let mapKey = pool + '/' + pooledCfg.collection.toLowerCase();
-    debug('added', mapKey);
     map.set(mapKey, pooledCfg);
   });
 };

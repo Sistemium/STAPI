@@ -3,6 +3,7 @@
 const selectQuery = require('../selectQuery');
 const assert = require('assert');
 const domainConfig = require('../../../config/domainConfig');
+const registerPlugins = require('../../plugins/registerPlugins');
 const path = require('path');
 
 RegExp.escape = function(text) {
@@ -17,6 +18,7 @@ describe('Create select query', () => {
       done();
     });
   });
+
 
   it('should create query', () => {
     //arrange
@@ -57,6 +59,6 @@ describe('Create select query', () => {
     expect(configPredicateExist).equal(true);
     expect(res.params).to.be.an('array');
     expect(res.params.length).equal(3);
-    expect(res.params[2]).equal('1');
+    expect(res.params[2]).equal(1);
   });
 });

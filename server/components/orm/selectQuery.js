@@ -4,7 +4,7 @@ const debug = require('debug')('stapi:orm:selectQuery');
 export default function (config, params) {
   "use strict";
 
-  function parseOrderByParams(params, alias) {
+  function parseOrderByParams(params) {
 
     let arr = params.split(',');
     let result = _.reduce(arr, (res, i) => {
@@ -137,9 +137,8 @@ export default function (config, params) {
           } else {
             predicateStr += `${alias}.${field.field} = ? AND `;
           }
-          //TODO: make converters for fields with type boolean
-          if (field.type && field.type.match(/^(bool|boolean)$/i)) {
-            params[key] = params[key] ? '1':'0';
+          if (field.converter) {
+            params[key] = field.converter (params[key]);
           }
           result.params.push(params[key]);
           withPredicate = true;
