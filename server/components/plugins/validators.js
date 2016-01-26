@@ -13,5 +13,15 @@ export default {
         return 'Valid values: ' + data.join();
       }
     }
+  },
+  checkMobileNumber: (value) => {
+    if (!value.match(/^[0-9]{10,11}$/)) {
+      return `Value ${value} is incorrect. Mobile number must be of 10 to 11 digits.`;
+    }
+  },
+  required: (value) => {
+    if (!value) {
+      return `Field is required.`;
+    }
   }
 }

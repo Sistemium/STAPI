@@ -21,12 +21,19 @@ function collectValidators(config) {
           fn: val.validator,
           field: key
         });
+      } else if (typeof val.validators === 'object') {
+        _.each(val.validators, (validator) => {
+          if (typeof validator === 'function') {
+           validators.push({
+             fn: validator,
+             field: key
+           });
+          }
+        });
       } else if (key === 'fields') {
         fn(val);
       }
-
     });
-
   };
 
   fn(config);
@@ -50,7 +57,7 @@ export default function () {
           if (validator.field) {
             msgs.push(`Invalid value for field '${validator.field}' '${item[validator.field]}': ` + v);
           } else {
-            msgs.push(`Invalid values '${item}'`);
+            msgs.push(`Invalid values '${item}': ` + v);
           }
         }
       });
