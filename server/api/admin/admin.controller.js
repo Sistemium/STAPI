@@ -1,5 +1,5 @@
 'use strict';
-import makeMap from '../../config/domainConfig';
+import makeMap from '../../components/orm/domainConfigsParser';
 import path from 'path';
 
 export function index(req, res) {

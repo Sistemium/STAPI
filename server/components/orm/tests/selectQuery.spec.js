@@ -2,7 +2,7 @@
 
 const selectQuery = require('../selectQuery');
 const assert = require('assert');
-const domainConfig = require('../../../config/domainConfig');
+const domainConfig = require('../domainConfigsParser');
 const registerPlugins = require('../../plugins/registerPlugins');
 const path = require('path');
 

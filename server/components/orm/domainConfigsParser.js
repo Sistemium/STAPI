@@ -1,10 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
-const plugins = require('../components/plugins');
+const plugins = require('../plugins/index');
 const dir = require('node-dir');
 const debug = require('debug')('stapi:domainConfig');
-import {getPoolsKeys,getPoolByName} from '../components/pool';
+import {getPoolsKeys,getPoolByName} from '../pool';
 
 let map = new Map();
 

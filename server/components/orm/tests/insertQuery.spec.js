@@ -3,7 +3,7 @@
 import insertQuery from '../insertQuery';
 import registerPlugins from '../../plugins/registerPlugins';
 import assert from 'assert';
-const domainConfig = require('../../../config/domainConfig');
+const domainConfig = require('../domainConfigsParser');
 const path = require('path');
 const _ = require('lodash');
 
