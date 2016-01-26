@@ -34,7 +34,7 @@ module.exports = {
       expr: '(select max([lastAuth]) from [pha].[accesstoken] where [agent] = [Agent].[id])'
     }
   },
-  deletable: 'isDisabled=1',
+  deletable: true,
 
   predicate: `(
     Agent.org in (select [data] from uac.tokenRole ('pha.org',@UACToken))
