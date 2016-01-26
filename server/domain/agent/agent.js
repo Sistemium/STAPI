@@ -16,12 +16,13 @@ module.exports = {
       field: 'mobile_number',
       converter: mobileNumber => {
         return mobileNumber ? '8' + mobileNumber.replace(/(8|^)([0-9]{10,11}).*$/, '$2') : null;
-      }
+      },
+      validators: [validators.required, validators.checkMobileNumber]
     },
     org: {
-      validator: function (req,val) {
+      validators: [function (req,val) {
         return validators.checkRole(req, 'pha.org', val);
-      }
+      }]
     },
     info: true,
     email: true,

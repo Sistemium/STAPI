@@ -55,9 +55,9 @@ export default function () {
           validator.fn(req, item);
         if (v) {
           if (validator.field) {
-            msgs.push(`Invalid value for field '${validator.field}' '${item[validator.field]}': ` + v);
+            msgs.push(`Invalid value '${item[validator.field]}' for field '${validator.field}': ` + v);
           } else {
-            msgs.push(`Invalid values '${item}': ` + v);
+            msgs.push(`Invalid values '${res.locals.config.collection}': ` + v);
           }
         }
       });
