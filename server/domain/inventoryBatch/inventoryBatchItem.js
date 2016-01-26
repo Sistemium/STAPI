@@ -24,5 +24,6 @@ module.exports = {
   },
   tableName: '[bs].[InventoryBatchItem]',
   alias: 'ibi',
-  collection: 'inventoryBatchItem'
+  collection: 'inventoryBatchItem',
+  deletable: true
 };

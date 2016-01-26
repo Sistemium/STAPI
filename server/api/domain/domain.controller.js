@@ -207,6 +207,7 @@ export function del(req, res, next) {
     let config = res.locals.config;
     try {
       let query = deleteQ(config, req.params.id);
+      debug('del.q', `query: ${query.query} \n params: ${query.params}`);
 
       conn.exec(query.query, query.params, (err, result) => {
         if (err) {
