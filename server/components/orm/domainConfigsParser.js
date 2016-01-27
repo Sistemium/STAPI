@@ -81,6 +81,7 @@ let normalizeConfig = (cfg, filename) => {
   _.each(cfg.fields, (val, key) => {
 
     if (!val) {
+      delete nCfg.fields[key];
       return;
     } else if (val === true) {
       nCfg.fields[key] = {
