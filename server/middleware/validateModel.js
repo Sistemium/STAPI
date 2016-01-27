@@ -64,7 +64,7 @@ export default function () {
           } else {
             msgs.push({
               message: v,
-              error: `Invalid values for'${res.locals.config.collection}'`
+              error: `Invalid values for '${res.locals.config.collection}'`
             });
           }
         }
