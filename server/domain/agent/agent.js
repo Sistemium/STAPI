@@ -27,7 +27,7 @@ module.exports = {
     info: true,
     email: true,
     roles: {
-      validator: function (req,val) {
+      validator: function (val) {
         if (!val) {
           return;
         }
