@@ -1,14 +1,13 @@
 'use strict';
+var predicates = require('predicates');
 
 module.exports = {
 
   pools: ['dev'],
   extends: 'defaultFields',
   fields: {
-    deviceCts: 'deviceCts',
-    code: {
-      field: 'code'
-    },
+    deviceCts: true,
+    code: true,
     isDone: {
       type: 'boolean'
     },
@@ -44,7 +43,17 @@ module.exports = {
     from bs.InventoryBatchItem ibi
     where ibi.inventoryBatch = ib.id
   ) as items`,
-  predicate: `(ib.site in (
+
+  deletable: 'isRemoved=1',
+
+  predicate: {
+    field: 'site',
+    fn: function (req) {
+      return predicates.inRoleData('site',req);
+    }
+  },
+
+  old:  `(ib.site in (
         select [data] from uac.tokenRole ('site',@UACToken)
     ) or exists (
         select * from uac.tokenRole ('warehouse',@UACToken)
