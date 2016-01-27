@@ -40,23 +40,24 @@ export default function () {
       return arr;
     }
 
+
     //get all ref predicates
+    function checkPredicates(ref) {
+      let predicates = ref.predicates || ref.predicate && [ref.predicate];
+
+      if (predicates) {
+        res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, ref.collection));
+      }
+    }
+
     _.each(config.fields, (val) => {
       let ref = val.refConfig;
       if (ref) {
-        let predicates = ref.predicates || ref.predicate && [ref.predicate];
-
-        if (predicates) {
-          res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, ref.collection));
-        }
+        checkPredicates(ref);
       }
     });
 
-    let predicates = config.predicates || config.predicate && [config.predicate];
-
-    if (predicates) {
-      res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, config.collection));
-    }
+    checkPredicates(config);
 
     debug('result', res.locals.predicates);
 
