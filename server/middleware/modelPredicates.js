@@ -50,20 +50,20 @@ export default function () {
       return arr;
     }
 
-
-    //get all ref predicates
-    function checkPredicates(ref) {
-      let predicates = ref.predicates || ref.predicate && [ref.predicate];
-
+    function checkPredicates(cfg,alias) {
+      let predicates = cfg.predicates || cfg.predicate && [cfg.predicate];
+      if (typeof cfg.deletable === 'string') {
+        predicates.push (`NOT ${alias||cfg.alias}.${cfg.deletable}`);
+      }
       if (predicates) {
-        res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, ref.collection));
+        res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, cfg.collection));
       }
     }
 
-    _.each(config.fields, (val) => {
+    _.each(config.fields, (val,key) => {
       let ref = val.refConfig;
       if (ref) {
-        checkPredicates(ref);
+        checkPredicates(ref,key);
       }
     });
 
