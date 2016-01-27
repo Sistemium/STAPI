@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const debug = require('debug')('stapi:orm:selectQuery');
 
-export default function (config, params) {
+export default function (config, params, predicates) {
   "use strict";
 
   function parseOrderByParams(params) {
@@ -59,7 +59,7 @@ export default function (config, params) {
     let refTableNames = new Map();
     let fields = cnfg.fields;
 
-    _.each(cnfg.fields, (prop,key) => {
+    _.each(cnfg.fields, (prop, key) => {
 
       if (prop.ref || prop.fields) {
 
@@ -72,7 +72,7 @@ export default function (config, params) {
         if (!fields) {
           result.query += `[${key}].xid as [${key}]`;
         } else {
-          _.each(fields,function(refField, refProp){
+          _.each(fields, function (refField, refProp) {
             result.query += `[${key}].[${refField.field}] as [${key}.${refProp}], `;
           });
           result.query = result.query.slice(0, -2);
@@ -138,16 +138,19 @@ export default function (config, params) {
             predicateStr += `${alias}.${field.field} = ? AND `;
           }
           if (field.converter) {
-            params[key] = field.converter (params[key]);
+            params[key] = field.converter(params[key]);
           }
           result.params.push(params[key]);
           withPredicate = true;
         }
       });
 
-      if (cnfg.predicate) {
+      if (predicates && predicates.length) {
+
         withPredicate = true;
-        predicateStr += `${cnfg.predicate} AND `;
+        _.each(predicates, (pred) => {
+          predicateStr += `${pred} AND `;
+        });
       }
 
       let q = params['q:'];

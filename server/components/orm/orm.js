@@ -4,8 +4,8 @@ import selectQuery from './selectQuery';
 import insertQuery from './insertQuery';
 import deleteQuery from './deleteQuery';
 
-export function select(config, params) {
-  return selectQuery(config, params);
+export function select(config, params, predicates) {
+  return selectQuery(config, params, predicates);
 }
 
 export function insert(config, body) {

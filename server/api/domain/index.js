@@ -7,9 +7,10 @@ import validateParams from '../../middleware/validateParams';
 import extractFromUrl from '../../middleware/extractFromUrl';
 import modifyBody from '../../middleware/modifyBody';
 import validateModel from '../../middleware/validateModel';
+import modelPredicates from '../../middleware/modelPredicates';
 
 var router = express.Router();
-var mw = [extractFromUrl(), headersToParams(), validateParams()];
+var mw = [extractFromUrl(), headersToParams(), validateParams(), modelPredicates()];
 var bm = [modifyBody(), validateModel(), controller.post];
 
 router
