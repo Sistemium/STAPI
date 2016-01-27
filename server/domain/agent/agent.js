@@ -20,8 +20,8 @@ module.exports = {
       validators: [validators.required, validators.checkMobileNumber]
     },
     org: {
-      validators: [function (req,val) {
-        return validators.checkRole(req, 'pha.org', val);
+      validators: [function (val, req) {
+        return validators.checkRole('pha.org', val, req);
       }]
     },
     info: true,

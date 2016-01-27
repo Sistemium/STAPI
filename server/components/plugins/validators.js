@@ -2,7 +2,7 @@
 const _ = require('lodash');
 
 export default {
-  checkRole:  (req, role, value) => {
+  checkRole:  (role, value, req) => {
     let auth = req.auth;
     let matchingRole = auth.roles && auth.roles[role];
     if (!matchingRole) {
@@ -14,12 +14,12 @@ export default {
       }
     }
   },
-  checkMobileNumber: (req, value) => {
+  checkMobileNumber: (value) => {
     if (!value || !value.match(/^[0-9]{10,11}$/)) {
       return `Mobile number must be of 10 to 11 digits.`;
     }
   },
-  required: (req, value) => {
+  required: (value) => {
     if (!value) {
       return `Field is required.`;
     }

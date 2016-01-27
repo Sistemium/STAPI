@@ -14,7 +14,7 @@ export default function (config, xid) {
   } else {
 
     if (typeof config.deletable === 'string') {
-      obj.query += `UPDATE ${config.tableName} SET ${config.deletable} WHERE ${config.fields.id.field} = ?`
+      obj.query += `UPDATE ${config.tableName} SET ${config.deletable} WHERE ${config.fields.id.field} = ? AND NOT isDisabled`;
       obj.params.push(xid);
     }
 

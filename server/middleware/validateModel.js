@@ -51,8 +51,8 @@ export default function () {
     _.each(req.body, function (item) {
       _.each(validators, function (validator) {
         var v = validator.field ?
-          validator.fn(req, item[validator.field]) :
-          validator.fn(req, item);
+          validator.fn(item[validator.field], req) :
+          validator.fn(item, req);
         if (v) {
           if (validator.field) {
             msgs.push(`Invalid value '${item[validator.field]}' for field '${validator.field}': ` + v);
