@@ -32,7 +32,6 @@ var doSelect = function (pool, conn, req, res) {
   let query;
   let config = res.locals.config;
   try {
-    debug('doSelect', res.locals.predicates);
     query = select(config, req['x-params'], res.locals.predicates);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);

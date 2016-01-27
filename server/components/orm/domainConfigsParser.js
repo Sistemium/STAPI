@@ -166,7 +166,8 @@ function addRefsToConfigs(map) {
             //alias: refConfig.alias,
             tableName: refConfig.tableName,
             //TODO: ref id hardcoded for now, change it that id will have some special property
-            id: refConfig.fields.id.field
+            id: refConfig.fields.id.field,
+            refConfig: refConfig
           });
           map.set(`${pool}/${config.collection.toLowerCase()}`, config);
         }

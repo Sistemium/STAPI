@@ -116,6 +116,14 @@ export default function (config, params, predicates) {
     if (refTableNames.size > 0) {
       for (let ref of refTableNames) {
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
+        debug('predicatesForJoin', predicates);
+        let predicatesForJoin = _.filter(predicates, (p) => {
+          return p.collection === ref[1].refConfig.collection;
+        });
+        debug('predicatesForJoin', predicatesForJoin);
+        _.each(predicatesForJoin, (p) => {
+          result.query += `AND ${ref[1].property}.${p.field} ${p.sql} `
+        });
       }
     }
 
@@ -145,11 +153,18 @@ export default function (config, params, predicates) {
         }
       });
 
+      predicates = _.filter(predicates, (p) => {
+        return p.collection === cnfg.collection || typeof p === 'string';
+      });
       if (predicates && predicates.length) {
 
         withPredicate = true;
         _.each(predicates, (pred) => {
-          predicateStr += `${pred} AND `;
+          if (pred.field && pred.collection === cnfg.collection) {
+            predicateStr += `${pred.field} ${pred.sql} AND `;
+          } else {
+            predicateStr += `${pred} AND `;
+          }
         });
       }
 

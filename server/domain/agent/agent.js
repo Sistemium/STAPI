@@ -49,16 +49,16 @@ module.exports = {
   },
   deletable: true,
 
-  predicate: function (req) {
-    return predicates.fieldInRoleData('Agent.org','pha.org',req);
-  }
-
-
-  //predicate: {
-  //  field: 'org',
-  //  fn: function (req) {
-  //    return predicates.inRoleData('pha.org',req);
-  //  }
+  //predicate: function (req) {
+  //  return predicates.fieldInRoleData('Agent.org','pha.org',req);
   //}
+
+
+  predicate: {
+    field: 'org',
+    fn: function (req) {
+      return predicates.inRoleData('pha.org',req);
+    }
+  }
 
 };
