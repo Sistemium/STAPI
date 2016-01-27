@@ -1,4 +1,5 @@
-var validators = require ('validators');
+var validators = require('validators');
+var predicates = require('predicates');
 
 module.exports = {
 
@@ -48,9 +49,16 @@ module.exports = {
   },
   deletable: true,
 
-  predicate: `(
-    Agent.org in (select [data] from uac.tokenRole ('pha.org',@UACToken))
-    OR exists (select * from uac.tokenRole ('pha.org',@UACToken) where [data] = '*')
-  )`
+  predicate: function (req) {
+    return predicates.fieldInRoleData('Agent.org','pha.org',req);
+  }
+
+
+  //predicate: {
+  //  field: 'org',
+  //  fn: function (req) {
+  //    return predicates.inRoleData('pha.org',req);
+  //  }
+  //}
 
 };

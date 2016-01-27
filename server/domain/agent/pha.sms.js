@@ -1,3 +1,5 @@
+var predicates = require('predicates');
+
 module.exports = {
 
   pools: ['pha'],
@@ -13,9 +15,6 @@ module.exports = {
     }
   },
 
-  predicate: `(
-    account.org in (select [data] from uac.tokenRole ('pha.org',@UACToken))
-    OR exists (select * from uac.tokenRole ('pha.org',@UACToken) where [data] = '*')
-  )`
+  predicate: (req) => {return predicates.fieldInRoleData ('account.org','pha.org',req);}
 
 };
