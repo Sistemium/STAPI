@@ -9,6 +9,8 @@ let functions = {
     if (res) {
       return `${field} ${res}`;
     }
+
+    return res;
   },
 
   inRoleData: function (role, req) {
@@ -25,7 +27,10 @@ let functions = {
       roles = `'${roles.join("','")}'`;
 
       return `in (${roles})`;
+    } else {
+      return false;
     }
+
   }
 
 };

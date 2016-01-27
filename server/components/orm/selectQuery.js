@@ -122,7 +122,7 @@ export default function (config, params, predicates) {
         });
         debug('predicatesForJoin', predicatesForJoin);
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND ${ref[1].property}.${p.field} ${p.sql} `
+          result.query += `AND (${ref[1].property}.${p.field} ${p.sql}) `
         });
       }
     }
@@ -161,9 +161,10 @@ export default function (config, params, predicates) {
         withPredicate = true;
         _.each(predicates, (pred) => {
           if (pred.field && pred.collection === cnfg.collection) {
-            predicateStr += `${pred.field} ${pred.sql} AND `;
+            let predAlias = fields[pred.field] ? '' : (alias + '.');
+            predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
           } else {
-            predicateStr += `${pred} AND `;
+            predicateStr += `(${pred}) AND `;
           }
         });
       }

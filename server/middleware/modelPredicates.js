@@ -14,25 +14,35 @@ export default function () {
       if (Array.isArray(predicates)) {
 
         _.each(predicates, (pred) => {
+
+          let predRes;
+
           if (typeof pred === 'function') {
-            let fnResult = pred(req);
-            if (fnResult) {
-              arr.push(fnResult);
+            predRes = pred(req);
+            if (predRes) {
+              arr.push(predRes);
             }
           } else if (typeof pred === 'string') {
             arr.push(pred);
           } else if (pred.fn) {
-            let fnResult = pred.fn(req);
-            if (fnResult) {
+            predRes = pred.fn(req);
+            if (predRes) {
               arr.push({
                 field: pred.field,
-                sql: fnResult,
+                sql: predRes,
                 collection: collection
               });
             }
           } else {
             next('Incorrect config, predicate must be array of functions or strings...');
           }
+
+          if (predRes===false) {
+            res.status(403);
+            next ('Not authorized');
+            return false;
+          }
+
         });
       }
 
