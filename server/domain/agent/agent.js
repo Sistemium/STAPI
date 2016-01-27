@@ -26,7 +26,19 @@ module.exports = {
     },
     info: true,
     email: true,
-    roles: true,
+    roles: {
+      validator: function (req,val) {
+        if (!val) {
+          return;
+        }
+        var roles = val.split(',');
+        if (roles.filter(role => {
+            return !role.match(/[a-z1-9]+(:[a-z1-9]+|$)/i);
+          }).length) {
+          return 'Roles must be role1:val1,role2:val2,role3';
+        }
+      }
+    },
     isDisabled: {
       type: 'boolean'
     },
