@@ -10,7 +10,7 @@ export default function (config, body, predicates) {
     params: []
   };
 
-  _.each(body, (val,k) => {
+  _.each(body, (val, k) => {
 
     let cnfProp = config.fields [k];
 
@@ -33,7 +33,7 @@ export default function (config, body, predicates) {
     //check that config alias not matches queryAlias
     let queryAlias = 'm';
     result.query =
-      `MERGE INTO ${config.tableName} AS ${config.alias} USING WITH AUTO NAME (
+      `MERGE INTO ${config.tableName} AS [${config.alias}] USING WITH AUTO NAME (
              SELECT `;
 
     let refAliases = [];
@@ -66,11 +66,15 @@ export default function (config, body, predicates) {
     });
     //debug('tPredicates', tPredicates);
     tPredicates = _.map(tPredicates, (tp) => {
+<<<<<<< HEAD
       if (typeof tp === 'string') {
         return tp;
       } else {
-        return `${tp.field || ''} ${tp.sql}`
+        return `${tp.field && `[${config.alias}].[${tp.field}]` || ''} ${tp.sql}`
       }
+=======
+      return `${tp.field || ''} ${tp.sql}`
+>>>>>>> origin/pooling
     });
     tPredicates = tPredicates.join(' AND ');
 
