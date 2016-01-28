@@ -46,7 +46,7 @@ module.exports = {
       }
     },
     roles: {
-      validator: function (val) {
+      validators: [function (val) {
         if (!val) {
           return;
         }
@@ -56,7 +56,11 @@ module.exports = {
           }).length) {
           return 'Roles must be role1:val1,role2:val2,role3';
         }
-      }
+      },function (val) {
+        if (val && val.match(/([,]|^)pha\.org([:,]|$)/ig)) {
+          return 'Setting pha.org role is not allowed';
+        }
+      }]
     },
     isDisabled: {
       type: 'boolean'
