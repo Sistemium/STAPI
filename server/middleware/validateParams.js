@@ -14,6 +14,5 @@ export default function () {
     });
 
     return isValid && next();
-
   }
 }
