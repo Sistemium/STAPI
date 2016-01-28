@@ -66,11 +66,7 @@ export default function (config, body, predicates) {
     });
     //debug('tPredicates', tPredicates);
     tPredicates = _.map(tPredicates, (tp) => {
-<<<<<<< HEAD
       return `${tp.field && `[${config.alias}].[${tp.field}]` || ''} ${tp.sql}`
-=======
-      return `${tp.field || ''} ${tp.sql}`
->>>>>>> origin/pooling
     });
     tPredicates = tPredicates.join(' AND ');
 
