@@ -32,13 +32,6 @@ describe('Create insert query', function () {
     };
 
     let config = map.get('dev/inventorybatchitem');
-    let writableFields = Object.keys(_.pickBy(config.fields, function (i) {
-      return !i.readonly;
-    }));
-    let query = `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
-             SELECT ? AS [code],? AS [xid],(SELECT id FROM [bs].[InventoryBatch] WHERE xid = ?) AS [inventoryBatch]) AS m ON t.[xid] = m.[xid]
-            WHEN NOT MATCHED THEN INSERT
-            WHEN MATCHED THEN UPDATE`;
 
     //act
     let result = insertQuery(config, body);
@@ -46,11 +39,13 @@ describe('Create insert query', function () {
     //assert
     expect(result).to.be.an('object');
     expect(result).to.have.keys(['query', 'params']);
-    expect(result.params.length).equal(writableFields.length);
-    query = query.replace(/\s/ig, '');
-    let queryRegex = new RegExp(RegExp.escape(query), 'gi');
-    result.query = result.query.replace(/\s/gi, '');
-    let queryMatch = result.query.match(queryRegex) !== null;
-    expect(queryMatch).equal(true);
   });
+
+  it('should create query with predicates', () => {
+
+    let body = {
+
+    }
+
+  })
 });

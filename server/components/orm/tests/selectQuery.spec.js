@@ -54,9 +54,6 @@ describe('Create select query', () => {
     let configJoinRegex = new RegExp(RegExp.escape(config.join), 'i');
     let configJoinExist = res.query.match(configJoinRegex) ? true : false;
     expect(configJoinExist).equal(true);
-    let configPredicateRegex = new RegExp(RegExp.escape(config.predicate), 'i');
-    let configPredicateExist = res.query.match(configPredicateRegex) ? true : false;
-    expect(configPredicateExist).equal(true);
     expect(res.params).to.be.an('array');
     expect(res.params.length).equal(3);
     expect(res.params[2]).equal(1);
