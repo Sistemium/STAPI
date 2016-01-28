@@ -14,10 +14,6 @@ export default function (config, body, predicates) {
 
     let cnfProp = config.fields [k];
 
-    //if (!cnfProp || cnfProp.readonly) {
-    //  return true;
-    //}
-
     if (cnfProp.ref && !cnfProp.insertRaw) {
       fields[cnfProp.field] = {
         body: val,
@@ -30,8 +26,7 @@ export default function (config, body, predicates) {
   });
 
   function concatQuery(fields, config) {
-    //check that config alias not matches queryAlias
-    let queryAlias = 'm';
+    let queryAlias = config.alias === 'm' ? 'n' : 'm';
     result.query =
       `MERGE INTO ${config.tableName} AS [${config.alias}] USING WITH AUTO NAME (
              SELECT `;
@@ -64,7 +59,7 @@ export default function (config, body, predicates) {
     let tPredicates = _.filter(predicates, (p) => {
       return p.collection === config.collection || typeof p === 'string';
     });
-    //debug('tPredicates', tPredicates);
+
     tPredicates = _.map(tPredicates, (tp) => {
       return `${tp.field && `[${config.alias}].[${tp.field}]` || ''} ${tp.sql}`
     });
