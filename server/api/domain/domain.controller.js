@@ -6,6 +6,19 @@ const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
 
+var statusByErr = (err) => {
+
+  if (err.code === '-70001') {
+    return 404;
+  } else if (err.code === '-70002') {
+    return 403;
+  }
+
+  return 500;
+
+};
+
+
 var errorHandler = function (err, conn, pool, res) {
 
   console.error('Client:', conn.number, 'exec error:', err);
@@ -20,7 +33,15 @@ var errorHandler = function (err, conn, pool, res) {
     });
   }
 
-  return res.status(500).json(err);
+  let status = statusByErr(err);
+
+  res.status(status);
+
+  if (status == 500) {
+    res.json (err);
+  } else {
+    res.end ();
+  }
 
 };
 
@@ -136,15 +157,13 @@ export function post(req, res, next) {
     return res.status(400) && next('Empty body');
   }
 
-  debug ('post:', req.body);
-
   let rowsAffected = 0;
 
   pool.customAcquire(req.headers.authorization).then (conn => {
 
     var execReqBody = (item, done) => {
       try {
-        let query = insert(res.locals.config, item);
+        let query = insert(res.locals.config, item, res.locals.predicates);
 
         debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
 
