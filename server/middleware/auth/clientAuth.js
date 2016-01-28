@@ -3,6 +3,7 @@
 import config from '../../config/environment';
 const authUrl = config.stAuthUrl;
 const request = require('request');
+const debug = require ('debug') ('stapi:clientAuth');
 
 // переделать на хранение в redis с автоочисткой по expiresAt
 var authorizedTokens = {};
@@ -44,7 +45,7 @@ var authByToken = function (token) {
 var checkOrgAuth = function (org, auth) {
 
   try {
-    if (auth.account.org === org || auth.roles.admin) {
+    if (auth.account.org === org || auth.roles.admin || auth.roles[org]) {
       return true;
     }
   } catch (e) {
