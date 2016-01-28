@@ -37,9 +37,11 @@ export default function (config, body) {
       `MERGE INTO ${config.tableName} AS t USING WITH AUTO NAME (
              SELECT `;
 
+    let refAlias;
     _.each(fields, (v, k) => {
       if (v && v.ref) {
         result.query += `(SELECT id FROM ${v.ref.tableName} WHERE xid = ?) AS [${k}],`;
+        refAlias = k;
         result.params.push(v.body);
       }
       else {
@@ -51,8 +53,8 @@ export default function (config, body) {
     result.query = result.query.slice(0, -1);
     result.query +=
       `) AS m ON t.[xid] = m.[xid]
-            WHEN NOT MATCHED THEN INSERT
-            WHEN MATCHED THEN UPDATE`;
+            WHEN NOT MATCHED AND m.${refAlias} IS NULL THEN INSERT
+            WHEN MATCHED AND m.${refAlias} IS NULL THEN UPDATE`;
 
     return result;
   }
