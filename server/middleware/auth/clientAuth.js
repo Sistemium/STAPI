@@ -6,8 +6,14 @@ const request = require('request');
 const debug = require ('debug') ('stapi:clientAuth');
 
 // переделать на хранение в redis с автоочисткой по expiresAt
-var authorizedTokens = {};
-var badTokens = {};
+
+var LRU = require("lru-cache");
+var lruOptions = {
+    max: process.env.AUTH_LRU_MAX || 1000,
+    maxAge: process.env.AUTH_LRU_MAX_AGE || 1000 * 5 * 60
+};
+var authorizedTokens = LRU (lruOptions);
+var badTokens = LRU (lruOptions);
 
 var authByToken = function (token) {
 
@@ -79,16 +85,22 @@ export default function () {
 
     var token = req.headers.authorization;
 
-    if (!token || badTokens[token]) {
-      res.status(401).end();
-    } else if (authorizedTokens[token]) {
-      checkRoles(authorizedTokens[token]);
+    if (!token || badTokens.get(token)) {
+      return res.status(401).end();
+    }
+
+    let authorized = authorizedTokens.get (token);
+
+    if (authorized) {
+      checkRoles(authorized);
     } else {
       authByToken(token).then(function (res) {
         console.log('Auth account success:', res.account && res.account.name);
-        checkRoles(authorizedTokens[token] = res);
+        authorizedTokens.set(token,res)
+        checkRoles(res);
       }, function () {
-        badTokens[token] = true;
+        debug ('Auth account error:', token);
+        badTokens.set (token, true);
         res.status(401).end();
       });
     }
