@@ -14,9 +14,9 @@ export default function (config, body) {
 
     let cnfProp = config.fields [k];
 
-    if (!cnfProp || cnfProp.readonly) {
-      return true;
-    }
+    //if (!cnfProp || cnfProp.readonly) {
+    //  return true;
+    //}
 
     if (cnfProp.ref && !cnfProp.insertRaw) {
       fields[cnfProp.field] = {
@@ -26,9 +26,6 @@ export default function (config, body) {
         }
       };
     } else {
-      if (cnfProp.converter) {
-        val = cnfProp.converter (val);
-      }
       fields[cnfProp.field] = val;
     }
 

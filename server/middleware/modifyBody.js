@@ -10,6 +10,7 @@ export default function () {
   return function (req, res, next) {
 
     let requestBody = req.body;
+    let config = res.locals.config;
 
     if (req.method === 'POST' || req.method === 'PUT') {
 
@@ -24,6 +25,10 @@ export default function () {
 
       applyParams(req['x-params'],req.body);
 
+      if (config) {
+        req.body = applyConverters (config,req);
+      }
+
     }
 
     debug ('body:',req.body);
@@ -33,6 +38,33 @@ export default function () {
 
 }
 
+var applyConverters = (config,req) => {
+
+  return _.map(req.body, item => {
+
+    var fields = {};
+
+    _.each (config.fields, (field, key) => {
+
+      if (!field || field.readonly) {
+        return;
+      }
+
+      let val = item [key];
+
+      if (field.converter) {
+        fields [key] = field.converter (val, req);
+      } else {
+        fields [key] = val || null;
+      }
+
+    });
+
+    return fields;
+
+  });
+
+};
 
 var applyParams = (params,bodyArray) => {
 
