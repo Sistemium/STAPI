@@ -52,7 +52,7 @@ module.exports = {
         }
         var roles = val.split(',');
         if (roles.filter(role => {
-            return !role.match(/^[a-z1-9\.\-]+(:[a-z1-9\.\-*]+$|$)/i);
+            return !role.match(/^[a-z0-9\.\-]+(:[a-z0-9\.\-*]+$|$)/i);
           }).length) {
           return 'Roles must be role1:val1,role2:val2,role3';
         }
@@ -63,6 +63,9 @@ module.exports = {
     },
     lastAuth: {
       expr: '(select max([lastAuth]) from [pha].[accesstoken] where [agent] = [Agent].[id])'
+    },
+    author: {
+      type: 'int'
     }
   },
   deletable: true,
