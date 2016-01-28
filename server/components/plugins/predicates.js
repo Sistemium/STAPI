@@ -31,6 +31,10 @@ let functions = {
       return false;
     }
 
+  },
+
+  matchAccountOrg: function (req) {
+    return `= '${req.auth.account.org}'`
   }
 
 };

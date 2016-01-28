@@ -21,12 +21,30 @@ module.exports = {
       validators: [validators.required, validators.checkMobileNumber]
     },
     org: {
-      validators: [function (val, req) {
-        return validators.checkRole('pha.org', val, req);
+      converter: (org,req) => {
+        return org || req.auth && req.auth.account.org;
+      },
+      validators: [(val,req) => {
+
+        if (req.auth.roles ['pha.org']) {
+          return validators.checkRole('pha.org', val, req);
+        } else {
+          return validators.hasNoRole('pha.admin', req) || validators.matchOrg (val, req);
+        }
+
       }]
     },
     info: true,
     email: true,
+    salesman: true,
+    billingName: {
+      field: 'billing_name',
+      validators: (val,req) => {
+        if (req.auth.account.org === 'un'){
+          return validators.required (val);
+        }
+      }
+    },
     roles: {
       validator: function (val) {
         if (!val) {
@@ -34,7 +52,7 @@ module.exports = {
         }
         var roles = val.split(',');
         if (roles.filter(role => {
-            return !role.match(/[a-z1-9]+(:[a-z1-9]+|$)/i);
+            return !role.match(/^[a-z1-9\.\-]+(:[a-z1-9\.\-*]+$|$)/i);
           }).length) {
           return 'Roles must be role1:val1,role2:val2,role3';
         }
@@ -57,7 +75,11 @@ module.exports = {
   predicate: {
     field: 'org',
     fn: function (req) {
-      return predicates.inRoleData('pha.org',req);
+      if (req.auth.roles ['pha.org']) {
+        return predicates.inRoleData('pha.org', req);
+      } else {
+        return predicates.matchAccountOrg(req);
+      }
     }
   }
 
