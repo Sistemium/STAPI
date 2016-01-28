@@ -10,7 +10,7 @@ export default function (config, body, predicates) {
     params: []
   };
 
-  _.each(body, (val,k) => {
+  _.each(body, (val, k) => {
 
     let cnfProp = config.fields [k];
 
@@ -66,11 +66,7 @@ export default function (config, body, predicates) {
     });
     //debug('tPredicates', tPredicates);
     tPredicates = _.map(tPredicates, (tp) => {
-      if (typeof tp === 'string') {
-        return tp;
-      } else {
-        return `${tp.field || ''} ${tp.sql}`
-      }
+      return `${tp.field || ''} ${tp.sql}`
     });
     tPredicates = tPredicates.join(' AND ');
 
