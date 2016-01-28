@@ -1,17 +1,17 @@
 const _ = require('lodash');
 const debug = require('debug')('stapi:orm:selectQuery');
 
-export default function (config, params) {
+export default function (config, params, predicates) {
   "use strict";
 
-  function parseOrderByParams(params, alias) {
+  function parseOrderByParams(params) {
 
     let arr = params.split(',');
     let result = _.reduce(arr, (res, i) => {
       if (i[0] === '-') {
-        res += `${alias}.${i.slice(1)} DESC`;
+        res += `[${i.slice(1)}] DESC`;
       } else {
-        res += `${alias}.${i}`;
+        res += `[${i}]`;
       }
       res += ', ';
       return res;
@@ -59,16 +59,32 @@ export default function (config, params) {
     let refTableNames = new Map();
     let fields = cnfg.fields;
 
-    _.each(cnfg.fields, (propObj,v) => {
+    _.each(cnfg.fields, (prop, key) => {
 
-      if (propObj.ref) {
-        refTableNames.set(propObj['ref'], propObj);
-        result.query += `[${v}].xid as [${v}]`;
-      } else if (propObj.expr) {
-        result.query += `${propObj.expr} as [${v}]`;
-        escapeParams.push(propObj.expr, v);
+      if (prop.ref || prop.fields) {
+
+        if (prop.ref) {
+          refTableNames.set(prop.ref, prop);
+        }
+
+        let fields = prop.fields;
+
+        if (!fields) {
+          result.query += `[${key}].xid as [${key}]`;
+        } else {
+          _.each(fields, function (refField, refProp) {
+            result.query += `[${key}].[${refField.field}] as [${key}.${refProp}], `;
+          });
+          result.query = result.query.slice(0, -2);
+        }
+
+      } else if (prop.expr) {
+
+        result.query += `${prop.expr} as [${key}]`;
+        escapeParams.push(prop.expr, key);
+
       } else {
-        result.query += `[${alias}].[${propObj['field']}] as ${v}`;
+        result.query += `[${alias}].[${prop.field}] as [${key}]`;
       }
 
       result.query += ', ';
@@ -100,6 +116,14 @@ export default function (config, params) {
     if (refTableNames.size > 0) {
       for (let ref of refTableNames) {
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
+        debug('predicatesForJoin', predicates);
+        let predicatesForJoin = _.filter(predicates, (p) => {
+          return p.collection === ref[1].refConfig.collection;
+        });
+        debug('predicatesForJoin', predicatesForJoin);
+        _.each(predicatesForJoin, (p) => {
+          result.query += `AND (${ref[1].property}.${p.field} ${p.sql}) `
+        });
       }
     }
 
@@ -121,18 +145,28 @@ export default function (config, params) {
           } else {
             predicateStr += `${alias}.${field.field} = ? AND `;
           }
-          //TODO: make converters for fields with type boolean
-          if (field.type && field.type.match(/^(bool|boolean)$/i)) {
-            params[key] = params[key] ? '1':'0';
+          if (field.converter) {
+            params[key] = field.converter(params[key]);
           }
           result.params.push(params[key]);
           withPredicate = true;
         }
       });
 
-      if (cnfg.predicate) {
+      predicates = _.filter(predicates, (p) => {
+        return p.collection === cnfg.collection || typeof p === 'string';
+      });
+      if (predicates && predicates.length) {
+
         withPredicate = true;
-        predicateStr += `${cnfg.predicate} AND `;
+        _.each(predicates, (pred) => {
+          if (pred.field && pred.collection === cnfg.collection) {
+            let predAlias = fields[pred.field] ? '' : (alias + '.');
+            predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
+          } else {
+            predicateStr += `(${pred}) AND `;
+          }
+        });
       }
 
       let q = params['q:'];
@@ -142,9 +176,8 @@ export default function (config, params) {
         withPredicate = true;
 
         try {
-          let parsed = JSON.parse(q);
-          var searchFields = parsed.searchFields;
-          var searchFor = parsed.searchFor;
+          var searchFields = q.searchFields;
+          var searchFor = q.searchFor;
           if (_.isString(searchFields)) {
             searchFields = searchFields.split(',');
           }

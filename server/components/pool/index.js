@@ -1,9 +1,17 @@
 'use strict';
 
 const connections = require('../../config/sqlanywhere/connectionParams');
-const poolManager = require('./poolManager');
+import poolManager from './poolManager';
 poolManager.initPools(connections);
 
 export default function (name) {
-  return poolManager.getPoolByName(name);
-};
+  return getPoolByName(name);
+}
+
+export function getPoolByName (name) {
+  return  poolManager.getPoolByName(name);
+}
+
+export function getPoolsKeys () {
+  return poolManager.getPoolsKeys();
+}

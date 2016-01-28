@@ -6,23 +6,19 @@ module.exports = {
     id: 'xid',
     ts: {
       type: 'timestamp',
-      readonly: true,
-      field: 'ts'
+      readonly: true
     },
     cts: {
       type: 'timestamp',
-      readonly: true,
-      field: 'cts'
+      readonly: true
     },
-    code: {
-      field: 'code'
-    },
+    code: true,
     inventoryBatch: {
-      field: 'inventoryBatch',
       ref: 'inventoryBatch'
     }
   },
   tableName: '[bs].[InventoryBatchItem]',
   alias: 'ibi',
-  collection: 'inventoryBatchItem'
+  collection: 'inventoryBatchItem',
+  deletable: true
 };

@@ -2,6 +2,7 @@
 
 var debug = require('debug')('stapi:dbAuth');
 const pools = require('../../components/pool/poolManager');
+var _ = require ('lodash');
 
 export function dbAuth() {
   return function (req, res, next) {
@@ -34,8 +35,9 @@ export function onAcquire(token) {
   debug ('onAcquire', 'start conn:', conn.name);
 
   return new Promise(function (resolve, reject) {
-    conn.exec(`set @UACToken = '${token}'`, function (err) {
+    conn.exec(`select '${token}' into @UACToken from uac.authorizedAccount ('${token}')`, function (err) {
       if (err) {
+        debug ('onAcquire', 'error conn:', conn.name, err);
         reject(err);
       } else {
         debug ('onAcquire', 'success conn:', conn.name);
@@ -53,6 +55,7 @@ function authenticator(conn, token) {
     var sql = `select * from uac.authorizedAccount ('${token}')`;
 
     conn.exec(sql, function (err, res) {
+      debug ('authenticator', 'res:', res);
       if (err || !res.length) {
         reject(err || 'not authorized');
       } else {
@@ -66,17 +69,14 @@ function authenticator(conn, token) {
 function authDb(req, res, next) {
 
   function setAuthor(id) {
-    if (req.method === 'POST') {
-      req.body.author = id;
+    if (req.method === 'POST' || req.method === 'PUT') {
+      req.query.author = id;
     }
   }
 
   let token = req.headers.authorization;
-
   let pool = pools.getPoolByName(req.pool);
-
   let authMap = (pool.authMap = pool.authMap || new Map());
-
   let auth = authMap.get(token);
 
   if (auth) {

@@ -2,6 +2,7 @@
 
 require('epipebomb')();
 
+const debug = require('debug')('stapi:sqlAnywhere');
 var sqlanywhere = require('sqlanywhere');
 var connParams = process.argv[2];
 var conn = sqlanywhere.createConnection();
@@ -35,17 +36,23 @@ conn.connect(connParams, function (err) {
 
 process.on('message', function (m) {
 
+  //debug ('message',m);
+
   if (m.sql) {
     var cb = function (err, res) {
       if (err) {
         m.error = parseError(err);
         process.send(m);
       } else {
+        if (!m.autoCommit) {
+          m.result = res;
+          return process.send(m);
+        }
         conn.commit(function (err) {
           if (err) {
             m.error = parseError(err);
           } else {
-            m.result = res || true;
+            m.result = res || 0;
           }
           process.send(m);
         });
@@ -62,7 +69,16 @@ process.on('message', function (m) {
         m = 'rolled back'
       }
       process.send(m);
-    })
+    });
+  } else if (m === 'commit') {
+    conn.commit(function (err) {
+      if (err) {
+        m = {error: parseError(err)}
+      } else {
+        m = 'committed';
+      }
+      process.send(m);
+    });
   }
 
 });

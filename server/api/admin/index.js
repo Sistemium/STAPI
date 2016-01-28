@@ -5,6 +5,6 @@ var controller = require('./admin.controller.js');
 
 var router = express.Router();
 
-router.get('/:id?', controller.index);
+router.get('/:pool?/:entity?', controller.index);
 
 module.exports = router;

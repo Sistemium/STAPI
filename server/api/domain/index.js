@@ -5,14 +5,24 @@ var controller = require('./domain.controller.js');
 import headersToParams from '../../middleware/headersToParams';
 import validateParams from '../../middleware/validateParams';
 import extractFromUrl from '../../middleware/extractFromUrl';
+import modifyBody from '../../middleware/modifyBody';
+import validateModel from '../../middleware/validateModel';
+import modelPredicates from '../../middleware/modelPredicates';
 
 var router = express.Router();
-var mw = [extractFromUrl(), headersToParams(), validateParams()];
+var mw = [extractFromUrl(), headersToParams(), validateParams(), modelPredicates()];
+var bm = [modifyBody(), validateModel(), controller.post];
 
 router
-  .get('/:collection/:id?', mw, controller.index)
-  .post('/:collection', mw, controller.post)
-  .get('/:filterCollection/:filterCollectionId/:collection', mw, controller.index)
+  .get ('/:collection/:id?', mw, controller.index)
+  .post('/:collection/:id?', mw, bm)
+  .put ('/:collection/:id?', mw, bm)
+  .delete('/:collection/:id', mw, controller.del)
+
+  .get ('/:filterCollection/:filterCollectionId/:collection/:id?', mw, controller.index)
+  .post('/:filterCollection/:filterCollectionId/:collection/:id?', mw, bm)
+  .put ('/:filterCollection/:filterCollectionId/:collection/:id?', mw, bm)
+  .delete('/:filterCollection/:filterCollectionId/:collection/:id?', mw, controller.del)
 ;
 
 module.exports = router;

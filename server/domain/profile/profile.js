@@ -2,7 +2,7 @@
 
 module.exports = (function () {
   return {
-    pools: ['phatest', 'dev'],
+    pools: ['pha'],
     fields: {
       code: {
         field: 'id'

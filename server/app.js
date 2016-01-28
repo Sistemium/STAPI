@@ -7,11 +7,13 @@
 import express from 'express';
 import config from './config/environment';
 import http from 'http';
-import domainConfig from './config/domainConfig';
+import domainConfig from './components/orm/domainConfigsParser';
 import registerPlugins from './components/plugins/registerPlugins';
 // Setup server
 var app = express();
 var server = http.createServer(app);
+
+require ('debug').log = console.info.bind(console);
 require('./config/express')(app);
 require('./routes')(app);
 

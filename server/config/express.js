@@ -21,10 +21,11 @@ export default function (app) {
   app.set('view engine', 'jade');
   app.use(compression());
   app.use(cors({
-    allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type']
+    allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type'],
+    exposedHeaders: ['X-Aggregate-Count']
   }));
   app.use(bodyParser.urlencoded({extended: false}));
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({limit: process.env.JSON_LIMIT || '100kb'}));
 
   app.set('appPath', path.join(config.root, 'client'));
 
@@ -35,7 +36,9 @@ export default function (app) {
   }
 
   if ('development' === env) {
-    app.use(require('connect-livereload')());
+    app.use(require('connect-livereload')({
+      port: 35731
+    }));
   }
 
   if ('development' === env || 'test' === env) {

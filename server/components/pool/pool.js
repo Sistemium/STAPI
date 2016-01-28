@@ -29,8 +29,7 @@ class Pool {
           name: connName,
           requestCount: 0,
 
-          exec: function (sql, params, callback) {
-
+          exec: function (sql, params, callback, autoCommit = true) {
             var _params = params;
 
             if (typeof params === 'function') {
@@ -43,7 +42,8 @@ class Pool {
             conn.process.send({
               number: ++conn.requestCount,
               sql: sql.toString(),
-              params: _params
+              params: _params,
+              autoCommit: autoCommit
             });
           },
 
@@ -52,15 +52,27 @@ class Pool {
             conn.process.send('rollback');
           },
 
+          execWithoutCommit: function (sql, params, callback) {
+            conn.exec(sql, params, callback, false);
+          },
+
+          commit: function (callback) {
+            conn.callback = callback;
+            conn.process.send('commit');
+          },
+
           rejectExec: function () {
-            conn.callback = function () {
-              conn.busy = false;
-              pool.release(conn);
+            conn.callback = () => {
+              conn.rollback (() =>{
+                conn.busy = false;
+                pool.release(conn);
+              })
             };
           }
         };
 
         conn.process.on('message', function (m) {
+          //debug ('message', m);
           if (m === 'connected') {
             if (self.config.onConnect) {
               self.config.onConnect.apply(conn).then(function () {
@@ -75,7 +87,7 @@ class Pool {
             conn.busy = true;
             onCreateCallback(m.connectError, conn);
             conn.process.kill();
-          } else if (m.result) {
+          } else if (m.result || m.result === 0) {
             if (m.number == conn.requestCount) {
               if (conn.callback) {
                 conn.callback(null, m.result);
@@ -87,7 +99,7 @@ class Pool {
             }
           } else if (m.error) {
             conn.callback(m.error);
-          } else if (m === 'rolled back') {
+          } else if (m === 'rolled back' || m === 'committed') {
             conn.callback();
           }
         });
@@ -145,6 +157,7 @@ class Pool {
                 resolve(aConn);
               }, function (err) {
                 pool.release(aConn);
+                debug ('onAcquire', 'reject:', err);
                 reject(err);
               })
           } else {

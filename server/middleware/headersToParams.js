@@ -22,13 +22,30 @@ export default function () {
       return params;
     }
 
-    req['x-params'] = _.assign(headersToParams(req.headers), {id: req.params.id}, req.query);
+    let xParams = _.assign(headersToParams(req.headers), req.params.id && {id: req.params.id}, req.query);
 
     if (req.params.filterCollection && req.params.filterCollectionId) {
-      req['x-params'][req.params.filterCollection] = req.params.filterCollectionId;
+      xParams [req.params.filterCollection] = req.params.filterCollectionId;
     }
 
-    debug ('x-params',req['x-params']);
+    if (xParams['searchFor:'] && xParams['searchFields:']) {
+      xParams['q:'] = {
+        searchFields: xParams ['searchFields:'],
+        searchFor: xParams ['searchFor:']
+      }
+    } else {
+      if (_.isString(xParams['q:'])) {
+        try {
+          xParams['q:'] = JSON.parse(xParams['q:']);
+        } catch (e) {
+          return res.status(400).end('Invalid JSON in q:');
+        }
+      }
+    }
+
+    debug ('x-params',xParams);
+
+    req ['x-params'] = xParams;
 
     next();
   }
