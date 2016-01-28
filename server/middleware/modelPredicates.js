@@ -23,7 +23,10 @@ export default function () {
               arr.push(predRes);
             }
           } else if (typeof pred === 'string') {
-            arr.push(pred);
+            arr.push({
+              collection: collection,
+              sql: pred
+            });
           } else if (pred.fn) {
             predRes = pred.fn(req);
             if (predRes) {
