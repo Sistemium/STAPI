@@ -6,12 +6,13 @@ import domainConfig from '../../components/orm/domainConfigsParser';
 import path from 'path';
 import {assert}  from 'chai';
 import registerPlugins from '../../components/plugins/registerPlugins';
+import config from '../../config/environment';
 
 describe('modify body middleware', () => {
 
   let parsedConfig;
   before((done) => {
-    domainConfig(path.normalize(path.join(__dirname, '../..', 'domain')), (m) => {
+    domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
       parsedConfig = m;
       done();
     });

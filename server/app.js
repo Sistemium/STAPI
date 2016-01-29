@@ -14,7 +14,7 @@ import path from 'path';
 var app = express();
 var server = http.createServer(app);
 
-require ('debug').log = console.info.bind(console);
+require('debug').log = console.info.bind(console);
 require('./config/express')(app);
 require('./routes')(app);
 

@@ -4,12 +4,14 @@ import httpMocks from 'node-mocks-http';
 import validateModel from '../validateModel';
 import domainConfig from '../../components/orm/domainConfigsParser';
 import path from 'path';
+
+import config from '../../config/environment';
 import registerPlugins from '../../components/plugins/registerPlugins';
 
 describe('validate model middleware', () => {
   let parsedConfigs;
   before((done) => {
-    domainConfig(path.normalize(path.join(__dirname + '../../../' + 'domain')), (m) => {
+    domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
       parsedConfigs = m;
       done();
     });
