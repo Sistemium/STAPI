@@ -1,19 +1,19 @@
 'use strict';
 
-import config from '../../config/environment';
+import config from '../../../config/environment';
 const authUrl = config.stAuthUrl;
 const request = require('request');
-const debug = require ('debug') ('stapi:clientAuth');
+const debug = require('debug')('stapi:clientAuth');
 
 // переделать на хранение в redis с автоочисткой по expiresAt
 
 var LRU = require("lru-cache");
 var lruOptions = {
-    max: process.env.AUTH_LRU_MAX || 1000,
-    maxAge: process.env.AUTH_LRU_MAX_AGE || 1000 * 5 * 60
+  max: process.env.AUTH_LRU_MAX || 1000,
+  maxAge: process.env.AUTH_LRU_MAX_AGE || 1000 * 5 * 60
 };
-var authorizedTokens = LRU (lruOptions);
-var badTokens = LRU (lruOptions);
+var authorizedTokens = LRU(lruOptions);
+var badTokens = LRU(lruOptions);
 
 var authByToken = function (token) {
 
@@ -85,22 +85,23 @@ export default function () {
 
     var token = req.headers.authorization;
 
+    debug('clientAuth', token);
     if (!token || badTokens.get(token)) {
       return res.status(401).end();
     }
 
-    let authorized = authorizedTokens.get (token);
+    let authorized = authorizedTokens.get(token);
 
     if (authorized) {
       checkRoles(authorized);
     } else {
       authByToken(token).then(function (res) {
         console.log('Auth account success:', res.account && res.account.name);
-        authorizedTokens.set(token,res)
+        authorizedTokens.set(token, res)
         checkRoles(res);
       }, function () {
-        debug ('Auth account error:', token);
-        badTokens.set (token, true);
+        debug('Auth account error:', token);
+        badTokens.set(token, true);
         res.status(401).end();
       });
     }

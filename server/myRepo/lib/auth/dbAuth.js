@@ -1,7 +1,7 @@
 'use strict';
 
 var debug = require('debug')('stapi:dbAuth');
-const pools = require('../../components/pool/poolManager');
+const pools = require('../../../components/pool/poolManager');
 var _ = require ('lodash');
 
 export function dbAuth() {
