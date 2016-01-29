@@ -5,6 +5,7 @@
 'use strict';
 import express from 'express';
 import config from './config/environment';
+
 import http from 'http';
 import domainConfig from './components/orm/domainConfigsParser';
 import registerPlugins from './components/plugins/registerPlugins';
@@ -28,7 +29,7 @@ function startServer() {
  * read configuration from specified folder or default folder is server/domain
  */
 
-domainConfig(path.normalize(path.join(__dirname, process.env.ST_COLLECTIONS)) || `${__dirname}/domain`, (map) => {
+domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)) || `${__dirname}/domain`, (map) => {
   app.locals.domainConfig = map;
 });
 setImmediate(startServer);
