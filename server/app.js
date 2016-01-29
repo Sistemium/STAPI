@@ -3,12 +3,12 @@
  */
 
 'use strict';
-
 import express from 'express';
 import config from './config/environment';
 import http from 'http';
 import domainConfig from './components/orm/domainConfigsParser';
 import registerPlugins from './components/plugins/registerPlugins';
+import path from 'path';
 // Setup server
 var app = express();
 var server = http.createServer(app);
@@ -24,7 +24,11 @@ function startServer() {
   });
 }
 
-domainConfig(`${__dirname}/domain`, (map) => {
+/**
+ * read configuration from specified folder or default folder is server/domain
+ */
+
+domainConfig(path.normalize(path.join(__dirname, process.env.ST_COLLECTIONS)) || `${__dirname}/domain`, (map) => {
   app.locals.domainConfig = map;
 });
 setImmediate(startServer);
