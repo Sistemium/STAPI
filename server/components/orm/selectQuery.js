@@ -157,13 +157,17 @@ export default function (config, params, predicates) {
         return p.collection === cnfg.collection || typeof p === 'string';
       });
       if (predicates && predicates.length) {
-
         withPredicate = true;
         _.each(predicates, (pred) => {
           if (pred.field && pred.collection === cnfg.collection) {
             let predAlias = fields[pred.field] ? '' : (alias + '.');
             predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
-          } else {
+          }
+          // or maybe better check for field in modelPredicates
+          else if (!pred.field && pred.collection === cnfg.collection) {
+            predicateStr += `${pred.sql} AND `;
+          }
+          else {
             predicateStr += `(${pred}) AND `;
           }
         });

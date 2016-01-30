@@ -3,13 +3,15 @@
 import deleteQuery from '../deleteQuery';
 import domainConfigsParser from '../domainConfigsParser';
 import registerPlugins from '../../plugins/registerPlugins';
+
+import config from '../../../config/environment';
 import assert from 'assert';
 import path from 'path';
 
 describe('delete query', () => {
   let map;
   before((done) => {
-    domainConfigsParser(path.normalize(path.join(__dirname, '../../..', 'domain')), (m) => {
+    domainConfigsParser(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
       map = m;
       done();
     });

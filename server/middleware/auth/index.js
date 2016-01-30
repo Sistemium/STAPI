@@ -1,6 +1,6 @@
 'use strict';
 
-import poolManager from '../../components/pool/poolManager';
+import poolManager from 'components/pool/poolManager';
 var async = require('async');
 
 export default function () {

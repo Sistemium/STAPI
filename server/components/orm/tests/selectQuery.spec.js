@@ -5,6 +5,7 @@ const assert = require('assert');
 const domainConfig = require('../domainConfigsParser');
 const registerPlugins = require('../../plugins/registerPlugins');
 const path = require('path');
+import config from '../../../config/environment';
 
 RegExp.escape = function(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -13,7 +14,7 @@ RegExp.escape = function(text) {
 describe('Create select query', () => {
   let map;
   before(function (done) {
-    domainConfig(path.join(__dirname, '../../..', 'domain'), (m) => {
+    domainConfig(path.join(config.root, process.env.ST_COLLECTIONS), (m) => {
       map = m;
       done();
     });

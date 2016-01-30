@@ -4,6 +4,7 @@ import insertQuery from '../insertQuery';
 import registerPlugins from '../../plugins/registerPlugins';
 import assert from 'assert';
 const domainConfig = require('../domainConfigsParser');
+import config from '../../../config/environment';
 const path = require('path');
 const _ = require('lodash');
 
@@ -15,7 +16,7 @@ describe('Create insert query', function () {
   let map;
   before(function (done) {
 
-    domainConfig(path.normalize(path.join(__dirname, '../../..', 'domain')), (m) => {
+    domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
       map = m;
       done();
     });
