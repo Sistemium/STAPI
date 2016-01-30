@@ -29,7 +29,7 @@ function startServer() {
  * read configuration from specified folder or default folder is server/domain
  */
 
-domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)) || `${__dirname}/domain`, (map) => {
+domainConfig(path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)) || `${__dirname}/domain`, (map) => {
   app.locals.domainConfig = map;
 });
 setImmediate(startServer);
