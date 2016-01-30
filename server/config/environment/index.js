@@ -30,15 +30,6 @@ var all = {
   // Secret for session, you will want to change this and make it an environment variable
   secrets: {
     session: 'session'
-  },
-
-  // MongoDB connection options
-  mongo: {
-    options: {
-      db: {
-        safe: true
-      }
-    }
   }
 };
 
