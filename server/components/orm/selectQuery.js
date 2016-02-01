@@ -8,6 +8,7 @@ export default function (parameters) {
   var params = parameters.params;
   var predicates = parameters.predicates;
   var selectFields = parameters.selectFields;
+  var noPaging = !!parameters.noPaging;
 
   function parseOrderByParams(params) {
 
@@ -117,9 +118,12 @@ export default function (parameters) {
 
     if (params['agg:']) {
       result.query = 'SELECT COUNT (*) as cnt';
+    } else if (noPaging){
+      result.query = 'SELECT ' + result.query.slice(0, -2);
     } else {
       result.query = 'SELECT TOP ? START AT ? ' + result.query.slice(0, -2);
       result.params.push(pageSize, startPage);
+
     }
 
     tableName = tableName.replace(/(\${[^}]*})/g, function (p) {

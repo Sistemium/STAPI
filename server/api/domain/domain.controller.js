@@ -233,7 +233,8 @@ export function del(req, res, next) {
         config: config,
         params: req['x-params'],
         predicates: res.locals.predicates,
-        selectFields: ['id']
+        selectFields: ['id'],
+        noPaging: true
       };
       let selectQueryObj = select(params);
       debug(selectQueryObj);
