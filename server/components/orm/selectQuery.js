@@ -116,14 +116,14 @@ export default function (config, params, predicates) {
     if (refTableNames.size > 0) {
       for (let ref of refTableNames) {
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
-        debug('predicatesForJoin', predicates);
+        debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
           return p.collection === ref[1].refConfig.collection;
         });
-        debug('predicatesForJoin', predicatesForJoin);
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND (${ref[1].property}.${p.field} ${p.sql}) `
+          result.query += `AND (${p.field ? `${ref[1].property}.${p.field} `:''}${p.sql}) `
         });
+        debug('predicatesForJoin', predicatesForJoin);
       }
     }
 
