@@ -229,7 +229,6 @@ export function del(req, res, next) {
       let query = deleteQ(config, selectQueryObj);
       debug('del.q', 'query:', query);
 
-      return;
       conn.exec(query.query, query.params, (err, result) => {
         if (err) {
           return errorHandler(err, conn, pool, res);
