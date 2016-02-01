@@ -1,8 +1,13 @@
+'use strict';
+
 const _ = require('lodash');
 const debug = require('debug')('stapi:orm:selectQuery');
 
-export default function (config, params, predicates, selectFields) {
-  "use strict";
+export default function (parameters) {
+  var config = parameters.config;
+  var params = parameters.params;
+  var predicates = parameters.predicates;
+  var selectFields = parameters.selectFields;
 
   function parseOrderByParams(params) {
 
@@ -140,7 +145,7 @@ export default function (config, params, predicates, selectFields) {
           return p.collection === ref[1].refConfig.collection;
         });
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND (${p.field ? `${ref[1].property}.${p.field} `:''}${p.sql}) `
+          result.query += `AND (${p.field ? `${ref[1].property}.${p.field} ` : ''}${p.sql}) `
         });
         debug('predicatesForJoin', predicatesForJoin);
       }

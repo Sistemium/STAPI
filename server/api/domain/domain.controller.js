@@ -53,7 +53,12 @@ var doSelect = function (pool, conn, req, res) {
   let query;
   let config = res.locals.config;
   try {
-    query = select(config, req['x-params'], res.locals.predicates);
+    let params = {
+      config: config,
+      params: req['x-params'],
+      predicates: res.locals.predicates
+    };
+    query = select(params);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);
     return res.status(400).end(err.message);
@@ -224,7 +229,13 @@ export function del(req, res, next) {
 
     let config = res.locals.config;
     try {
-      let selectQueryObj = select(config, req['x-params'], res.locals.predicates, ['id']);
+      let params = {
+        config: config,
+        params: req['x-params'],
+        predicates: res.locals.predicates,
+        selectFields: ['id']
+      };
+      let selectQueryObj = select(params);
       debug(selectQueryObj);
       let query = deleteQ(config, selectQueryObj);
       debug('del.q', 'query:', query);
