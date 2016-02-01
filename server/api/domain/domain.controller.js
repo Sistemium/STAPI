@@ -224,9 +224,12 @@ export function del(req, res, next) {
 
     let config = res.locals.config;
     try {
-      let query = deleteQ(config, req.params.id);
+      let selectQueryObj = select(config, req['x-params'], res.locals.predicates, ['id']);
+      debug(selectQueryObj);
+      let query = deleteQ(config, selectQueryObj);
       debug('del.q', 'query:', query);
 
+      return;
       conn.exec(query.query, query.params, (err, result) => {
         if (err) {
           return errorHandler(err, conn, pool, res);

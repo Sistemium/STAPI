@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const debug = require('debug')('stapi:orm:selectQuery');
 
-export default function (config, params, predicates) {
+export default function (config, params, predicates, selectFields) {
   "use strict";
 
   function parseOrderByParams(params) {
@@ -59,8 +59,7 @@ export default function (config, params, predicates) {
     let refTableNames = new Map();
     let fields = cnfg.fields;
 
-    _.each(cnfg.fields, (prop, key) => {
-
+    function selectField(prop, key) {
       if (prop.ref || prop.fields) {
 
         if (prop.ref) {
@@ -88,8 +87,28 @@ export default function (config, params, predicates) {
       }
 
       result.query += ', ';
+    }
 
-    });
+    if (selectFields) {
+      _.each(selectFields, (field) => {
+        let configKeys = Object.keys(fields);
+        let keyIndex = configKeys.indexOf(field);
+        if (keyIndex >= 0) {
+          let key = configKeys[keyIndex];
+          let prop = fields[key];
+          selectField(prop, key);
+        } else {
+          throw new Error(`Select field "${field}" not defined in config`);
+        }
+      });
+    } else {
+
+      _.each(cnfg.fields, (prop, key) => {
+
+        selectField(prop, key);
+
+      });
+    }
 
     if (params['agg:']) {
       result.query = 'SELECT COUNT (*) as cnt';
