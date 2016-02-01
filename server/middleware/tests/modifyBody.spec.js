@@ -12,7 +12,7 @@ describe('modify body middleware', () => {
 
   let parsedConfig;
   before((done) => {
-    domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
+    domainConfig(path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)), (m) => {
       parsedConfig = m;
       done();
     });

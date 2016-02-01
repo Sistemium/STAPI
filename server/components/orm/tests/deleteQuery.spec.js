@@ -11,12 +11,12 @@ import path from 'path';
 describe('delete query', () => {
   let map;
   before((done) => {
-    domainConfigsParser(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
+    domainConfigsParser(path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)), (m) => {
       map = m;
       done();
     });
   });
-
+  
   it('should create delete query', () => {
 
     //arrange
