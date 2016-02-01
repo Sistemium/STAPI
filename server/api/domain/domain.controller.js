@@ -242,6 +242,8 @@ export function del(req, res, next) {
       debug('del.q', 'query:', query);
 
       conn.exec(query.query, query.params, (err, result) => {
+        pool.release(conn);
+
         if (err) {
           return errorHandler(err, conn, pool, res);
         }
