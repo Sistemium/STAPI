@@ -242,12 +242,11 @@ export function del(req, res, next) {
       debug('del.q', 'query:', query);
 
       conn.exec(query.query, query.params, (err, result) => {
-        pool.release(conn);
-
         if (err) {
           return errorHandler(err, conn, pool, res);
         }
 
+        pool.release(conn);
         if (!result) {
           return res.status(404).end();
         } else {
