@@ -5,6 +5,7 @@ import {select, insert, deleteQ} from '../../components/orm/orm';
 const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
+var url = require ('url');
 
 var statusByErr = (err) => {
 
@@ -155,6 +156,15 @@ export function index(req, res, next) {
   });
 }
 
+var locationUrl = (req,id) => {
+  return url.format ({
+    pathname: `${req.path}/${id}`,
+    port: process.env.PORT,
+    hostname: req.hostname,
+    protocol: 'http'
+  });
+};
+
 export function post(req, res, next) {
   var pool = pools(req.pool);
 
@@ -206,6 +216,9 @@ export function post(req, res, next) {
         pool.release(conn);
 
         if (rowsAffected) {
+          if (req.createMode) {
+            return res.status(201).set('Location',locationUrl(req, req.createMode)).end();
+          }
           return res.status(200).set('X-Rows-Affected', rowsAffected).end();
         } else {
           return res.status(404).end();

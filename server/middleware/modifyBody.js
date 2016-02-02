@@ -1,6 +1,7 @@
 'use strict';
 import _ from 'lodash';
 var debug = require('debug')('stapi:modifyBody');
+var uuid = require ('node-uuid');
 
 /**
  * Middleware converts object to array, adds queryString params to each array element
@@ -18,12 +19,16 @@ export default function () {
         if (req.method === 'PUT') {
           return res.status(400).end('PUT requires object');
         }
-      }
-      else if (typeof requestBody === 'object') {
+      } else if (typeof requestBody === 'object') {
         req.body = [requestBody];
+        req.wasOneObject = true;
       }
 
       applyParams(req['x-params'],req.body);
+
+      if (req.wasOneObject && !req.body[0].id) {
+        req.body[0].id = (req.createMode = uuid.v4());
+      }
 
       if (config) {
         req.body = applyConverters (config,req);
