@@ -69,7 +69,7 @@ export default function (parameters) {
       if (prop.ref || prop.fields) {
 
         if (prop.ref) {
-          refTableNames.set(prop.ref, prop);
+          refTableNames.set(key, prop);
         }
 
         let fields = prop.fields;
@@ -142,6 +142,7 @@ export default function (parameters) {
     result.query += ` FROM ${tableName} as [${alias}]`;
 
     if (refTableNames.size > 0) {
+      //debug('refTableNames', [...refTableNames]);
       for (let ref of refTableNames) {
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
         debug('predicatesForJoin', 'predicates:', predicates);

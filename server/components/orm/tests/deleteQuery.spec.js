@@ -16,7 +16,7 @@ describe('delete query', () => {
       done();
     });
   });
-  
+
   it('should create delete query', () => {
 
     //arrange
