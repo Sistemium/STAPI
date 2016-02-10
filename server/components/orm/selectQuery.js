@@ -144,6 +144,9 @@ export default function (parameters) {
     if (refTableNames.size > 0) {
       //debug('refTableNames', [...refTableNames]);
       for (let ref of refTableNames) {
+        if (ref[1].optional) {
+          result.query += ' LEFT';
+        }
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
         debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
@@ -170,7 +173,7 @@ export default function (parameters) {
       _.each(fields, (field, key) => {
         if (params && params[key]) {
           if (field.ref) {
-            predicateStr += `[${field.ref}].[${field.id}] = ? AND `;
+            predicateStr += `[${key}].[${field.id}] = ? AND `;
           } else {
             predicateStr += `${alias}.${field.field} = ? AND `;
           }
