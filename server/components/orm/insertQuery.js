@@ -17,7 +17,8 @@ export default function (config, body, predicates) {
     if (cnfProp.ref && !cnfProp.insertRaw) {
       fields[cnfProp.field] = {
         body: val,
-        refConfig: cnfProp.refConfig
+        refConfig: cnfProp.refConfig,
+        optional: cnfProp.optional
       };
     } else {
       fields[cnfProp.field] = val;
@@ -44,7 +45,10 @@ export default function (config, body, predicates) {
         });
         refPredicates = refPredicates.join(' AND ');
         result.query += `(SELECT id FROM ${v.refConfig.tableName} as [${k}] WHERE xid = ? ${refPredicates && ` AND ${refPredicates}`}) AS [${k}],`;
-        refAliases.push(`${queryAlias}.` + k);
+
+        if (!v.optional || v.body) {
+          refAliases.push(`${queryAlias}.` + k);
+        }
         result.params.push(v.body);
       }
       else {
