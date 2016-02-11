@@ -34,7 +34,7 @@ export function index(req, res) {
     let keyPool = '';
     domainConfig.forEach((value, key) => {
       keyPool = key.split('/')[0];
-      if (keyPool === pool) {
+      if (keyPool.toLowerCase() === pool.toLowerCase()) {
         result[key] = value;
       }
     });
