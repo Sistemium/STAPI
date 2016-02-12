@@ -5,6 +5,7 @@ import plugins from './index';
 const debug = require('debug')('stapi:plugins:registerPlugins');
 import path from 'path';
 import config from '../../config/environment';
+import {boolConverter, jsonConverter} from './converters';
 
 let externalPluginsPaths = process.env.PLUGINS;
 
@@ -38,5 +39,8 @@ export default (function () {
   plugins().register('parse.boolean',parseBool);
   plugins().register('parse.bool',parseBool);
   plugins().register('parse.json', parseJson);
+  plugins().register('convert.bool', boolConverter);
+  plugins().register('convert.boolean', boolConverter);
+  plugins().register('convert.json', jsonConverter);
   debug('registerPlugins', 'finished registering plugins');
 })()
