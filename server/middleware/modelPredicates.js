@@ -50,14 +50,14 @@ export default function () {
         });
       }
 
-      debug('makePredicate', arr);
+      //debug('makePredicate', arr);
       return arr;
     }
 
     function checkPredicates(cfg,alias) {
       let predicates = cfg.predicates || cfg.predicate && [cfg.predicate] || [];
       if (typeof cfg.deletable === 'string') {
-        debug('checkPredicates', alias, cfg);
+        //debug('checkPredicates', alias, cfg);
         predicates.push (`NOT ${alias||cfg.alias}.${cfg.deletable}`);
       }
       if (predicates.length) {
@@ -74,7 +74,7 @@ export default function () {
 
     checkPredicates(config);
 
-    debug('result', res.locals.predicates);
+    //debug('result', res.locals.predicates);
 
     next();
   }
