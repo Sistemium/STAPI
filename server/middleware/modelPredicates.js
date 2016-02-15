@@ -55,12 +55,13 @@ export default function () {
     }
 
     function checkPredicates(cfg,alias) {
-      let predicates = cfg.predicates || cfg.predicate && [cfg.predicate];
+      let predicates = cfg.predicates || cfg.predicate && [cfg.predicate] || [];
       if (typeof cfg.deletable === 'string') {
+        debug('checkPredicates', alias, cfg);
         predicates.push (`NOT ${alias||cfg.alias}.${cfg.deletable}`);
       }
-      if (predicates) {
-        res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, cfg.collection));
+      if (predicates.length) {
+        res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, alias));
       }
     }
 

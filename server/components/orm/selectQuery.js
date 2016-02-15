@@ -150,7 +150,7 @@ export default function (parameters) {
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
         debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
-          return p.collection === ref[1].refConfig.collection;
+          return p.collection === ref[1].property;
         });
         _.each(predicatesForJoin, (p) => {
           result.query += `AND (${p.field ? `${ref[1].property}.${p.field} ` : ''}${p.sql}) `
