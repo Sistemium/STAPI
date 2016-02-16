@@ -186,17 +186,17 @@ export default function (parameters) {
       });
 
       predicates = _.filter(predicates, (p) => {
-        return p.collection === cnfg.collection || typeof p === 'string';
+        return p.collection === alias || typeof p === 'string';
       });
       if (predicates && predicates.length) {
         withPredicate = true;
         _.each(predicates, (pred) => {
-          if (pred.field && pred.collection === cnfg.collection) {
+          if (pred.field && pred.collection === alias) {
             let predAlias = fields[pred.field] ? '' : (alias + '.');
             predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
           }
           // or maybe better check for field in modelPredicates
-          else if (!pred.field && pred.collection === cnfg.collection) {
+          else if (!pred.field && pred.collection === alias) {
             predicateStr += `${pred.sql} AND `;
           }
           else {

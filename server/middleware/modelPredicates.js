@@ -72,9 +72,9 @@ export default function () {
       }
     });
 
-    checkPredicates(config);
+    checkPredicates(config,config.alias);
 
-    //debug('result', res.locals.predicates);
+    debug('result', res.locals.predicates);
 
     next();
   }
