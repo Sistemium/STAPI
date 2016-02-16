@@ -217,11 +217,15 @@ export function post(req, res, next) {
 
         if (rowsAffected) {
           if (req.createMode) {
-            return res.status(201).set('Location',locationUrl(req, req.createMode)).end();
+            return res.status(201)
+              .set('Location',locationUrl(req, req.createMode))
+              .json(req.headers['x-return-post'] ? req.body[0] : undefined);
           }
-          return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+          return res.status(200)
+            .set('X-Rows-Affected', rowsAffected)
+            .json(req.headers['x-return-post'] ? req.body : undefined);
         } else {
-          return res.status(404).end();
+          return res.status(404).end(req.headers['x-return-post'] ? req.body : undefined);
         }
       });
 
