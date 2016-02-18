@@ -38,7 +38,7 @@ export default function (config, body, predicates) {
     _.each(fields, (v, k) => {
       if (v && v.refConfig) {
         let refPredicates = _.filter(predicates, (p) => {
-          return p.collection === v.refConfig.collection;
+          return p.collection === k;
         });
         refPredicates = _.map(refPredicates, (rp) => {
           return `${rp.field || ''} ${rp.sql}`;
@@ -60,12 +60,15 @@ export default function (config, body, predicates) {
     result.query = result.query.slice(0, -1);
     refAliases = refAliases.join(' IS NOT NULL AND ');
 
+    debug('tPredicates', predicates);
+
     let tPredicates = _.filter(predicates, (p) => {
-      return p.collection === config.collection || typeof p === 'string';
+      return p.collection === config.alias || typeof p === 'string';
     });
 
+    debug('tPredicates', tPredicates);
     tPredicates = _.map(tPredicates, (tp) => {
-      return `${tp.field && `[${config.alias}].[${tp.field}]` || ''} ${tp.sql}`
+      return tp.field ? `[${config.alias}].[${tp.field}] ${tp.sql}` : `${tp.sql || (tp)}`;
     });
     tPredicates = tPredicates.join(' AND ');
 

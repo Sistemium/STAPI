@@ -1,5 +1,4 @@
 'use strict';
-import selectQuery from './selectQuery';
 
 export default function (config, selectObj) {
 

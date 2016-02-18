@@ -28,6 +28,9 @@ export default function () {
               sql: pred
             });
           } else if (pred.fn) {
+            if (pred.method && !req.method.match(pred.method)) {
+              return;
+            }
             predRes = pred.fn(req);
             if (predRes) {
               arr.push({
@@ -40,10 +43,10 @@ export default function () {
             next('Incorrect config, predicate must be array of functions or strings...');
           }
 
-          if (predRes===false) {
+          if (predRes === false) {
             res.status(403);
-            debug ('makePredicate false', pred);
-            next ('Forbidden');
+            debug('makePredicate false', pred);
+            next('Forbidden');
             return false;
           }
 
@@ -54,25 +57,25 @@ export default function () {
       return arr;
     }
 
-    function checkPredicates(cfg,alias) {
+    function checkPredicates(cfg, alias) {
       let predicates = cfg.predicates || cfg.predicate && [cfg.predicate] || [];
       if (typeof cfg.deletable === 'string') {
         //debug('checkPredicates', alias, cfg);
-        predicates.push (`NOT ${alias||cfg.alias}.${cfg.deletable}`);
+        predicates.push(`NOT ${alias || cfg.alias}.${cfg.deletable}`);
       }
       if (predicates.length) {
         res.locals.predicates = res.locals.predicates.concat(makePredicate(predicates, alias));
       }
     }
 
-    _.each(config.fields, (val,key) => {
+    _.each(config.fields, (val, key) => {
       let ref = val.refConfig;
       if (ref) {
-        checkPredicates(ref,key);
+        checkPredicates(ref, key);
       }
     });
 
-    checkPredicates(config,config.alias);
+    checkPredicates(config, config.alias);
 
     debug('result', res.locals.predicates);
 
