@@ -216,14 +216,18 @@ export function post(req, res, next) {
         pool.release(conn);
 
         if (rowsAffected) {
+          let response;
+          if (req.headers['x-return-post']) {
+            response = req.wasOneObject ? req.body [0] : req.body;
+          }
           if (req.createMode) {
             return res.status(201)
               .set('Location',locationUrl(req, req.createMode))
-              .json(req.headers['x-return-post'] ? req.body[0] : undefined);
+              .json(response);
           }
           return res.status(200)
             .set('X-Rows-Affected', rowsAffected)
-            .json(req.headers['x-return-post'] ? req.body : undefined);
+            .json(response);
         } else {
           return res.status(404).end(req.headers['x-return-post'] ? req.body : undefined);
         }
