@@ -51,14 +51,14 @@ var applyConverters = (config,req) => {
 
     _.each (config.fields, (field, key) => {
 
-      if (!field || field.readonly) {
+      if (!field || field.readonly && !field.converter) {
         return;
       }
 
       let val = item [key];
 
       if (field.converter) {
-        fields [key] = field.converter (val, req);
+        fields [key] = field.converter (val, req, item);
       } else {
         fields [key] = val || null;
       }
