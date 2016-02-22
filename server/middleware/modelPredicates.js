@@ -70,7 +70,7 @@ export default function () {
 
     _.each(config.fields, (val, key) => {
       let ref = val.refConfig;
-      if (ref) {
+      if (ref && !val.ignorePredicates) {
         checkPredicates(ref, key);
       }
     });
