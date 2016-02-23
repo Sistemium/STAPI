@@ -58,7 +58,7 @@ export default function () {
     }
 
     function checkPredicates(cfg, alias) {
-      let predicates = cfg.predicates || cfg.predicate && [cfg.predicate] || [];
+      let predicates = _.cloneDeep (cfg.predicates || cfg.predicate && [cfg.predicate] || []);
       if (typeof cfg.deletable === 'string') {
         //debug('checkPredicates', alias, cfg);
         predicates.push(`NOT ${alias || cfg.alias}.${cfg.deletable}`);

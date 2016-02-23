@@ -5,9 +5,9 @@ const debug = require('debug')('stapi:orm:selectQuery');
 
 export default function (parameters) {
   var config = parameters.config;
-  var params = parameters.params;
-  var predicates = parameters.predicates;
-  var selectFields = parameters.selectFields;
+  var params = _.cloneDeep (parameters.params);
+  var predicates = _.cloneDeep (parameters.predicates);
+  var selectFields = _.cloneDeep (parameters.selectFields);
   var noPaging = !!parameters.noPaging;
 
   function parseOrderByParams(params) {
