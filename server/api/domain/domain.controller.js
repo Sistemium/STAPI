@@ -1,7 +1,7 @@
 'use strict';
 
 const debug = require('debug')('stapi:domain:controller');
-import {select, insert, deleteQ} from '../../components/orm/orm';
+import {select, insert, deleteQ, parseDbData} from '../../components/orm/orm';
 const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
@@ -77,45 +77,11 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
-    function parseScalar (field, val) {
-      if (field.parser) {
-        if (!(val == null || val == undefined)) {
-          return field.parser(val);
-        }
-      }
-      return val;
-    }
-
-    function parseObject(obj) {
-
-      let parsed = {};
-
-      _.each(config.fields, (field, key) => {
-
-        if (field.fields) {
-          parsed [key] = {};
-          _.each (field.fields, function(f,prop){
-            parsed [key] [prop] = parseScalar (f, obj [key + '.' + prop]);
-          });
-        } else {
-          let val = (parsed [key] = obj [key]);
-          if (field.parser) {
-            if (!(val == null || val == undefined)) {
-              parsed [key] = parseScalar(field,val);
-            }
-          }
-        }
-      });
-
-      return parsed;
-
-    }
-
     if (req.params.id) {
-      result = result.length ? parseObject(result[0]) : undefined;
+      result = result.length ? parseDbData(config,result[0]) : undefined;
     } else if (!req['x-params']['agg:'] && Array.isArray(result)) {
       _.each(result, (item, i) => {
-        result [i] = parseObject(item);
+        result [i] = parseDbData(config,item);
       });
     }
 
@@ -167,14 +133,17 @@ var locationUrl = (req,id) => {
 
 export function post(req, res, next) {
   var pool = pools(req.pool);
+  let config = res.locals.config;
 
   if (_.isEmpty(req.body)) {
     return res.status(400) && next('Empty body');
   }
 
-  let rowsAffected = 0;
 
   pool.customAcquire(req.headers.authorization).then (conn => {
+
+    let rowsAffected = 0;
+    let responseArray = [];
 
     var execReqBody = (item, done) => {
       try {
@@ -188,7 +157,13 @@ export function post(req, res, next) {
           }
 
           if (affected) {
-            rowsAffected += affected;
+            rowsAffected ++;
+            if (typeof affected === 'object') {
+              debug ('affected:', affected);
+              let parsed = parseDbData(config,affected[0]);
+              responseArray.push (parsed);
+              debug ('parsed:', parsed);
+            }
           }
 
           debug ('rowsAffected:', rowsAffected);
@@ -218,7 +193,10 @@ export function post(req, res, next) {
         if (rowsAffected) {
           let response;
           if (req.headers['x-return-post']) {
-            response = req.wasOneObject ? req.body [0] : req.body;
+            if (!responseArray.length) {
+              responseArray = req.body;
+            }
+            response = req.wasOneObject ? responseArray [0] : responseArray;
           }
           if (req.createMode) {
             return res.status(201)

@@ -9,6 +9,7 @@ export default function (parameters) {
   var predicates = _.cloneDeep (parameters.predicates);
   var selectFields = _.cloneDeep (parameters.selectFields);
   var noPaging = !!parameters.noPaging;
+  var tableAs = parameters.tableAs;
 
   function parseOrderByParams(params) {
 
@@ -52,7 +53,7 @@ export default function (parameters) {
    */
   function makeQuery(cnfg) {
 
-    let tableName = cnfg.selectFrom;
+    let tableName = tableAs || cnfg.selectFrom;
     let alias = cnfg.alias;
     let escapeParams = [];
     let pageSize = parseInt(params['x-page-size:']) || 10;
@@ -148,14 +149,14 @@ export default function (parameters) {
           result.query += ' LEFT';
         }
         result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
-        debug('predicatesForJoin', 'predicates:', predicates);
+        //debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
           return p.collection === ref[1].property;
         });
         _.each(predicatesForJoin, (p) => {
           result.query += `AND (${p.field ? `${ref[1].property}.${p.field} ` : ''}${p.sql}) `
         });
-        debug('predicatesForJoin', predicatesForJoin);
+        //debug('predicatesForJoin', predicatesForJoin);
       }
     }
 
