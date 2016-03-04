@@ -24,7 +24,7 @@ var errorHandler = function (err, conn, pool, res) {
 
   console.error('Client:', conn.number, 'exec error:', err);
 
-  if (err.code.match(/(-308)(-2005)(-121)(-101)/ig)) {
+  if (err.code.match(/(-308)|(-2005)|(-121)|(-101)/ig)) {
     console.log('Pool will destroy conn:', conn.number);
     pool.destroy(conn);
   } else {
