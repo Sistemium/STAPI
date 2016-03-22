@@ -70,16 +70,16 @@ export default function (parameters) {
       if (prop.ref || prop.fields) {
 
         if (prop.ref) {
-          refTableNames.set(key, prop);
+          refTableNames.set(prop.alias, prop);
         }
 
         let fields = prop.fields;
 
         if (!fields) {
-          result.query += `[${key}].xid as [${key}]`;
+          result.query += `[${prop.alias || key}].xid as [${key}]`;
         } else {
           _.each(fields, function (refField, refProp) {
-            result.query += `[${key}].[${refField.field}] as [${key}.${refProp}], `;
+            result.query += `[${prop.alias || key}].[${refField.field}] as [${key}.${refProp}], `;
           });
           result.query = result.query.slice(0, -2);
         }
@@ -148,13 +148,13 @@ export default function (parameters) {
         if (ref[1].optional) {
           result.query += ' LEFT';
         }
-        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].property}] on [${ref[1].property}].id = ${alias}.${ref[1].field} `;
+        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].alias}] on [${ref[1].alias}].id = ${alias}.${ref[1].field} `;
         //debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
-          return p.collection === ref[1].property;
+          return p.collection === ref[1].alias;
         });
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND (${p.field ? `${ref[1].property}.${p.field} ` : ''}${p.sql}) `
+          result.query += `AND (${p.field ? `${ref[1].alias}.${p.field} ` : ''}${p.sql}) `
         });
         //debug('predicatesForJoin', predicatesForJoin);
       }
