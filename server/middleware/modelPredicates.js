@@ -70,8 +70,14 @@ export default function () {
 
     _.each(config.fields, (val, key) => {
       let ref = val.refConfig;
-      if (ref && !val.ignorePredicates) {
-        checkPredicates(ref, key);
+      let ignorePredicates = val.ignorePredicates;
+      if (ref && _.isObject(ignorePredicates)) {
+        if (ignorePredicates.method && req.method.match(ignorePredicates.method)) {
+          checkPredicates(ref, val.alias);
+        }
+      }
+      else if (ref && !ignorePredicates) {
+        checkPredicates(ref, val.alias);
       }
     });
 
