@@ -19,7 +19,6 @@ var statusByErr = (err) => {
 
 };
 
-
 var errorHandler = function (err, conn, pool, res) {
 
   console.error('Client:', conn.number, 'exec error:', err);
@@ -45,7 +44,6 @@ var errorHandler = function (err, conn, pool, res) {
   }
 
 };
-
 
 var doSelect = function (pool, conn, req, res) {
 

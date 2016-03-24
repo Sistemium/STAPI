@@ -13,7 +13,7 @@ export default function () {
     let requestBody = req.body;
     let config = res.locals.config;
 
-    if (req.method === 'POST' || req.method === 'PUT') {
+    if (req.method.match(/POST|PUT|PATCH/)) {
 
       if (Array.isArray(requestBody)) {
         if (req.method === 'PUT') {
@@ -49,22 +49,41 @@ var applyConverters = (config,req) => {
 
     var fields = {};
 
-    _.each (config.fields, (field, key) => {
+    if (req.method === 'PATCH') {
 
-      if (!field || field.readonly && !field.converter) {
-        return;
-      }
+      _.each(item, (val, key) => {
+        let field = config.fields[key];
+        if (!field || field.readonly && !field.converter) {
+          return;
+        }
 
-      let val = item [key];
+        if (field.converter) {
+          fields [key] = field.converter (val, req, item);
+        } else {
+          fields [key] = val || null;
+        }
+      });
 
-      if (field.converter) {
-        fields [key] = field.converter (val, req, item);
-      } else {
-        fields [key] = val || null;
-      }
+    } else {
 
-    });
+      _.each (config.fields, (field, key) => {
 
+        if (!field || field.readonly && !field.converter) {
+          return;
+        }
+
+        let val = item [key];
+
+        if (field.converter) {
+          fields [key] = field.converter (val, req, item);
+        } else {
+          fields [key] = val || null;
+        }
+      });
+
+    }
+
+    debug('applyConverters: fields', fields);
     return fields;
 
   });
