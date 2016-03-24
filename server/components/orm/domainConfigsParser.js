@@ -172,7 +172,7 @@ function addRefsToConfigs(map) {
             if (config.refAliasRe) {
               let matched = key.match (config.refAliasRe);
               if (matched) {
-                val.alias = _.tail (matched);
+                val.alias = _.last (matched);
               }
             }
           }
