@@ -35,7 +35,7 @@ export default function (parameters) {
     _.each(searchFields, (field) => {
       //check that passed field is in config
       if (fields[field]) {
-        likeStr += `${cfg.alias}.${fields[field].field} LIKE ? OR `;
+        likeStr += `${cfg.alias}.[${fields[field].field}] LIKE ? OR `;
         params.push(`%${searchFor}%`);
       } else {
         console.log(`No such field ${field} defined...`);
@@ -176,7 +176,7 @@ export default function (parameters) {
           if (field.ref) {
             predicateStr += `[${key}] = ? AND `;
           } else {
-            predicateStr += `${alias}.${field.field} = ? AND `;
+            predicateStr += `${alias}.[${field.field}] = ? AND `;
           }
           if (field.converter) {
             params[key] = field.converter(params[key]);
