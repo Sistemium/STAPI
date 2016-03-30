@@ -202,6 +202,7 @@ export default function (parameters) {
         _.each(predicates, (pred) => {
           if (pred.field && pred.collection === alias) {
             let predField = fields[pred.field];
+            // TODO support pred.dbField
             let predAlias = (predField && predField.field === pred.field) ? '' : (alias + '.');
             predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
           }
