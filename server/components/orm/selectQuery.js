@@ -181,7 +181,7 @@ export default function (parameters) {
           if (field.ref) {
             // FIXME won't work sometimes without proper alias
             predicateStr += `[${key}] = ? AND `;
-          } if (field.expr && params['agg:']) {
+          } else if (field.expr && params['agg:']) {
             predicateStr += `${field.expr} = ? AND `;
           } else {
             predicateStr += `${alias}.[${field.field}] = ? AND `;
@@ -201,7 +201,8 @@ export default function (parameters) {
         withPredicate = true;
         _.each(predicates, (pred) => {
           if (pred.field && pred.collection === alias) {
-            let predAlias = fields[pred.field] ? '' : (alias + '.');
+            let predField = fields[pred.field];
+            let predAlias = (predField && predField.field === pred.field) ? '' : (alias + '.');
             predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
           }
           // or maybe better check for field in modelPredicates
