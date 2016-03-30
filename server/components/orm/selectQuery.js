@@ -27,16 +27,21 @@ export default function (parameters) {
     return result;
   }
 
-  function concatSearchStr(searchFields, searchFor, params, cfg) {
+  function concatSearchStr(searchFields, searchFor, sqlParams, cfg) {
 
     let likeStr = '';
     let fields = cfg.fields;
 
     _.each(searchFields, (field) => {
       //check that passed field is in config
-      if (fields[field]) {
-        likeStr += `${cfg.alias}.[${fields[field].field}] LIKE ? OR `;
-        params.push(`%${searchFor}%`);
+      let fieldConf = fields[field];
+      if (fieldConf) {
+        if (fieldConf.expr && params['agg:']) {
+          likeStr += `${fieldConf.expr} LIKE ? OR `;
+        } else {
+          likeStr += `[${field}] LIKE ? OR `;
+        }
+        sqlParams.push(`%${searchFor}%`);
       } else {
         console.log(`No such field ${field} defined...`);
         throw new Error(`No such field ${field} defined...`);
@@ -174,7 +179,10 @@ export default function (parameters) {
       _.each(fields, (field, key) => {
         if (params && params[key]) {
           if (field.ref) {
+            // FIXME won't work sometimes without proper alias
             predicateStr += `[${key}] = ? AND `;
+          } if (field.expr && params['agg:']) {
+            predicateStr += `${field.expr} = ? AND `;
           } else {
             predicateStr += `${alias}.[${field.field}] = ? AND `;
           }
