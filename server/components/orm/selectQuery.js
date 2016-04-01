@@ -15,12 +15,31 @@ export default function (parameters) {
 
     let arr = params.split(',');
     let result = _.reduce(arr, (res, i) => {
+
+      let direction = '';
+      let colName = i;
+      let colPrefix = '';
+
       if (i[0] === '-') {
-        res += `[${i.slice(1)}] DESC`;
-      } else {
-        res += `[${i}]`;
+        direction = ' DESC';
+        colName = i.slice(1);
       }
-      res += ', ';
+
+      let colPrefixMatch = colName.match(/([^.]*)[.](.*)/) || '';
+
+      if (colPrefixMatch) {
+        colPrefix = colPrefixMatch[1];
+        let refField = _.find(config.fields,{alias: colPrefix});
+        if (refField && !refField.fields) {
+          colPrefix = `[${colPrefix}].`;
+          colName = colPrefixMatch[2];
+        } else {
+          colPrefix = '';
+        }
+      }
+
+      res += `${colPrefix}[${colName}]${direction}, `;
+
       return res;
     }, '');
     result = result.slice(0, -2);
