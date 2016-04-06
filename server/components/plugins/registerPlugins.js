@@ -36,6 +36,7 @@ export default (function () {
   debug('registerPlugins', 'starting registering plugins');
   plugins().register('parse.int',parseInt);
   plugins().register('parse.float',parseFloat);
+  plugins().register('parse.decimal',parseFloat);
   plugins().register('parse.boolean',parseBool);
   plugins().register('parse.bool',parseBool);
   plugins().register('parse.json', parseJson);
