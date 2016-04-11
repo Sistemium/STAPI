@@ -57,6 +57,8 @@ export default function (parameters) {
       if (fieldConf) {
         if (fieldConf.expr && params['agg:']) {
           likeStr += `${fieldConf.expr} LIKE ? OR `;
+        } else if (fieldConf.field !== field && params['agg:']) {
+          likeStr += `${fieldConf.field} LIKE ? OR `;
         } else {
           likeStr += `[${field}] LIKE ? OR `;
         }
