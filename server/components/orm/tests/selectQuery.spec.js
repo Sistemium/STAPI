@@ -14,7 +14,7 @@ RegExp.escape = function(text) {
 describe('Create select query', () => {
   let map;
   before(function (done) {
-    domainConfig(path.join(config.root, process.env.ST_COLLECTIONS), (m) => {
+    domainConfig(path.join(config.root, process.env.DOMAIN_CONFIG), (m) => {
       map = m;
       done();
     });
@@ -28,7 +28,11 @@ describe('Create select query', () => {
       '@shipmentRoute': 1172
     };
     //act
-    let res = selectQuery(config, params);
+    let options = {
+      config: config,
+      params: params
+    };
+    let res = selectQuery(options);
 
     //assert
     expect(res).to.be.an('object');
@@ -43,7 +47,11 @@ describe('Create select query', () => {
     };
 
     //act
-    let res = selectQuery(config, params);
+    let options = {
+      config: config,
+      params: params
+    };
+    let res = selectQuery(options);
 
     //assert
     expect(res).to.be.an('object');

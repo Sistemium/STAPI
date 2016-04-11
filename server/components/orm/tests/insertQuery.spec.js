@@ -16,7 +16,7 @@ describe('Create insert query', function () {
   let map;
   before(function (done) {
 
-    domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
+    domainConfig(path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)), (m) => {
       map = m;
       done();
     });

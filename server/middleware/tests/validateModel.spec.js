@@ -11,7 +11,7 @@ import registerPlugins from '../../components/plugins/registerPlugins';
 describe('validate model middleware', () => {
   let parsedConfigs;
   before((done) => {
-    domainConfig(path.normalize(path.join(config.root, process.env.ST_COLLECTIONS)), (m) => {
+    domainConfig(path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)), (m) => {
       parsedConfigs = m;
       done();
     });

@@ -1,10 +1,11 @@
 'use strict';
 
 const debug = require('debug')('stapi:domain:controller');
-import {select, insert, deleteQ} from '../../components/orm/orm';
+import {select, insert, deleteQ, parseDbData} from '../../components/orm/orm';
 const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
+var url = require ('url');
 
 var statusByErr = (err) => {
 
@@ -18,12 +19,11 @@ var statusByErr = (err) => {
 
 };
 
-
 var errorHandler = function (err, conn, pool, res) {
 
   console.error('Client:', conn.number, 'exec error:', err);
 
-  if (err.code.match(/(-308)(-2005)(-121)(-101)/ig)) {
+  if (err.code.match(/(-308)|(-2005)|(-121)|(-101)/ig)) {
     console.log('Pool will destroy conn:', conn.number);
     pool.destroy(conn);
   } else {
@@ -45,7 +45,6 @@ var errorHandler = function (err, conn, pool, res) {
 
 };
 
-
 var doSelect = function (pool, conn, req, res) {
 
   debug('index.doSelect', 'start');
@@ -53,7 +52,12 @@ var doSelect = function (pool, conn, req, res) {
   let query;
   let config = res.locals.config;
   try {
-    query = select(config, req['x-params'], res.locals.predicates);
+    let params = {
+      config: config,
+      params: req['x-params'],
+      predicates: res.locals.predicates
+    };
+    query = select(params);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);
     return res.status(400).end(err.message);
@@ -71,45 +75,11 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
-    function parseScalar (field, val) {
-      if (field.parser) {
-        if (!(val == null || val == undefined)) {
-          return field.parser(val);
-        }
-      }
-      return val;
-    }
-
-    function parseObject(obj) {
-
-      let parsed = {};
-
-      _.each(config.fields, (field, key) => {
-
-        if (field.fields) {
-          parsed [key] = {};
-          _.each (field.fields, function(f,prop){
-            parsed [key] [prop] = parseScalar (f, obj [key + '.' + prop]);
-          });
-        } else {
-          let val = (parsed [key] = obj [key]);
-          if (field.parser) {
-            if (!(val == null || val == undefined)) {
-              parsed [key] = parseScalar(field,val);
-            }
-          }
-        }
-      });
-
-      return parsed;
-
-    }
-
     if (req.params.id) {
-      result = result.length ? parseObject(result[0]) : undefined;
+      result = result.length ? parseDbData(config,result[0]) : undefined;
     } else if (!req['x-params']['agg:'] && Array.isArray(result)) {
       _.each(result, (item, i) => {
-        result [i] = parseObject(item);
+        result [i] = parseDbData(config,item);
       });
     }
 
@@ -150,16 +120,28 @@ export function index(req, res, next) {
   });
 }
 
+var locationUrl = (req,id) => {
+  return url.format ({
+    pathname: `${req.path}/${id}`,
+    port: process.env.PORT,
+    hostname: req.hostname,
+    protocol: 'http'
+  });
+};
+
 export function post(req, res, next) {
   var pool = pools(req.pool);
+  let config = res.locals.config;
 
   if (_.isEmpty(req.body)) {
     return res.status(400) && next('Empty body');
   }
 
-  let rowsAffected = 0;
 
   pool.customAcquire(req.headers.authorization).then (conn => {
+
+    let rowsAffected = 0;
+    let responseArray = [];
 
     var execReqBody = (item, done) => {
       try {
@@ -173,7 +155,13 @@ export function post(req, res, next) {
           }
 
           if (affected) {
-            rowsAffected += affected;
+            rowsAffected ++;
+            if (typeof affected === 'object') {
+              debug ('affected:', affected);
+              let parsed = parseDbData(config,affected[0]);
+              responseArray.push (parsed);
+              debug ('parsed:', parsed);
+            }
           }
 
           debug ('rowsAffected:', rowsAffected);
@@ -201,9 +189,23 @@ export function post(req, res, next) {
         pool.release(conn);
 
         if (rowsAffected) {
-          return res.status(200).set('X-Rows-Affected', rowsAffected).end();
+          let response;
+          if (req.headers['x-return-post']) {
+            if (!responseArray.length) {
+              responseArray = req.body;
+            }
+            response = req.wasOneObject ? responseArray [0] : responseArray;
+          }
+          if (req.createMode) {
+            return res.status(201)
+              .set('Location',locationUrl(req, req.createMode))
+              .json(response);
+          }
+          return res.status(200)
+            .set('X-Rows-Affected', rowsAffected)
+            .json(response);
         } else {
-          return res.status(404).end();
+          return res.status(404).end(req.headers['x-return-post'] ? req.body : undefined);
         }
       });
 
@@ -224,7 +226,16 @@ export function del(req, res, next) {
 
     let config = res.locals.config;
     try {
-      let query = deleteQ(config, req.params.id);
+      let params = {
+        config: config,
+        params: req['x-params'],
+        predicates: res.locals.predicates,
+        selectFields: ['id'],
+        noPaging: true
+      };
+      let selectQueryObj = select(params);
+      debug(selectQueryObj);
+      let query = deleteQ(config, selectQueryObj);
       debug('del.q', 'query:', query);
 
       conn.exec(query.query, query.params, (err, result) => {
@@ -232,6 +243,7 @@ export function del(req, res, next) {
           return errorHandler(err, conn, pool, res);
         }
 
+        pool.release(conn);
         if (!result) {
           return res.status(404).end();
         } else {

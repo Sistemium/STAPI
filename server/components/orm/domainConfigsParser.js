@@ -17,10 +17,6 @@ function parseFields(fields) {
   _.each(fields, (field, key) => {
     if (_.isObject(field)) {
 
-      if (field.ref) {
-        field.property = key;
-      }
-
       if (field.expr && !field.converter) {
         field.readonly = true;
       }
@@ -170,6 +166,18 @@ function addRefsToConfigs(map) {
             id: refConfig.fields.id.field,
             refConfig: refConfig
           });
+
+          if (!val.alias) {
+            val.alias = key;
+            if (config.refAliasRe) {
+              let matched = key.match (config.refAliasRe);
+              if (matched) {
+                val.alias = _.last (matched);
+              }
+            }
+          }
+
+
           map.set(`${pool}/${config.collection.toLowerCase()}`, config);
         }
       });

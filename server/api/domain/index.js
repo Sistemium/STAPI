@@ -17,11 +17,13 @@ router
   .get ('/:collection/:id?', mw, controller.index)
   .post('/:collection/:id?', mw, bm)
   .put ('/:collection/:id?', mw, bm)
+  .patch('/:collection/:id?', mw, bm)
   .delete('/:collection/:id', mw, controller.del)
 
   .get ('/:filterCollection/:filterCollectionId/:collection/:id?', mw, controller.index)
   .post('/:filterCollection/:filterCollectionId/:collection/:id?', mw, bm)
   .put ('/:filterCollection/:filterCollectionId/:collection/:id?', mw, bm)
+  .patch('/:filterCollection/:filterCollectionId/:collection/:id?', mw, bm)
   .delete('/:filterCollection/:filterCollectionId/:collection/:id?', mw, controller.del)
 ;
 
