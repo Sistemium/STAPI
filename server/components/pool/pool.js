@@ -156,7 +156,11 @@ class Pool {
               .then(function () {
                 resolve(aConn);
               }, function (err) {
-                pool.release(aConn);
+                if (err.code && err.code.match(/(-308)|(-2005)|(-121)|(-101)/ig)) {
+                  pool.destroy(aConn);
+                } else {
+                  pool.release(aConn);
+                }
                 debug ('onAcquire', 'reject:', err);
                 reject(err);
               })
