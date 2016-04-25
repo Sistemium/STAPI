@@ -159,6 +159,9 @@ function addRefsToConfigs(map) {
       _.each(config.fields, (val, key) => {
         if (val.ref) {
           let refConfig = map.get(`${pool}/${val['ref'].toLowerCase()}`);
+          if (!refConfig) {
+            console.error ('no ref config: ', val);
+          }
           _.assign(config.fields[key], {
             //alias: refConfig.alias,
             tableName: refConfig.tableName,
