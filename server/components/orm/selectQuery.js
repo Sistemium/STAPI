@@ -264,6 +264,10 @@ export default function (parameters) {
 
     makePredicate();
 
+    if (cnfg.groupBy) {
+      result.query += ` GROUP BY ${cnfg.groupBy} `
+    }
+
     if (!params['agg:']) {
       if (params['x-order-by:']) {
         let orderBy = parseOrderByParams(params['x-order-by:'], alias);
