@@ -17,7 +17,7 @@ function parseFields(fields) {
   _.each(fields, (field, key) => {
     if (_.isObject(field)) {
 
-      if (field.expr && !field.converter) {
+      if (field.expr && !field.converter && field.readonly !== false) {
         field.readonly = true;
       }
 

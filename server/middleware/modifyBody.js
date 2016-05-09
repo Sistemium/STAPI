@@ -68,7 +68,7 @@ var applyConverters = (config,req) => {
 
       _.each (config.fields, (field, key) => {
 
-        if (!field || field.readonly && !field.converter) {
+        if (!field || field.readonly) {
           return;
         }
 
