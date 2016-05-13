@@ -188,9 +188,11 @@ export function post(req, res, next) {
       conn.commit(() => {
         pool.release(conn);
 
+        let returnPost = pool.config.returnPost || req.headers['x-return-post'];
+
         if (rowsAffected) {
           let response;
-          if (req.headers['x-return-post']) {
+          if (returnPost) {
             if (!responseArray.length) {
               responseArray = req.body;
             }
@@ -205,7 +207,7 @@ export function post(req, res, next) {
             .set('X-Rows-Affected', rowsAffected)
             .json(response);
         } else {
-          return res.status(404).end(req.headers['x-return-post'] ? req.body : undefined);
+          return res.sendStatus(404);
         }
       });
 
