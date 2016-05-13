@@ -60,7 +60,7 @@ var applyConverters = (config,req) => {
         if (field.converter) {
           fields [key] = field.converter (val, req, item);
         } else {
-          fields [key] = val || null;
+          fields [key] = val === 0 ? 0 : (val || null);
         }
       });
 
@@ -77,7 +77,7 @@ var applyConverters = (config,req) => {
         if (field.converter) {
           fields [key] = field.converter (val, req, item);
         } else {
-          fields [key] = val || null;
+          fields [key] = val === 0 ? 0 : (val || null);
         }
       });
 
