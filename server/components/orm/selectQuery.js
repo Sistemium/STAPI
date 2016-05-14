@@ -54,8 +54,19 @@ export default function (parameters) {
     _.each(searchFields, (field) => {
       //check that passed field is in config
       let fieldConf = fields[field];
+      let colPrefixMatch = field.match(/([^.]*)[.](.*)/) || '';
+      let alias = colPrefixMatch && colPrefixMatch[1];
+
+      if (!fieldConf && alias) {
+        fieldConf = _.find(fields, function (f) {
+          return f.alias === alias;
+        });
+      }
+
       if (fieldConf) {
-        if (fieldConf.expr && params['agg:']) {
+        if (alias && fieldConf.ref) {
+          likeStr += `[${fieldConf.alias}].[${colPrefixMatch[2]}] LIKE ? OR `;
+        } else if (fieldConf.expr && params['agg:']) {
           likeStr += `${fieldConf.expr} LIKE ? OR `;
         } else if (fieldConf.field !== field && params['agg:']) {
           likeStr += `${fieldConf.field} LIKE ? OR `;
@@ -199,7 +210,9 @@ export default function (parameters) {
 
       _.each(fields, (field, key) => {
         if (params && params[key]) {
-          if (field.ref) {
+          if (field.ref && params['agg:']) {
+            predicateStr += `[${field.alias}].xid = ? AND `;
+          } else if (field.ref) {
             // FIXME won't work sometimes without proper alias
             predicateStr += `[${key}] = ? AND `;
           } else if (field.expr && params['agg:']) {
