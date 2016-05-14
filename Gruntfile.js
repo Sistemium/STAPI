@@ -395,7 +395,8 @@ module.exports = function (grunt) {
             'package.json',
             '<%= yeoman.server %>/**/*',
             '!server/config/local.env.js',
-            '!server/config/sqlanywhere/*'
+            '!server/config/sqlanywhere/*',
+            '!server/**/*.sql'
           ]
         }]
       },
