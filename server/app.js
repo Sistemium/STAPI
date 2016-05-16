@@ -7,6 +7,7 @@ import express from 'express';
 import config from './config/environment';
 
 import http from 'http';
+import registerPlugins from './components/plugins/registerPlugins';
 import domainConfig from './components/orm/domainConfigsParser';
 import path from 'path';
 // Setup server
