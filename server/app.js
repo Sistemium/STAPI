@@ -8,7 +8,6 @@ import config from './config/environment';
 
 import http from 'http';
 import domainConfig from './components/orm/domainConfigsParser';
-import registerPlugins from './components/plugins/registerPlugins';
 import path from 'path';
 // Setup server
 var app = express();
