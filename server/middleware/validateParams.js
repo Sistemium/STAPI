@@ -1,5 +1,5 @@
 'use strict';
-const _ = require('lodash');
+import _ from 'lodash';
 
 export default function () {
   return function (req, res, next) {
