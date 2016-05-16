@@ -11,6 +11,10 @@ module.exports = {
   // Server port
   port: process.env.OPENSHIFT_NODEJS_PORT ||
   process.env.PORT ||
-  8080
+  8080,
+  sts: {
+    socket: 'https://socket.sistemium.com',
+    socket2: 'https://socket2.sistemium.com'
+  }
 
 };

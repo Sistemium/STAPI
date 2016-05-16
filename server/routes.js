@@ -11,6 +11,7 @@ import extractPool from './middleware/extractPool';
 
 export default function (app) {
   // Insert routes below
+  app.use('/api/sts', require('./api/sts'));
   app.use('/api/admin/map', require('./api/admin'));
   app.use('/api/:pool', extractPool(), auth(), require('./api/domain'));
 
