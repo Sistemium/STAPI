@@ -2,6 +2,24 @@
 const _ = require('lodash');
 const debug = require('debug')('stapi:modelPredicates');
 
+
+function predicateObj (collection, pred, predRes) {
+  let sql, params;
+  if (_.isString(predRes)) {
+    sql = predRes;
+  } else {
+    sql = predRes.sql;
+    params = predRes.params;
+  }
+  return {
+    field: pred.field,
+    sql: sql,
+    collection: collection,
+    params: params
+  };
+}
+
+
 export default function () {
   return function (req, res, next) {
     let config = res.locals.config;
@@ -20,7 +38,7 @@ export default function () {
           if (typeof pred === 'function') {
             predRes = pred(req);
             if (predRes) {
-              arr.push(predRes);
+              arr.push(predicateObj(collection,pred,predRes));
             }
           } else if (typeof pred === 'string') {
             arr.push({
@@ -33,11 +51,7 @@ export default function () {
             }
             predRes = pred.fn(req);
             if (predRes) {
-              arr.push({
-                field: pred.field,
-                sql: predRes,
-                collection: collection
-              });
+              arr.push(predicateObj(collection,pred,predRes));
             }
           } else {
             next('Incorrect config, predicate must be array of functions or strings...');

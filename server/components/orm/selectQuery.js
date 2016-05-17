@@ -247,6 +247,9 @@ export default function (parameters) {
           else {
             predicateStr += `(${pred}) AND `;
           }
+          if (_.isArray(pred.params)) {
+            Array.prototype.push.apply(result.params,pred.params);
+          }
         });
       }
 
