@@ -14,9 +14,14 @@ import path from 'path';
 var app = express();
 var server = http.createServer(app);
 
-require('debug').log = console.info.bind(console);
-require('./config/express')(app);
-require('./routes')(app);
+import debug from 'debug';
+debug.log = console.info.bind(console);
+
+import expressConfig from './config/express';
+expressConfig (app);
+
+import routesConfig from './routes';
+routesConfig (app);
 
 // Start server
 function startServer() {
