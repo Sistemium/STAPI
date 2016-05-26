@@ -190,7 +190,13 @@ export default function (parameters) {
         if (ref[1].optional) {
           result.query += ' LEFT';
         }
-        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].alias}] on [${ref[1].alias}].id = ${alias}.${ref[1].field} `;
+        let localField = alias + '.[' + ref[1].field + ']';
+
+        if (ref[1].expr) {
+          localField = ref[1].expr;
+        }
+
+        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].alias}] on [${ref[1].alias}].id = ${localField} `;
         //debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
           return p.collection === ref[1].alias;
