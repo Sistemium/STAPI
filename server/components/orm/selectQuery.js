@@ -296,8 +296,13 @@ export default function (parameters) {
         result.query += ` ORDER BY ${orderBy}`;
       } else {
         //default order by
-        if (cnfg.fields['ts'].field === 'ts') {
-          result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field} DESC`;
+        let tsField = cnfg.fields['ts'];
+        if (tsField && tsField.field === 'ts') {
+          if (tsField.expr){
+            result.query += ` ORDER BY ts DESC`;
+          } else {
+            result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field} DESC`;
+          }
         }
       }
     }
