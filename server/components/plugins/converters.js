@@ -6,7 +6,7 @@ export function boolConverter(val) {
 
 export function jsonConverter(val) {
   try {
-    return JSON.stringify(val);
+    return val ? JSON.stringify(val) : null;
   } catch (err) {
     throw new Error(err);
   }

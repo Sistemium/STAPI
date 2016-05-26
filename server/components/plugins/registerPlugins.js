@@ -25,7 +25,7 @@ if (externalPluginsPaths) {
 var parseBool = function(val) {return !!val;};
 var parseJson = function(val) {
   try {
-    return JSON.parse(val);
+    return val ? JSON.parse(val) : null;
   } catch (err) {
     debug('error', 'Error occurred during parsing of json');
     throw new Error(err);
