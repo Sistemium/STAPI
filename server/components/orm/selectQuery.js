@@ -179,6 +179,11 @@ export default function (parameters) {
 
     result.query += ` FROM ${tableName} as [${alias}]`;
 
+    //if join in config
+    if (cnfg.join) {
+      result.query += ` ${cnfg.join} `
+    }
+
     if (refTableNames.size > 0) {
       //debug('refTableNames', [...refTableNames]);
       for (let ref of refTableNames) {
@@ -195,11 +200,6 @@ export default function (parameters) {
         });
         //debug('predicatesForJoin', predicatesForJoin);
       }
-    }
-
-    //if join in config
-    if (cnfg.join) {
-      result.query += ` ${cnfg.join} `
     }
 
     function makePredicate() {
