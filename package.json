@@ -1,6 +1,6 @@
 {
   "name": "st-api-v4",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "server/app.js",
   "dependencies": {
     "async": "^1.5.2",
