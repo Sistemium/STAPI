@@ -202,7 +202,10 @@ export default function (parameters) {
           return p.collection === ref[1].alias;
         });
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND (${p.field ? `${ref[1].alias}.${p.field} ` : ''}${p.sql}) `
+          result.query += `AND (${p.field ? `${ref[1].alias}.${p.field} ` : ''}${p.sql}) `;
+          if (_.isArray(p.params)) {
+            Array.prototype.push.apply(result.params,p.params);
+          }
         });
         //debug('predicatesForJoin', predicatesForJoin);
       }
