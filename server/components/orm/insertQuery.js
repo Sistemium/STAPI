@@ -38,19 +38,30 @@ export default function (config, body, predicates) {
     //debug('fields', fields);
     _.each(fields, (v, k) => {
       if (v && v.refConfig) {
+
         let refPredicates = _.filter(predicates, (p) => {
           return p.collection === k;
         });
+
+        result.params.push(v.body);
+
         refPredicates = _.map(refPredicates, (rp) => {
+          if (rp.params) {
+            Array.prototype.push.apply(result.params,rp.params);
+          }
           return `${rp.field || ''} ${rp.sql}`;
         });
+
         refPredicates = refPredicates.join(' AND ');
-        result.query += `(SELECT id FROM ${v.refConfig.tableName} as [${k}] WHERE xid = ? ${refPredicates && ` AND ${refPredicates}`}) AS [${k}],`;
+        result.query += `(
+          SELECT id FROM ${v.refConfig.tableName} as [${k}] 
+          WHERE xid = ? ${refPredicates && ` AND ${refPredicates}`}
+        ) AS [${k}],`;
 
         if (!v.optional || v.body) {
           refAliases.push(`${queryAlias}.` + k);
         }
-        result.params.push(v.body);
+
       }
       else {
         result.query += `? AS [${k}],`;
@@ -69,6 +80,9 @@ export default function (config, body, predicates) {
 
     debug('tPredicates', tPredicates);
     tPredicates = _.map(tPredicates, (tp) => {
+      if (tp.params) {
+        Array.prototype.push.apply(result.params,tp.params);
+      }
       return tp.field ? `[${config.alias}].[${tp.field}] ${tp.sql}` : `${tp.sql || (tp)}`;
     });
     tPredicates = tPredicates.join(' AND ');
