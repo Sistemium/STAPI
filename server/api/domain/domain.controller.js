@@ -5,7 +5,7 @@ import {select, insert, deleteQ, parseDbData} from '../../components/orm/orm';
 const _ = require('lodash');
 import pools from '../../components/pool';
 var async = require('async');
-var url = require ('url');
+var url = require('url');
 
 var statusByErr = (err) => {
 
@@ -38,9 +38,9 @@ var errorHandler = function (err, conn, pool, res) {
   res.status(status);
 
   if (status == 500) {
-    res.json (err);
+    res.json(err);
   } else {
-    res.end ();
+    res.end();
   }
 
 };
@@ -84,10 +84,10 @@ var doSelect = function (pool, conn, req, res) {
     let offset = req['x-params']['x-offset:'] && result.length && getOffset(result);
 
     if (req.params.id) {
-      result = result.length ? parseDbData(config,result[0]) : undefined;
+      result = result.length ? parseDbData(config, result[0]) : undefined;
     } else if (!req['x-params']['agg:'] && Array.isArray(result)) {
       _.each(result, (item, i) => {
-        result [i] = parseDbData(config,item);
+        result [i] = parseDbData(config, item);
       });
     }
 
@@ -130,12 +130,12 @@ export function index(req, res, next) {
     doSelect(pool, conn, req, res);
   }, function (err) {
     console.error('index:customAcquire', err);
-    res.status(500) && next (new Error (err.text));
+    res.status(500) && next(new Error(err.text));
   });
 }
 
-var locationUrl = (req,id) => {
-  return url.format ({
+var locationUrl = (req, id) => {
+  return url.format({
     pathname: `${req.path}/${id}`,
     port: process.env.PORT,
     hostname: req.hostname,
@@ -152,7 +152,7 @@ export function post(req, res, next) {
   }
 
 
-  pool.customAcquire(req.headers.authorization).then (conn => {
+  pool.customAcquire(req.headers.authorization).then(conn => {
 
     let rowsAffected = 0;
     let responseArray = [];
@@ -165,20 +165,20 @@ export function post(req, res, next) {
 
         conn.execWithoutCommit(query.query, query.params, (err, affected) => {
           if (err) {
-            return done (err);
+            return done(err);
           }
 
           if (affected) {
-            rowsAffected ++;
+            rowsAffected++;
             if (typeof affected === 'object') {
-              debug ('affected:', affected);
-              let parsed = parseDbData(config,affected[0]);
-              responseArray.push (parsed);
-              debug ('parsed:', parsed);
+              debug('affected:', affected);
+              let parsed = parseDbData(config, affected[0]);
+              responseArray.push(parsed);
+              debug('parsed:', parsed);
             }
           }
 
-          debug ('rowsAffected:', rowsAffected);
+          debug('rowsAffected:', rowsAffected);
 
           done();
         });
@@ -214,7 +214,7 @@ export function post(req, res, next) {
           }
           if (req.createMode) {
             return res.status(201)
-              .set('Location',locationUrl(req, req.createMode))
+              .set('Location', locationUrl(req, req.createMode))
               .json(response);
           }
           return res.status(200)
@@ -227,9 +227,9 @@ export function post(req, res, next) {
 
     });
 
-  },function (err){
-    console.error ('post:customAcquire', err);
-    res.status(500) && next (new Error (err.text));
+  }, function (err) {
+    console.error('post:customAcquire', err);
+    res.status(500) && next(new Error(err.text));
   });
 
 }
@@ -238,7 +238,7 @@ export function del(req, res, next) {
 
   let pool = pools(req.pool);
 
-  pool.customAcquire(req.headers.authorization).then ((conn) => {
+  pool.customAcquire(req.headers.authorization).then((conn) => {
 
     let config = res.locals.config;
     try {
