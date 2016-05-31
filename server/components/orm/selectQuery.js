@@ -10,6 +10,7 @@ export default function (parameters) {
   var selectFields = _.cloneDeep (parameters.selectFields);
   var noPaging = !!parameters.noPaging;
   var tableAs = parameters.tableAs;
+  var offset = params['x-offset:'];
 
   function parseOrderByParams(params) {
 
@@ -145,13 +146,13 @@ export default function (parameters) {
           throw new Error(`Select field "${field}" not defined in config`);
         }
       });
+
     } else {
+      _.each(cnfg.fields, selectField);
+    }
 
-      _.each(cnfg.fields, (prop, key) => {
-
-        selectField(prop, key);
-
-      });
+    if (offset) {
+      result.query += `[${alias}].id as IDREF, `;
     }
 
     if (params['agg:']) {
@@ -279,6 +280,25 @@ export default function (parameters) {
           throw new Error(err);
         }
 
+      }
+
+      if (offset && offset !== '*') {
+        try {
+          let offsetId = offset.match(/[\d]+$/)[0];
+          let offsetTsMatch = offset.match(/.+-(\d{14})(\d{3})-.+/);
+
+          let offsetSeconds = offsetTsMatch[1];
+          let offsetMs = offsetTsMatch.length > 2 ? parseInt(offsetTsMatch[2]) : 0;
+          let offsetTs = `${offsetSeconds}.${_.padStart(offsetMs,3,'0')}`;
+          let offsetTs1 = `${offsetSeconds}.${_.padStart(offsetMs + 1,3,'0')}`;
+
+          predicateStr += `(${alias}.ts >= ? OR (${alias}.ts >= ? and ${alias}.id > ?))`;
+
+          Array.prototype.push.apply(result.params,[offsetTs1,offsetTs,offsetId]);
+
+        } catch (e) {
+          throw new Error('Wrong offset format: ' + offset);
+        }
       }
 
       if (withPredicate) {

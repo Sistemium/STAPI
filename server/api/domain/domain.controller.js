@@ -45,6 +45,12 @@ var errorHandler = function (err, conn, pool, res) {
 
 };
 
+function getOffset(data) {
+  let top1 = data[0];
+
+  return `1-${top1.ts.replace(/[^\d]/g, '')}-${top1.IDREF}`;
+}
+
 var doSelect = function (pool, conn, req, res) {
 
   debug('index.doSelect', 'start');
@@ -75,6 +81,8 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
+    let offset = req['x-params']['x-offset:'] && result.length && getOffset(result);
+
     if (req.params.id) {
       result = result.length ? parseDbData(config,result[0]) : undefined;
     } else if (!req['x-params']['agg:'] && Array.isArray(result)) {
@@ -97,6 +105,9 @@ var doSelect = function (pool, conn, req, res) {
         });
       } else if (result.length) {
         res.set('X-Rows-Count', result.length);
+        if (offset) {
+          res.set('X-Offset', offset);
+        }
       }
 
       return res.status(200).json(result);
