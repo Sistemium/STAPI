@@ -46,7 +46,11 @@ var errorHandler = function (err, conn, pool, res) {
 };
 
 function getOffset(data) {
-  let top1 = data[0];
+  if (!data.length) {
+    return null;
+  }
+  
+  let top1 = _.last(data);
 
   return `1-${top1.ts.replace(/[^\d]/g, '')}-${top1.IDREF}`;
 }

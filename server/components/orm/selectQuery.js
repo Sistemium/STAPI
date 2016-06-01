@@ -322,10 +322,15 @@ export default function (parameters) {
         let tsField = cnfg.fields['ts'];
         if (tsField && tsField.field === 'ts') {
           if (tsField.expr){
-            result.query += ` ORDER BY ts DESC`;
+            result.query += ` ORDER BY ts`;
           } else {
-            result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field} DESC`;
+            result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field}`;
           }
+        }
+        if (offset) {
+          result.query += ' ASC, IDREF ASC'
+        } else {
+          result.query += ' DESC'
         }
       }
     }
