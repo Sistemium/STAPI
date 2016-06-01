@@ -49,7 +49,7 @@ function getOffset(data) {
   if (!data.length) {
     return null;
   }
-  
+
   let top1 = _.last(data);
 
   return `1-${top1.ts.replace(/[^\d]/g, '')}-${top1.IDREF}`;
@@ -156,6 +156,9 @@ export function post(req, res, next) {
     return res.status(400) && next('Empty body');
   }
 
+  if (config.readonly) {
+    return res.status(403) && next('Collection is read-only');
+  }
 
   pool.customAcquire(req.headers.authorization).then(conn => {
 
@@ -242,6 +245,10 @@ export function post(req, res, next) {
 export function del(req, res, next) {
 
   let pool = pools(req.pool);
+
+  if (!res.locals.config.deletable) {
+    return res.status(403) && next('Collection is not deletable');
+  }
 
   pool.customAcquire(req.headers.authorization).then((conn) => {
 
