@@ -11,6 +11,7 @@ export default function (parameters) {
   var noPaging = !!parameters.noPaging;
   var tableAs = parameters.tableAs;
   var offset = params['x-offset:'];
+  var joins = _.cloneDeep (parameters.joins) || config.joins;
 
   function parseOrderByParams(params) {
 
@@ -181,8 +182,27 @@ export default function (parameters) {
     result.query += ` FROM ${tableName} as [${alias}]`;
 
     //if join in config
-    if (cnfg.join) {
-      result.query += ` ${cnfg.join} `
+    if (joins) {
+
+      if (!_.isArray(joins)) {
+        joins = [joins];
+      }
+
+      _.each (joins, function (join){
+
+        if (_.isString(join)) {
+          join = {
+            sql: cnfg.join
+          }
+        }
+
+        result.query += ` ${join.sql} `;
+
+        if (join.params) {
+          Array.prototype.push.apply(result.params,join.params);
+        }
+
+      });
     }
 
     if (refTableNames.size > 0) {

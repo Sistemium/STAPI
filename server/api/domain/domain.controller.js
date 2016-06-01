@@ -65,7 +65,8 @@ var doSelect = function (pool, conn, req, res) {
     let params = {
       config: config,
       params: req['x-params'],
-      predicates: res.locals.predicates
+      predicates: res.locals.predicates,
+      joins: res.locals.joins
     };
     query = select(params);
   } catch (err) {
