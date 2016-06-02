@@ -195,6 +195,10 @@ export default function (parameters) {
 
       _.each (joins, function (join){
 
+        if (join.collection !== alias) {
+          return;
+        }
+
         if (_.isString(join)) {
           join = {
             sql: cnfg.join
