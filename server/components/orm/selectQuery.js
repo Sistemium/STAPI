@@ -166,20 +166,25 @@ export default function (parameters) {
 
     }
 
-    tableName = tableName.replace(/(\${[^}]*})/g, function (p) {
-      let param = p.match(/{([^\?}]*)/)[1];
-      if (params[param]) {
-        result.params.push(params[param]);
-        return `[${param}] = ?`;
-      }
-      else if (p.match(/\?}$/)) {
-        return '';
-      } else {
-        throw new Error(`Required parameter missing: "${param}"`);
-      }
-    });
+    if (tableName) {
 
-    result.query += ` FROM ${tableName} as [${alias}]`;
+      tableName = tableName.replace(/(\${[^}]*})/g, function (p) {
+        let param = p.match(/{([^\?}]*)/)[1];
+        if (params[param]) {
+          result.params.push(params[param]);
+          return `[${param}] = ?`;
+        }
+        else if (p.match(/\?}$/)) {
+          return '';
+        } else {
+          throw new Error(`Required parameter missing: "${param}"`);
+        }
+      });
+
+      result.query += ` FROM ${tableName} as [${alias}]`;
+    } else {
+      result.query += ` FROM `;
+    }
 
     //if join in config
     if (joins) {
@@ -346,11 +351,11 @@ export default function (parameters) {
           } else {
             result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field}`;
           }
-        }
-        if (offset) {
-          result.query += ' ASC, IDREF ASC'
-        } else {
-          result.query += ' DESC'
+          if (offset) {
+            result.query += ' ASC, IDREF ASC'
+          } else {
+            result.query += ' DESC'
+          }
         }
       }
     }

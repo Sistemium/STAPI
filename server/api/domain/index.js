@@ -8,10 +8,11 @@ import extractFromUrl from '../../middleware/extractFromUrl';
 import modifyBody from '../../middleware/modifyBody';
 import validateModel from '../../middleware/validateModel';
 import modelPredicates from '../../middleware/modelPredicates';
-import modelJoins from '../../middleware/modelJoins';
+import modelConfig from '../../middleware/modelConfig';
+
 
 var router = express.Router();
-var mw = [extractFromUrl(), headersToParams(), validateParams(), modelJoins(), modelPredicates()];
+var mw = [extractFromUrl(), headersToParams(), validateParams(), modelConfig('join'), modelPredicates()];
 var bm = [modifyBody(), validateModel(), controller.post];
 
 router
