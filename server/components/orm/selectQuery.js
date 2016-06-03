@@ -321,9 +321,11 @@ export default function (parameters) {
           let offsetTs = `${offsetSeconds}.${_.padStart(offsetMs,3,'0')}`;
           let offsetTs1 = `${offsetSeconds}.${_.padStart(offsetMs + 1,3,'0')}`;
 
-          predicateStr += `(${alias}.ts >= ? OR (${alias}.ts >= ? and ${alias}.id > ?))`;
+          withPredicate = true;
 
-          Array.prototype.push.apply(result.params,[offsetTs1,offsetTs,offsetId]);
+          predicateStr += `(${alias}.ts > ? AND (${alias}.ts >= ? or ${alias}.id > ?))`;
+
+          Array.prototype.push.apply(result.params,[offsetTs,offsetTs1,offsetId]);
 
         } catch (e) {
           throw new Error('Wrong offset format: ' + offset);
