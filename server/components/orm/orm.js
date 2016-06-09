@@ -9,8 +9,8 @@ export function select(config, params, predicates, selectFields) {
   return selectQuery(config, params, predicates, selectFields);
 }
 
-export function insert(config, body, predicates) {
-  return insertQuery(config, body, predicates);
+export function insert(config, body, predicates, poolConfig, joins) {
+  return insertQuery(config, body, predicates, poolConfig, joins);
 }
 
 export function deleteQ(config, selectObj) {

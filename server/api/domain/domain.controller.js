@@ -167,7 +167,7 @@ export function post(req, res, next) {
 
     var execReqBody = (item, done) => {
       try {
-        let query = insert(res.locals.config, item, res.locals.predicates);
+        let query = insert(res.locals.config, item, res.locals.predicates, pool.config, res.locals.joins);
 
         debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
 

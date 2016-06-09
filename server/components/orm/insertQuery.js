@@ -2,7 +2,7 @@ var _ = require('lodash');
 const debug = require('debug')('stapi:orm:insertQuery');
 import selectQuery from './selectQuery';
 
-export default function (config, body, predicates) {
+export default function (config, body, predicates, poolConfig, joins) {
   "use strict";
 
   let fields = {};
@@ -96,12 +96,13 @@ export default function (config, body, predicates) {
             ${refAliases && `WHEN MATCHED THEN RAISERROR 70001`}
     `;
 
-    if (config.selectFromMerge) {
+    if (config.selectFromMerge || poolConfig.selectFromMerge) {
       let params = {
         config: config,
         params: {},
         tableAs: `(select * from (${result.query}) referencing (final as inserted))`,
-        noPaging: true
+        noPaging: true,
+        joins: joins
       };
       let sq = selectQuery(params);
       result.query = sq.query;
