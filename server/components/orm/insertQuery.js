@@ -11,6 +11,8 @@ export default function (config, body, predicates, poolConfig, joins) {
     params: []
   };
 
+  //debug('body', body);
+
   _.each(body, (val, k) => {
 
     let cnfProp = config.fields [k];
@@ -35,7 +37,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     let refAliases = [];
 
-    //debug('fields', fields);
+    debug('concatQuery:fields', fields);
     _.each(fields, (v, k) => {
       if (v && v.refConfig) {
 
@@ -70,7 +72,7 @@ export default function (config, body, predicates, poolConfig, joins) {
     });
 
     result.query = result.query.slice(0, -1);
-    refAliases = refAliases.join(' IS NOT NULL AND ');
+    var refAliasesString = refAliases.join(' IS NOT NULL AND ');
 
     debug('tPredicates', predicates);
 
@@ -89,11 +91,11 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     result.query +=
       `) AS ${queryAlias} ON ${config.alias}.[xid] = ${queryAlias}.[xid]
-            WHEN NOT MATCHED ${refAliases && `AND ${refAliases} IS NOT NULL`} THEN INSERT
-            ${refAliases && `WHEN NOT MATCHED THEN RAISERROR 70001`}
+            WHEN NOT MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN INSERT
+            ${refAliasesString && `WHEN NOT MATCHED THEN RAISERROR 70001`}
             ${tPredicates && `WHEN MATCHED AND NOT (${tPredicates}) THEN RAISERROR 70002`}
-            WHEN MATCHED ${refAliases && `AND ${refAliases} IS NOT NULL`} THEN UPDATE
-            ${refAliases && `WHEN MATCHED THEN RAISERROR 70001`}
+            WHEN MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN UPDATE
+            ${refAliasesString && `WHEN MATCHED THEN RAISERROR 70001`}
     `;
 
     if (config.selectFromMerge || poolConfig.selectFromMerge) {
