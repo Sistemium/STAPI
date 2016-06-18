@@ -89,10 +89,10 @@ var doSelect = function (pool, conn, req, res) {
     let offset = req['x-params']['x-offset:'] && result.length && getOffset(result);
 
     if (req.params.id) {
-      result = result.length ? parseDbData(config, result[0]) : undefined;
+      result = result.length ? parseDbData(config, result[0], req) : undefined;
     } else if (!req['x-params']['agg:'] && Array.isArray(result)) {
       _.each(result, (item, i) => {
-        result [i] = parseDbData(config, item);
+        result [i] = parseDbData(config, item, req);
       });
     }
 

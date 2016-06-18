@@ -17,6 +17,6 @@ export function deleteQ(config, selectObj) {
   return deleteQuery(config, selectObj);
 }
 
-export function parseDbData(config, dbObj) {
-  return dbDataParser(config, dbObj);
+export function parseDbData(config, dbObj, req) {
+  return dbDataParser(config, dbObj, req);
 }
