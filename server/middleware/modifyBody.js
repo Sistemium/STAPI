@@ -82,6 +82,10 @@ var applyConverters = (config,req) => {
       });
 
     }
+    
+    if (_.isFunction(config.converter)) {
+      config.converter(fields, req);
+    }
 
     debug('applyConverters: fields', fields);
     return fields;
