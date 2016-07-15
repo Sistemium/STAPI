@@ -40,7 +40,6 @@ process.on('message', function (m) {
 
   if (m.sql) {
     var cb = function (err, res) {
-      debug('cb:', err, res);
       if (err) {
         m.error = parseError(err);
         process.send(m);

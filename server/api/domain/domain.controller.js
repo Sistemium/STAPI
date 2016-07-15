@@ -96,7 +96,7 @@ var doSelect = function (pool, conn, req, res) {
       });
     }
 
-    debug('index', 'parseObject done', result);
+    debug('index', 'parseObject done');
 
     if (!result) {
       return res.status(404).json();
