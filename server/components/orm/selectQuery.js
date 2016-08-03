@@ -256,6 +256,8 @@ export default function (parameters) {
             predicateStr += `[${key}] = ? AND `;
           } else if (field.expr && params['agg:']) {
             predicateStr += `${field.expr} = ? AND `;
+          } else if (field.expr) {
+            predicateStr += `${field.field} = ? AND `
           } else {
             predicateStr += `${alias}.[${field.field}] = ? AND `;
           }
