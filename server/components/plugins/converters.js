@@ -1,7 +1,7 @@
 'use strict';
 
 export function boolConverter(val) {
-  return (val === '0' || !val) ? 0 : 1
+  return (val === '0' || val === 'false' || !val) ? 0 : 1
 }
 
 export function jsonConverter(val) {
