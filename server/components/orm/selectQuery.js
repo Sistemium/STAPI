@@ -248,7 +248,7 @@ export default function (parameters) {
       let fields = cnfg.fields;
 
       _.each(fields, (field, key) => {
-        if (params && params[key]) {
+        if (params && !_.isUndefined(params[key])) {
           if (field.ref && params['agg:']) {
             predicateStr += `[${field.alias}].xid = ? AND `;
           } else if (field.ref) {
