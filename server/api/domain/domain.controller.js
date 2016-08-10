@@ -86,6 +86,8 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
+    debug('results before:', result);
+    debug('req params:', req.params);
     let offset = req['x-params']['x-offset:'] && result.length && getOffset(result);
 
     if (req.params.id) {
@@ -96,14 +98,16 @@ var doSelect = function (pool, conn, req, res) {
       });
     }
 
-    debug('index', 'parseObject done');
+    debug('index', 'parseObject done', result);
 
     if (!result) {
       return res.status(404).json();
     } else if (req.params.id || result.length) {
 
       if (req['x-params']['agg:']) {
-        var cnt = result[0].cnt;
+        debug('result after:', result);
+
+        var cnt = result.length && result[0].cnt || result.cnt || 0;
         res.set('X-Aggregate-Count', cnt);
         return res.json({
           count: cnt
