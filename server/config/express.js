@@ -13,6 +13,8 @@ import errorHandler from 'errorhandler';
 import path from 'path';
 import config from './environment';
 import cors from 'cors';
+import winston from 'winston';
+import expressWinston from 'express-winston';
 
 export default function (app) {
   var env = app.get('env');
@@ -47,4 +49,14 @@ export default function (app) {
     app.use(morgan(process.env.MORGAN || 'dev'));
     app.use(errorHandler()); // Error handler - has to be last
   }
+  expressWinston.requestWhitelist.push('body');
+  expressWinston.responseWhitelist.push('body');
+  app.use(expressWinston.logger({
+    transports: [
+      new winston.transports.Console({
+        json: true,
+        colorize: true
+      })],
+    colorStatus: true
+  }));
 }
