@@ -12,8 +12,7 @@ import errorHandler from 'errorhandler';
 import path from 'path';
 import config from './environment';
 import cors from 'cors';
-import winston from 'winston';
-import expressWinston from 'express-winston';
+import logResponseBody from '../middleware/logResponseBodyMiddleware';
 import afterResponse from '../middleware/afterResponseMiddleware';
 
 
@@ -51,18 +50,7 @@ export default function (app) {
     app.use(errorHandler()); // Error handler - has to be last
   }
 
-  expressWinston.requestWhitelist.push('body');
-  expressWinston.responseWhitelist.push('body');
-
-  app.use(expressWinston.logger({
-    transports: [
-      new winston.transports.Console({
-        json: true,
-        colorize: true
-      })],
-    colorStatus: true
-  }));
-
+  app.use(logResponseBody);
   //  register the 'after response' middleware
   app.use(afterResponse);
 }
