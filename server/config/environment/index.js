@@ -24,7 +24,9 @@ var all = {
   // Server IP
   ip: process.env.IP || '0.0.0.0',
 
-  instance: process.env.INSTANCE_NAME,
+  slBodyLengthMax: process.env.SL_BODY_LENGTH_MAX || 2500,
+
+  instanceName: process.env.INSTANCE_NAME,
 
   // Secret for session, you will want to change this and make it an environment variable
   secrets: {

@@ -3,7 +3,7 @@ import url from 'url';
 import RequestHttpClient from 'request';
 import config from '../config/environment';
 import _ from 'lodash';
-const RESPONSE_BODY_LENGTH = 2500;
+const SL_BODY_LENGTH_MAX = config.slBodyLengthMax;
 
 export default function (request, response, done) {
 
@@ -38,7 +38,7 @@ export default function (request, response, done) {
 
         let responseBodyLength = response.body.toString().length;
 
-        if (responseBodyLength > RESPONSE_BODY_LENGTH) {
+        if (responseBodyLength > SL_BODY_LENGTH_MAX) {
           //TODO write something
           response.body = {};
         }
@@ -52,7 +52,7 @@ export default function (request, response, done) {
           responseBody: response.body,
           status: response.statusCode,
           authorization: request.authorization || request.headers.authorization,
-          instanceName: config.instance,
+          instanceName: config.instanceName,
           query: request.query,
           accountName: accountName
         };
