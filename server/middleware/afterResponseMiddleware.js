@@ -52,8 +52,6 @@ export default function (request, response, done) {
           authorization: request.authorization || request.headers.authorization
         };
 
-        winston.log('info', 'logRequests', requestLogData);
-
         RequestHttpClient({
             url: logRequestsUrl,
             method: 'POST',
@@ -62,28 +60,13 @@ export default function (request, response, done) {
               "content-type": "application/json"
             },
             body: requestLogData
-          }, function (error, response, body) {
+          }, function (error) {
             if (error) {
-              winston.log('error', `error: ${error}`);
+              console.error(`error: ${error}`);
             }
-
-            winston.log('info', `response: ${JSON.stringify(response)}`);
-            winston.log('info', `body: ${JSON.stringify(body)}`);
           }
         );
       }
-
-    } else {
-
-      console.log(
-        //  the user agent
-        request.headers['user-agent'],
-        //  the requested path
-        request.path,
-        //  the HTTP status code returned
-        response.statusCode
-      );
-
     }
 
   }
