@@ -52,7 +52,7 @@ export default function (request, response, done) {
           responseBody: response.body,
           status: response.statusCode,
           authorization: request.authorization || request.headers.authorization,
-          instanceName: config.name,
+          instanceName: config.instance,
           query: request.query,
           accountName: accountName
         };
