@@ -1,5 +1,9 @@
-grant connect to stapi;
-grant dba to stapi;
+grant connect to sl;
+grant dba to sl;
+
+util.setUserOption 'asamium.default.domain', 'sl';
+
+meta.createDbspace 'sl';
 
 meta.defineType 'resource:STRING';
 meta.defineType 'params:STRING';
