@@ -40,7 +40,9 @@ export default function (request, response, done) {
 
         if (responseBodyLength > SL_BODY_LENGTH_MAX) {
           //TODO write something
-          response.body = {};
+          response.body = {
+            error: `Response length exceeds the max length: ${SL_BODY_LENGTH_MAX}`
+          };
         }
 
         let accountName = _.get(request.auth, 'account.name');
