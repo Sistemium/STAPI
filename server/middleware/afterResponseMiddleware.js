@@ -3,6 +3,7 @@ import url from 'url';
 import RequestHttpClient from 'request';
 import config from '../config/environment';
 import _ from 'lodash';
+const RESPONSE_BODY_LENGTH = 2500;
 
 export default function (request, response, done) {
 
@@ -34,6 +35,13 @@ export default function (request, response, done) {
       if (fullUrl(request) === logRequestsUrl) {
         return done();
       } else {
+
+        let responseBodyLength = response.body.toString().length;
+
+        if (responseBodyLength > RESPONSE_BODY_LENGTH) {
+          //TODO write something
+          response.body = {};
+        }
 
         let accountName = _.get(request.auth, 'account.name');
         let requestLogData = {
