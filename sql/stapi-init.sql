@@ -5,18 +5,19 @@ util.setUserOption 'asamium.default.domain', 'sl';
 
 meta.createDbspace 'sl';
 
-meta.defineType 'resource:STRING';
+meta.defineType 'resource:CODE';
 meta.defineType 'params:STRING';
+meta.defineType 'query:STRING';
 meta.defineType 'requestBody:STRING';
 meta.defineType 'responseBody:STRING';
-meta.defineType 'authorization:STRING';
-meta.defineType 'method:STRING';
-meta.defineType 'status:STRING';
-meta.defineType 'instance:STRING';
+meta.defineType 'authorization:CODE';
+meta.defineType 'method:SHORT';
+meta.defineType 'status:INT';
+meta.defineType 'instance:MEDIUM';
 meta.defineType 'isDeleted:BOOL';
 
 meta.defineEntity 'RequestLog',
-  'resource;params;requestBody;responseBody;status;authorization;method;instance;isDeleted'
+  'resource;params;requestBody;responseBody;status;authorization;method;instance;isDeleted;query'
 ;
 
 meta.createTable 'RequestLog',0,1;
