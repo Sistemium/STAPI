@@ -35,7 +35,7 @@ export default function (request, response, done) {
         return done();
       } else {
 
-        let accountName = _.get(req.auth, 'account.name');
+        let accountName = _.get(request.auth, 'account.name');
         let requestLogData = {
           resource: `${request.pool}/${request.params.collection}`,
           params: request.params,
