@@ -4,10 +4,6 @@ import RequestHttpClient from 'request';
 
 export default function (request, response, done) {
 
-
-  // console.log(response);
-
-  // let pool = getPoolByName()
   //  define our postProcessor
   //  we do this here as we automatically get to access the
   //  request and response arguments
@@ -37,11 +33,6 @@ export default function (request, response, done) {
         return done();
       } else {
 
-        // we still have access to the request and response
-        // variables provided when the our middleware is
-        // called (we registered registered the function with
-        // request, response and done arguments).
-
         let requestLogData = {
           resource: request.path,
           params: request.params,
@@ -49,7 +40,8 @@ export default function (request, response, done) {
           requestBody: request.body,
           responseBody: response.body,
           status: response.statusCode,
-          authorization: request.authorization || request.headers.authorization
+          authorization: request.authorization || request.headers.authorization,
+          instance: pool.config
         };
 
         RequestHttpClient({
