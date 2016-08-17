@@ -15,7 +15,7 @@ export default function (req, res, next) {
       chunks.push(chunk);
 
     var body = Buffer.concat(chunks).toString('utf8');
-    console.log(req.path, body);
+    res.body = body;
 
     oldEnd.apply(res, arguments);
   };
