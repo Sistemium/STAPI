@@ -13,12 +13,12 @@ meta.defineType 'responseBody:STRING';
 meta.defineType 'authorization:CODE';
 meta.defineType 'method:SHORT';
 meta.defineType 'status:INT';
-meta.defineType 'instance:MEDIUM';
+meta.defineType 'instanceName:MEDIUM';
 meta.defineType 'isDeleted:BOOL';
 meta.defineType 'accountName:CODE';
 
 meta.defineEntity 'RequestLog',
-  'resource;params;requestBody;responseBody;status;authorization;method;instance;isDeleted;query;accountName'
+  'resource;params;requestBody;responseBody;status;authorization;method;instanceName;isDeleted;query;accountName'
 ;
 
 meta.createTable 'RequestLog',0,1;

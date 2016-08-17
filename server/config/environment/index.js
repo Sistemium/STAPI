@@ -24,7 +24,7 @@ var all = {
   // Server IP
   ip: process.env.IP || '0.0.0.0',
 
-  name: process.env.SERVER_NAME,
+  instance: process.env.INSTANCE,
 
   // Secret for session, you will want to change this and make it an environment variable
   secrets: {
