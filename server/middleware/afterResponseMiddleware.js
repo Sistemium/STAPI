@@ -35,8 +35,7 @@ export default function (request, response, done) {
         return done();
       } else {
 
-         let accountName = _.get(req.auth, 'account.name');
-
+        let accountName = _.get(req.auth, 'account.name');
         let requestLogData = {
           resource: `${request.pool}/${request.params.collection}`,
           params: request.params,
@@ -66,7 +65,6 @@ export default function (request, response, done) {
         );
       }
     }
-
   }
 
   //  listen for the finish and close events, pass those on to
