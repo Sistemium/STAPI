@@ -15,9 +15,10 @@ meta.defineType 'method:SHORT';
 meta.defineType 'status:INT';
 meta.defineType 'instance:MEDIUM';
 meta.defineType 'isDeleted:BOOL';
+meta.defineType 'accountName:CODE';
 
 meta.defineEntity 'RequestLog',
-  'resource;params;requestBody;responseBody;status;authorization;method;instance;isDeleted;query'
+  'resource;params;requestBody;responseBody;status;authorization;method;instance;isDeleted;query;accountName'
 ;
 
 meta.createTable 'RequestLog',0,1;

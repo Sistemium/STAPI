@@ -2,6 +2,7 @@ import getPoolByName from '../components/pool';
 import url from 'url';
 import RequestHttpClient from 'request';
 import config from '../config/environment';
+import _ from 'lodash';
 
 export default function (request, response, done) {
 
@@ -34,6 +35,8 @@ export default function (request, response, done) {
         return done();
       } else {
 
+         let accountName = _.get(req.auth, 'account.name');
+
         let requestLogData = {
           resource: `${request.pool}/${request.params.collection}`,
           params: request.params,
@@ -43,7 +46,8 @@ export default function (request, response, done) {
           status: response.statusCode,
           authorization: request.authorization || request.headers.authorization,
           instance: config.name,
-          query: request.query
+          query: request.query,
+          accountName: accountName
         };
 
         RequestHttpClient({
