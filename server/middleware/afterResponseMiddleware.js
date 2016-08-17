@@ -39,7 +39,6 @@ export default function (request, response, done) {
         let responseBodyLength = response.body.toString().length;
 
         if (responseBodyLength > SL_BODY_LENGTH_MAX) {
-          //TODO write something
           response.body = {
             error: `Response length exceeds the max length: ${SL_BODY_LENGTH_MAX}`
           };
