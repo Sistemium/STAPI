@@ -1,6 +1,7 @@
 import getPoolByName from '../components/pool';
 import url from 'url';
 import RequestHttpClient from 'request';
+import config from '../config/environment';
 
 export default function (request, response, done) {
 
@@ -34,14 +35,15 @@ export default function (request, response, done) {
       } else {
 
         let requestLogData = {
-          resource: request.path,
+          resource: `${request.pool}/${request.params.collection}`,
           params: request.params,
           method: request.method,
           requestBody: request.body,
           responseBody: response.body,
           status: response.statusCode,
           authorization: request.authorization || request.headers.authorization,
-          instance: pool.config
+          instance: config.serverName,
+          query: request.query
         };
 
         RequestHttpClient({
