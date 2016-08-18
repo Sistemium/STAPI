@@ -18,6 +18,10 @@ export default function (request, response, done) {
 
     let pool = getPoolByName(request.pool);
 
+    if (!pool) {
+      return done('Incorrect pool name...');
+    }
+
     function fullUrl(req) {
 
       return url.format({
