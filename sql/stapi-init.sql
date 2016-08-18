@@ -10,7 +10,7 @@ meta.defineType 'params:STRING';
 meta.defineType 'query:STRING';
 meta.defineType 'requestBody:STRING';
 meta.defineType 'responseBody:STRING';
-meta.defineType 'authorization:CODE';
+meta.defineType 'authorization,,nullable:CODE';
 meta.defineType 'method:SHORT';
 meta.defineType 'status:INT';
 meta.defineType 'instanceName:MEDIUM';
