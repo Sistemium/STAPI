@@ -86,8 +86,6 @@ var doSelect = function (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
-    debug('results before:', result);
-    debug('req params:', req.params);
     let offset = req['x-params']['x-offset:'] && result.length && getOffset(result);
 
     if (req.params.id) {
@@ -98,20 +96,20 @@ var doSelect = function (pool, conn, req, res) {
       });
     }
 
-    debug('index', 'parseObject done', result);
-
     if (!result) {
       return res.status(404).json();
     } else if (req.params.id || result.length) {
 
       if (req['x-params']['agg:']) {
-        debug('result after:', result);
 
         var cnt = result.length && result[0].cnt || result.cnt || 0;
+
         res.set('X-Aggregate-Count', cnt);
+
         return res.json({
           count: cnt
         });
+
       } else if (result.length) {
         res.set('X-Rows-Count', result.length);
         if (offset) {
@@ -186,7 +184,7 @@ export function post(req, res, next) {
               debug('affected:', affected);
               let parsed = parseDbData(config, affected[0]);
               responseArray.push(parsed);
-              debug('parsed:', parsed);
+              // debug('parsed:', parsed);
             }
           }
 
