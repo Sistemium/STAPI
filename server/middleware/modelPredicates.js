@@ -36,7 +36,7 @@ export default function () {
           let predRes;
 
           if (typeof pred === 'function') {
-            predRes = pred(req);
+            predRes = pred(req, collection);
             if (predRes) {
               arr.push(predicateObj(collection,pred,predRes));
             }
@@ -49,7 +49,7 @@ export default function () {
             if (pred.method && !req.method.match(pred.method)) {
               return;
             }
-            predRes = pred.fn(req);
+            predRes = pred.fn(req, collection);
             if (predRes) {
               arr.push(predicateObj(collection,pred,predRes));
             }
