@@ -38,14 +38,14 @@ export default function (config, body, predicates, poolConfig, joins) {
     let refAliases = [];
 
     debug('concatQuery:fields', fields);
-    _.each(fields, (v, k) => {
-      if (v && v.refConfig) {
+    _.each(fields, (field, fieldKey) => {
+      if (field && field.refConfig) {
 
         let refPredicates = _.filter(predicates, (p) => {
-          return p.collection === k;
+          return p.collection === fieldKey;
         });
 
-        result.params.push(v.body);
+        result.params.push(field.body);
 
         refPredicates = _.map(refPredicates, (rp) => {
           if (rp.params) {
@@ -56,18 +56,18 @@ export default function (config, body, predicates, poolConfig, joins) {
 
         refPredicates = refPredicates.join(' AND ');
         result.query += `(
-          SELECT id FROM ${v.refConfig.tableName} as [${k}] 
+          SELECT id FROM ${field.refConfig.tableName} as [${fieldKey}] 
           WHERE xid = ? ${refPredicates && ` AND ${refPredicates}`}
-        ) AS [${k}],`;
+        ) AS [${fieldKey}],`;
 
-        if (!v.optional || v.body) {
-          refAliases.push(`${queryAlias}.` + k);
+        if (!field.optional || field.body) {
+          refAliases.push(`${queryAlias}.` + fieldKey);
         }
 
       }
       else {
-        result.query += `? AS [${k}],`;
-        result.params.push(v);
+        result.query += `? AS [${fieldKey}],`;
+        result.params.push(field);
       }
     });
 
