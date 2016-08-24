@@ -30,15 +30,21 @@ export default function (config, body, predicates, poolConfig, joins) {
   });
 
   function concatQuery(fields, config) {
+
     let queryAlias = config.alias === 'm' ? 'n' : 'm';
+    let refAliases = [];
+    var immutables = [];
+
     result.query =
       `MERGE INTO ${config.tableName} AS [${config.alias}] USING WITH AUTO NAME (
              SELECT `;
 
-    let refAliases = [];
 
     debug('concatQuery:fields', fields);
+
+
     _.each(fields, (field, fieldKey) => {
+
       if (field && field.refConfig) {
 
         let refPredicates = _.filter(predicates, (p) => {
@@ -61,18 +67,30 @@ export default function (config, body, predicates, poolConfig, joins) {
         ) AS [${fieldKey}],`;
 
         if (!field.optional || field.body) {
-          refAliases.push(`${queryAlias}.` + fieldKey);
+          refAliases.push(`${queryAlias}.${fieldKey}`);
+        }
+
+      } else {
+
+        result.query += `? AS [${fieldKey}],`;
+        result.params.push(field);
+
+        if (_.get(config.fields[fieldKey],'immutable')) {
+          immutables.push(`${queryAlias}.${fieldKey} = ${config.alias}.${fieldKey}`);
         }
 
       }
-      else {
-        result.query += `? AS [${fieldKey}],`;
-        result.params.push(field);
-      }
+
     });
 
     result.query = result.query.slice(0, -1);
+
     var refAliasesString = refAliases.join(' IS NOT NULL AND ');
+    var immutablesString = immutables.join(' AND ');
+
+    if (immutablesString) {
+      immutablesString = `WHEN MATCHED AND not (${immutablesString}) THEN RAISERROR 70002`;
+    }
 
     debug('tPredicates', predicates);
 
@@ -94,6 +112,7 @@ export default function (config, body, predicates, poolConfig, joins) {
             WHEN NOT MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN INSERT
             ${refAliasesString && `WHEN NOT MATCHED THEN RAISERROR 70001`}
             ${tPredicates && `WHEN MATCHED AND NOT (${tPredicates}) THEN RAISERROR 70002`}
+            ${immutablesString} 
             WHEN MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN UPDATE
             ${refAliasesString && `WHEN MATCHED THEN RAISERROR 70001`}
     `;
