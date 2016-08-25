@@ -48,7 +48,7 @@ export default function (config, body, predicates, poolConfig, joins) {
       if (field && field.refConfig) {
 
         let refPredicates = _.filter(predicates, (p) => {
-          return p.collection === fieldKey;
+          return !p.sameCollection && p.collection === fieldKey;
         });
 
         result.params.push(field.body);
@@ -92,19 +92,21 @@ export default function (config, body, predicates, poolConfig, joins) {
       immutablesString = `WHEN MATCHED AND not (${immutablesString}) THEN RAISERROR 70002`;
     }
 
-    debug('tPredicates', predicates);
+    // debug('all predicates', predicates);
 
     let tPredicates = _.filter(predicates, (p) => {
       return p.collection === config.alias || typeof p === 'string';
     });
 
-    debug('tPredicates', tPredicates);
+    debug('applied predicates', tPredicates);
+
     tPredicates = _.map(tPredicates, (tp) => {
       if (tp.params) {
         Array.prototype.push.apply(result.params,tp.params);
       }
       return tp.field ? `[${config.alias}].[${tp.field}] ${tp.sql}` : `${tp.sql || (tp)}`;
     });
+
     tPredicates = tPredicates.join(' AND ');
 
     result.query +=
