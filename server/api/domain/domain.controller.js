@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import async from 'async';
 import {select, insert, deleteQ, parseDbData} from '../../components/orm/orm';
-import {doSelect, errorHandle, locationUrl} from './domainControllerHelper';
+import {doSelect, errorHandler, locationUrl} from './domainControllerHelper';
 import pools from '../../components/pool';
 
 const debug = require('debug')('stapi:domain:controller');
