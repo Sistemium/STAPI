@@ -10,14 +10,16 @@ const debug = require('debug')('stapi:domain:controller');
 export function index(req, res, next) {
   let pool = pools(req.pool);
 
-  pool.customAcquire(req.headers.authorization).then(function (conn) {
+  pool.customAcquire(req.headers.authorization).then(conn => {
+
     req.on('close', function () {
       console.error('Client:', conn.number, 'request closed unexpectedly');
       conn.rejectExec();
     });
 
     doSelect(pool, conn, req, res);
-  }, function (err) {
+
+  }, err => {
     console.error('index:customAcquire', err);
     res.status(500) && next(new Error(err.text));
   });
@@ -40,7 +42,7 @@ export function post(req, res, next) {
     let rowsAffected = 0;
     let responseArray = [];
 
-    var execReqBody = (item, done) => {
+    function execReqBody (item, done) {
       try {
         let query = insert(res.locals.config, item, res.locals.predicates, pool.config, res.locals.joins);
 
@@ -68,7 +70,7 @@ export function post(req, res, next) {
       } catch (err) {
         return done(err);
       }
-    };
+    }
 
     req.on('close', function () {
       console.error('Client:', conn.number, 'request closed unexpectedly');
@@ -128,7 +130,9 @@ export function del(req, res, next) {
   pool.customAcquire(req.headers.authorization).then((conn) => {
 
     let config = res.locals.config;
+
     try {
+
       let params = {
         config: config,
         params: req['x-params'],
@@ -136,8 +140,10 @@ export function del(req, res, next) {
         selectFields: ['id'],
         noPaging: true
       };
+
       let selectQueryObj = select(params);
       debug(selectQueryObj);
+
       let query = deleteQ(config, selectQueryObj);
       debug('del.q', 'query:', query);
 
