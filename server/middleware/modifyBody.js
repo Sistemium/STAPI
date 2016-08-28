@@ -1,7 +1,7 @@
 'use strict';
 import _ from 'lodash';
 var debug = require('debug')('stapi:modifyBody');
-var uuid = require ('node-uuid');
+var uuid = require('node-uuid');
 
 /**
  * Middleware converts object to array, adds queryString params to each array element
@@ -24,26 +24,26 @@ export default function () {
         req.wasOneObject = true;
       }
 
-      applyParams(req['x-params'],req.body);
+      applyParams(req['x-params'], req.body);
 
       if (req.wasOneObject && !req.body[0].id) {
         req.body[0].id = (req.createMode = uuid.v4());
       }
 
       if (config) {
-        req.body = applyConverters (config,req);
+        req.body = applyConverters(config, req);
       }
 
     }
 
-    debug ('body:',req.body);
+    debug('body:', req.body);
     next();
 
   };
 
 }
 
-var applyConverters = (config,req) => {
+function applyConverters(config, req) {
 
   return _.map(req.body, item => {
 
@@ -58,7 +58,7 @@ var applyConverters = (config,req) => {
         }
 
         if (field.converter) {
-          fields [key] = field.converter (val, req, item);
+          fields [key] = field.converter(val, req, item);
         } else {
           fields [key] = val === 0 ? 0 : (val || null);
         }
@@ -66,7 +66,7 @@ var applyConverters = (config,req) => {
 
     } else {
 
-      _.each (config.fields, (field, key) => {
+      _.each(config.fields, (field, key) => {
 
         if (!field || field.readonly) {
           return;
@@ -75,14 +75,14 @@ var applyConverters = (config,req) => {
         let val = item [key];
 
         if (field.converter) {
-          fields [key] = field.converter (val, req, item);
+          fields [key] = field.converter(val, req, item);
         } else {
           fields [key] = val === 0 ? 0 : (val || null);
         }
       });
 
     }
-    
+
     if (_.isFunction(config.converter)) {
       config.converter(fields, req);
     }
@@ -92,9 +92,9 @@ var applyConverters = (config,req) => {
 
   });
 
-};
+}
 
-var applyParams = (params,bodyArray) => {
+function applyParams(params, bodyArray) {
 
   let queryString = _.transform(params, (result, value, key) => {
     if (value && !key.match(/:$/)) {
@@ -104,10 +104,10 @@ var applyParams = (params,bodyArray) => {
 
   if (queryString) {
     _.each(bodyArray, item => {
-      _.each(queryString, (val,key) => {
+      _.each(queryString, (val, key) => {
         item [key] = val;
       });
     });
   }
 
-};
+}
