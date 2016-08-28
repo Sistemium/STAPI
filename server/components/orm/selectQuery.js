@@ -263,7 +263,7 @@ export default function (parameters) {
             predicateStr += `${alias}.[${field.field}] = ? AND `;
           }
           if (field.converter) {
-            params[key] = field.converter(params[key]);
+            params[key] = field.converter(params[key], req);
           }
           result.params.push(params[key]);
           withPredicate = true;
