@@ -12,6 +12,7 @@ export default function (parameters) {
   var tableAs = parameters.tableAs;
   var offset = params['x-offset:'];
   var joins = _.cloneDeep (parameters.joins) || config.joins;
+  var req = params.req;
 
   function parseOrderByParams(params) {
 

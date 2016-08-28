@@ -78,7 +78,8 @@ function doSelect (pool, conn, req, res) {
       config: config,
       params: req['x-params'],
       predicates: res.locals.predicates,
-      joins: res.locals.joins
+      joins: res.locals.joins,
+      req: req
     };
     query = select(params);
   } catch (err) {
