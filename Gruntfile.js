@@ -372,23 +372,23 @@ module.exports = function (grunt) {
     copy: {
       dist: {
         files: [{
-          expand: true,
-          dot: true,
-          cwd: '<%= yeoman.client %>',
-          dest: '<%= yeoman.dist %>/<%= yeoman.client %>',
-          src: [
-            '*.{ico,png,txt}',
-            '.htaccess',
-            'assets/images/{,*/}*.{webp}',
-            'assets/fonts/**/*',
-            'index.html'
-          ]
-        }, {
-          expand: true,
-          cwd: '.tmp/images',
-          dest: '<%= yeoman.dist %>/<%= yeoman.client %>/assets/images',
-          src: ['generated/*']
-        }, {
+        //   expand: true,
+        //   dot: true,
+        //   cwd: '<%= yeoman.client %>',
+        //   dest: '<%= yeoman.dist %>/<%= yeoman.client %>',
+        //   src: [
+        //     '*.{ico,png,txt}',
+        //     '.htaccess',
+        //     'assets/images/{,*/}*.{webp}',
+        //     'assets/fonts/**/*',
+        //     'index.html'
+        //   ]
+        // }, {
+        //   expand: true,
+        //   cwd: '.tmp/images',
+        //   dest: '<%= yeoman.dist %>/<%= yeoman.client %>/assets/images',
+        //   src: ['generated/*']
+        // }, {
           expand: true,
           dest: '<%= yeoman.dist %>',
           src: [
@@ -826,22 +826,22 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
-    'concurrent:pre',
-    'concurrent:dist',
-    'injector',
-    'wiredep:client',
-    'useminPrepare',
-    'postcss',
-    'ngtemplates',
-    'concat',
-    'ngAnnotate',
+    // 'concurrent:pre',
+    // 'concurrent:dist',
+    // 'injector',
+    // 'wiredep:client',
+    // 'useminPrepare',
+    // 'postcss',
+    // 'ngtemplates',
+    // 'concat',
+    // 'ngAnnotate',
     'copy:dist',
     'babel:server',
-    'cdnify',
-    'cssmin',
-    'uglify',
-    'filerev',
-    'usemin'
+    // 'cdnify',
+    // 'cssmin',
+    // 'uglify',
+    // 'filerev',
+    // 'usemin'
   ]);
 
   grunt.registerTask('default', [
