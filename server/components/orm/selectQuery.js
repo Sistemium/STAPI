@@ -249,25 +249,38 @@ export default function (parameters) {
       let fields = cnfg.fields;
 
       _.each(fields, (field, key) => {
-        if (params && !_.isUndefined(params[key])) {
+
+        let value = params[key];
+
+        if (params && !_.isUndefined(value)) {
+
           if (field.ref && params['agg:']) {
-            predicateStr += `[${field.alias}].xid = ? AND `;
+            predicateStr += `[${field.alias}].xid`;
           } else if (field.ref) {
             // FIXME won't work sometimes without proper alias
-            predicateStr += `[${key}] = ? AND `;
+            predicateStr += `[${key}]`;
           } else if (field.expr && params['agg:']) {
-            predicateStr += `${field.expr} = ? AND `;
+            predicateStr += `${field.expr}`;
           } else if (field.expr) {
-            predicateStr += `${field.field} = ? AND `
+            predicateStr += `${field.field}`
           } else {
-            predicateStr += `${alias}.[${field.field}] = ? AND `;
+            predicateStr += `${alias}.[${field.field}]`;
           }
-          if (field.converter) {
-            params[key] = field.converter(params[key], req);
+
+          if (value === '') {
+            predicateStr += ' is null AND ';
+          } else {
+            predicateStr += ' = ? AND ';
+            if (field.converter) {
+              value = field.converter(value, req);
+            }
+            result.params.push(value);
           }
-          result.params.push(params[key]);
+
           withPredicate = true;
+
         }
+
       });
 
       predicates = _.filter(predicates, (p) => {
