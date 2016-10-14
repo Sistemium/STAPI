@@ -433,18 +433,18 @@ module.exports = function (grunt) {
     // Run some tasks in parallel to speed up the build process
     concurrent: {
       pre: [
-        'injector:sass',
-        'ngconstant'
+        // 'injector:sass',
+        // 'ngconstant'
       ],
       server: [
-        'newer:babel:client',
-        'jade',
-        'sass',
+        // 'newer:babel:client',
+        // 'jade',
+        // 'sass',
       ],
       test: [
-        'newer:babel:client',
-        'jade',
-        'sass',
+        // 'newer:babel:client',
+        // 'jade',
+        // 'sass',
       ],
       debug: {
         tasks: [
@@ -458,7 +458,7 @@ module.exports = function (grunt) {
       dist: [
         'newer:babel:client',
         'jade',
-        'sass',
+        // 'sass',
         'imagemin'
       ]
     },
@@ -718,9 +718,9 @@ module.exports = function (grunt) {
       'env:all',
       'concurrent:pre',
       'concurrent:server',
-      'injector',
-      'wiredep:client',
-      'postcss',
+    //   'injector',
+    //   'wiredep:client',
+    //   'postcss',
       'express:dev',
       'wait',
       'watch'
