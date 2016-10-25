@@ -54,7 +54,7 @@ export default function () {
               arr.push(predicateObj(collection,pred,predRes));
             }
           } else {
-            next('Incorrect config, predicate must be array of functions or strings...');
+            next('Incorrect config, predicate must function or string or object with fn function.');
           }
 
           if (predRes === false) {
