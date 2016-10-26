@@ -1,19 +1,22 @@
 'use strict';
 
 import poolManager from 'components/pool/poolManager';
-var async = require('async');
+import async from 'async';
 
-export default function () {
-  return function (req, res, next) {
+export default function (key) {
+
+  key = key || 'middleware';
+
+  return (req, res, next) => {
+
     let pool = poolManager.getPoolByName(req.pool);
 
     if (!pool) {
       return res.status(404).end();
     }
 
-    async.eachSeries(pool.config.middleware,(mw,done) => {
-      mw (req, res, done);
-    }, next);
+    async.eachSeries(pool.config[key], (mw, done) => mw(req, res, done), next);
 
   }
+
 }
