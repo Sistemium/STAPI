@@ -13,7 +13,7 @@ export default function (app) {
   // Insert routes below
   app.use('/api/sts', require('./api/sts'));
   app.use('/api/admin/map', require('./api/admin'));
-  app.use('/api/:pool', extractPool(), auth(), require('./api/domain'));
+  app.use('/api/:pool', extractPool(), auth('middleware'), require('./api/domain'));
 
   // All undefined asset or api routes should return a 404
   app.route('/:url(auth|components|app|bower_components|assets)/*')
