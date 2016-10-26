@@ -9,10 +9,10 @@ import modifyBody from '../../middleware/modifyBody';
 import validateModel from '../../middleware/validateModel';
 import modelPredicates from '../../middleware/modelPredicates';
 import modelConfig from '../../middleware/modelConfig';
-
+import auth from '../../middleware/auth';
 
 var router = express.Router();
-var mw = [extractFromUrl(), headersToParams(), validateParams(), modelConfig('join'), modelPredicates()];
+var mw = [extractFromUrl(), auth('auth'), headersToParams(), validateParams(), modelConfig('join'), modelPredicates()];
 var bm = [modifyBody(), validateModel(), controller.post];
 
 router
