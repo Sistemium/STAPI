@@ -50,13 +50,13 @@ export default function (request, response, done) {
 
         let accountName = _.get(request.auth, 'account.name');
         let requestLogData = {
-          resource: `${request.pool}/${request.params.collection}`,
+          resource: `${request.pool}/${_.get(request, 'params.collection')}`,
           params: request.params,
           method: request.method,
           requestBody: request.body,
           responseBody: response.body,
           status: response.statusCode,
-          authorization: request.authorization || request.headers.authorization,
+          authorization: request.authorization || _.get(request, 'headers.authorization'),
           instanceName: config.instanceName,
           query: request.query,
           accountName: accountName
