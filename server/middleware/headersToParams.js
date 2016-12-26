@@ -7,7 +7,7 @@ export default function () {
 
     debug ('params', req.params);
 
-    let supportedHeaders = /x-page-size|x-start-page|x-order-by/i;
+    let supportedHeaders = /x-page-size|x-start-page|x-order-by|x-offset/i;
 
     function headersToParams(headers) {
 
