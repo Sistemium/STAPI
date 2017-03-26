@@ -5,7 +5,6 @@
 'use strict';
 
 import errors from './components/errors';
-import path from 'path';
 import auth from './middleware/auth';
 import extractPool from './middleware/extractPool';
 
@@ -21,6 +20,6 @@ export default function (app) {
 
   app.route('/*')
     .get((req, res) => {
-      res.send(404);
+      res.sendStatus(404);
     });
 }
