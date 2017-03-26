@@ -26,12 +26,16 @@ function parseObject(config, obj, req) {
     } else {
       let val = (parsed [key] = obj [key]);
       if (field.parser) {
-        if (!(val == null || val == undefined)) {
+        if (!(val === null || val === undefined)) {
           parsed [key] = parseScalar(field, val, req);
         }
       }
     }
   });
+
+  if (obj['count()']) {
+    parsed['count()'] = obj['count()'];
+  }
 
   return parsed;
 

@@ -14,6 +14,9 @@ export default function (parameters) {
   let offset = params['x-offset:'];
   let joins = _.cloneDeep (parameters.joins) || config.joins;
   let req = params.req;
+  let orderBy;
+
+  let groupBy = params['groupBy:'];
 
   function parseOrderByParams(params) {
 
@@ -107,6 +110,10 @@ export default function (parameters) {
     let refTableNames = new Map();
     let fields = cnfg.fields;
 
+    if (params['x-order-by:']) {
+      orderBy = parseOrderByParams(params['x-order-by:'], alias);
+    }
+
     function selectField(prop, key) {
       if (prop.ref || prop.fields) {
 
@@ -160,8 +167,31 @@ export default function (parameters) {
 
     if (params['agg:']) {
       result.query = 'SELECT COUNT (*) as cnt';
-    } else if (noPaging){
-      result.query = 'SELECT ' + result.query.slice(0, -2);
+    } else if (groupBy) {
+
+      let groupByList = [];
+
+      let selectGrouped = _.filter(_.map(groupBy.split(','), field => {
+
+        let fieldConfig = config.fields[_.trim(field)];
+
+        if (!fieldConfig || fieldConfig.expr) return;
+
+        groupByList.push(`[${field}]`);
+
+        let source = fieldConfig.ref ? `[${fieldConfig.alias}].xid as ` : `${alias}.`;
+
+        return `${source}[${field}]`;
+
+      }));
+
+      groupBy = groupByList.join(', ');
+      orderBy = groupBy;
+
+      result.query = `SELECT ${selectGrouped.join(', ')}, count(*) as [count()] `;
+
+    } else if (noPaging) {
+      result.query = 'SELECT ' + slice(0, -2);
     } else {
       result.query = 'SELECT TOP ? START AT ? ' + result.query.slice(0, -2);
       result.params.push(pageSize, startPage);
@@ -357,13 +387,14 @@ export default function (parameters) {
 
     makePredicate();
 
-    if (cnfg.groupBy) {
-      result.query += ` GROUP BY ${cnfg.groupBy} `
+    groupBy = groupBy || cnfg.groupBy;
+
+    if (groupBy) {
+      result.query += ` GROUP BY ${groupBy} `
     }
 
     if (!params['agg:']) {
-      if (params['x-order-by:']) {
-        let orderBy = parseOrderByParams(params['x-order-by:'], alias);
+      if (orderBy) {
         result.query += ` ORDER BY ${orderBy}`;
       } else {
         //default order by
