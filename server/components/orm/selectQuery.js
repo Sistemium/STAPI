@@ -291,6 +291,7 @@ export default function (parameters) {
           if (field.ref && params['agg:']) {
             predicateStr += `[${field.alias}].xid`;
           } else if (field.ref) {
+
             // FIXME won't work sometimes without proper alias
 
             if (groupBy) {
@@ -326,26 +327,33 @@ export default function (parameters) {
       predicates = _.filter(predicates, (p) => {
         return p.collection === alias || typeof p === 'string';
       });
+
       if (predicates && predicates.length) {
+
         withPredicate = true;
+
         _.each(predicates, (pred) => {
+
           if (pred.field && pred.collection === alias) {
+
             let predField = fields[pred.field];
             // TODO support pred.dbField
             let predAlias = (predField && predField.field === pred.field) ? '' : (alias + '.');
             predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
-          }
-          // or maybe better check for field in modelPredicates
-          else if (!pred.field && pred.collection === alias) {
+
+          } else if (!pred.field && pred.collection === alias) {
+            // or maybe better check for field in modelPredicates
             predicateStr += `${pred.sql} AND `;
-          }
-          else {
+          } else {
             predicateStr += `(${pred}) AND `;
           }
+
           if (_.isArray(pred.params)) {
             Array.prototype.push.apply(result.params, pred.params);
           }
+
         });
+
       }
 
       let q = params['q:'];
