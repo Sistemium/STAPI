@@ -292,7 +292,13 @@ export default function (parameters) {
             predicateStr += `[${field.alias}].xid`;
           } else if (field.ref) {
             // FIXME won't work sometimes without proper alias
-            predicateStr += `[${key}]`;
+
+            if (groupBy) {
+              predicateStr += `${field.alias}.xid`;
+            } else {
+              predicateStr += `[${key}]`;
+            }
+
           } else if (field.expr && params['agg:']) {
             predicateStr += `${field.expr}`;
           } else if (field.expr) {
