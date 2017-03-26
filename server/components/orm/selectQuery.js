@@ -1,18 +1,18 @@
 'use strict';
 
-const _ = require('lodash');
+import _ from 'lodash';
 const debug = require('debug')('stapi:orm:selectQuery');
 
 export default function (parameters) {
 
   let config = parameters.config;
-  let params = _.cloneDeep (parameters.params);
-  let predicates = _.cloneDeep (parameters.predicates);
-  let selectFields = _.cloneDeep (parameters.selectFields);
+  let params = _.cloneDeep(parameters.params);
+  let predicates = _.cloneDeep(parameters.predicates);
+  let selectFields = _.cloneDeep(parameters.selectFields);
   let noPaging = !!parameters.noPaging;
   let tableAs = parameters.tableAs;
   let offset = params['x-offset:'];
-  let joins = _.cloneDeep (parameters.joins) || config.joins;
+  let joins = _.cloneDeep(parameters.joins) || config.joins;
   let req = params.req;
   let orderBy;
 
@@ -36,7 +36,7 @@ export default function (parameters) {
 
       if (colPrefixMatch) {
         colPrefix = colPrefixMatch[1];
-        let refField = _.find(config.fields,{alias: colPrefix});
+        let refField = _.find(config.fields, {alias: colPrefix});
         if (refField && !refField.fields) {
           colPrefix = `[${colPrefix}].`;
           colName = colPrefixMatch[2];
@@ -195,7 +195,6 @@ export default function (parameters) {
     } else {
       result.query = 'SELECT TOP ? START AT ? ' + result.query.slice(0, -2);
       result.params.push(pageSize, startPage);
-
     }
 
     if (tableName) {
@@ -225,7 +224,7 @@ export default function (parameters) {
         joins = [joins];
       }
 
-      _.each (joins, function (join){
+      _.each(joins, function (join) {
 
         if (join.collection !== alias) {
           return;
@@ -240,7 +239,7 @@ export default function (parameters) {
         result.query += ` ${join.sql} `;
 
         if (join.params) {
-          Array.prototype.push.apply(result.params,join.params);
+          Array.prototype.push.apply(result.params, join.params);
         }
 
       });
@@ -266,7 +265,7 @@ export default function (parameters) {
         _.each(predicatesForJoin, (p) => {
           result.query += `AND (${p.field ? `${ref[1].alias}.${p.field} ` : ''}${p.sql}) `;
           if (_.isArray(p.params)) {
-            Array.prototype.push.apply(result.params,p.params);
+            Array.prototype.push.apply(result.params, p.params);
           }
         });
         //debug('predicatesForJoin', predicatesForJoin);
@@ -334,7 +333,7 @@ export default function (parameters) {
             predicateStr += `(${pred}) AND `;
           }
           if (_.isArray(pred.params)) {
-            Array.prototype.push.apply(result.params,pred.params);
+            Array.prototype.push.apply(result.params, pred.params);
           }
         });
       }
@@ -365,14 +364,14 @@ export default function (parameters) {
 
           let offsetSeconds = offsetTsMatch[1];
           let offsetMs = offsetTsMatch.length > 2 ? parseInt(offsetTsMatch[2]) : 0;
-          let offsetTs = `${offsetSeconds}.${_.padStart(offsetMs,3,'0')}`;
-          let offsetTs1 = `${offsetSeconds}.${_.padStart(offsetMs + 1,3,'0')}`;
+          let offsetTs = `${offsetSeconds}.${_.padStart(offsetMs, 3, '0')}`;
+          let offsetTs1 = `${offsetSeconds}.${_.padStart(offsetMs + 1, 3, '0')}`;
 
           withPredicate = true;
 
           predicateStr += `(${alias}.ts > ? AND (${alias}.ts >= ? or ${alias}.id > ?))`;
 
-          Array.prototype.push.apply(result.params,[offsetTs,offsetTs1,offsetId]);
+          Array.prototype.push.apply(result.params, [offsetTs, offsetTs1, offsetId]);
 
         } catch (e) {
           throw new Error('Wrong offset format: ' + offset);
@@ -400,7 +399,7 @@ export default function (parameters) {
         //default order by
         let tsField = cnfg.fields['ts'];
         if (tsField && tsField.field === 'ts') {
-          if (tsField.expr){
+          if (tsField.expr) {
             result.query += ` ORDER BY ts`;
           } else {
             result.query += ` ORDER BY ${alias}.${cnfg.fields['ts'].field}`;
