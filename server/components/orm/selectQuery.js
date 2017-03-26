@@ -175,11 +175,15 @@ export default function (parameters) {
 
         let fieldConfig = config.fields[_.trim(field)];
 
-        if (!fieldConfig || fieldConfig.expr) return;
+        if (!fieldConfig) return;
 
         groupByList.push(`[${field}]`);
 
         let source = fieldConfig.ref ? `[${fieldConfig.alias}].xid as ` : `${alias}.`;
+
+        if (fieldConfig.expr) {
+          source = `${fieldConfig.expr} as `;
+        }
 
         return `${source}[${field}]`;
 
@@ -191,7 +195,7 @@ export default function (parameters) {
       result.query = `SELECT ${selectGrouped.join(', ')}, count(*) as [count()] `;
 
     } else if (noPaging) {
-      result.query = 'SELECT ' + slice(0, -2);
+      result.query = 'SELECT ' + result.query.slice(0, -2);
     } else {
       result.query = 'SELECT TOP ? START AT ? ' + result.query.slice(0, -2);
       result.params.push(pageSize, startPage);
