@@ -4,15 +4,16 @@ const _ = require('lodash');
 const debug = require('debug')('stapi:orm:selectQuery');
 
 export default function (parameters) {
-  var config = parameters.config;
-  var params = _.cloneDeep (parameters.params);
-  var predicates = _.cloneDeep (parameters.predicates);
-  var selectFields = _.cloneDeep (parameters.selectFields);
-  var noPaging = !!parameters.noPaging;
-  var tableAs = parameters.tableAs;
-  var offset = params['x-offset:'];
-  var joins = _.cloneDeep (parameters.joins) || config.joins;
-  var req = params.req;
+
+  let config = parameters.config;
+  let params = _.cloneDeep (parameters.params);
+  let predicates = _.cloneDeep (parameters.predicates);
+  let selectFields = _.cloneDeep (parameters.selectFields);
+  let noPaging = !!parameters.noPaging;
+  let tableAs = parameters.tableAs;
+  let offset = params['x-offset:'];
+  let joins = _.cloneDeep (parameters.joins) || config.joins;
+  let req = params.req;
 
   function parseOrderByParams(params) {
 
@@ -315,8 +316,8 @@ export default function (parameters) {
         withPredicate = true;
 
         try {
-          var searchFields = q.searchFields;
-          var searchFor = q.searchFor;
+          let searchFields = q.searchFields;
+          let searchFor = q.searchFor;
           if (_.isString(searchFields)) {
             searchFields = searchFields.split(',');
           }
