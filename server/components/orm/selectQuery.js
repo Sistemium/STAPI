@@ -194,6 +194,16 @@ export default function (parameters) {
 
       result.query = `SELECT ${selectGrouped.join(', ')}, count(*) as [count()] `;
 
+      _.each(cnfg.fields, (field, name) => {
+
+        if (field.ref || name === 'author') return;
+
+        if (/^decimal|int|integer$/.test(field.type)) {
+          result.query += `, sum([${alias}].[${field.field}]) as [sum(${name})]`;
+        }
+
+      });
+
     } else if (noPaging) {
       result.query = 'SELECT ' + result.query.slice(0, -2);
     } else {
@@ -338,7 +348,7 @@ export default function (parameters) {
 
             let predField = fields[pred.field];
             // TODO support pred.dbField
-            let predAlias = (predField && predField.field === pred.field) ? '' : (alias + '.');
+            let predAlias = (predField && predField.field === pred.field && !groupBy) ? '' : (alias + '.');
             predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
 
           } else if (!pred.field && pred.collection === alias) {

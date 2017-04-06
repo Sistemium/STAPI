@@ -24,13 +24,24 @@ function parseObject(config, obj, req) {
         parsed [key] [prop] = parseScalar(f, obj [key + '.' + prop]);
       });
     } else {
-      let val = (parsed [key] = obj [key]);
+
+      let sumKey = `sum(${key})`;
+      let val = obj[sumKey];
+
+      if (val) {
+        key = sumKey;
+      } else {
+        val = (parsed [key] = obj [key]);
+      }
+
       if (field.parser) {
         if (!(val === null || val === undefined)) {
           parsed [key] = parseScalar(field, val, req);
         }
       }
+
     }
+
   });
 
   if (obj['count()']) {
