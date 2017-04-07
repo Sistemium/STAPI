@@ -16,7 +16,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     let cnfProp = config.fields [k];
 
-    if (cnfProp.ref && !(cnfProp.insertRaw || cnfProp.converter)) {
+    if (cnfProp.ref && !cnfProp.insertRaw) {
       let field = _.pick(cnfProp, ['refConfig', 'optional']);
       field.body = val;
       fields[cnfProp.field] = field;
@@ -30,15 +30,12 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     let queryAlias = config.alias === 'm' ? 'n' : 'm';
     let refAliases = [];
-    let immutables = [];
+    let updateMatched = [];
 
     result.query =
       `MERGE INTO ${config.tableName} AS [${config.alias}] USING WITH AUTO NAME (
              SELECT `;
-
-
     debug('concatQuery:fields', fields);
-
 
     _.each(fields, (field, fieldKey) => {
 
@@ -72,24 +69,17 @@ export default function (config, body, predicates, poolConfig, joins) {
         result.query += `? AS [${fieldKey}],`;
         result.params.push(field);
 
-        if (_.get(config.fields[fieldKey],'immutable')) {
-          immutables.push(`${queryAlias}.${fieldKey} = ${config.alias}.${fieldKey}`);
-        }
+      }
 
+      if (_.get(config.fields[fieldKey],'immutable') !== true) {
+        updateMatched.push(`${config.alias}.[${fieldKey}] = ${queryAlias}.[${fieldKey}]`);
       }
 
     });
 
     result.query = result.query.slice(0, -1);
 
-    var refAliasesString = refAliases.join(' IS NOT NULL AND ');
-    var immutablesString = immutables.join(' AND ');
-
-    if (immutablesString) {
-      immutablesString = `WHEN MATCHED AND not (${immutablesString}) THEN RAISERROR 70002`;
-    }
-
-    // debug('all predicates', predicates);
+    let refAliasesString = refAliases.join(' IS NOT NULL AND ');
 
     let tPredicates = _.filter(predicates, (p) => {
       return p.collection === config.alias || typeof p === 'string';
@@ -111,8 +101,8 @@ export default function (config, body, predicates, poolConfig, joins) {
             WHEN NOT MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN INSERT
             ${refAliasesString && `WHEN NOT MATCHED THEN RAISERROR 70001`}
             ${tPredicates && `WHEN MATCHED AND NOT (${tPredicates}) THEN RAISERROR 70002`}
-            ${immutablesString} 
-            WHEN MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN UPDATE
+            WHEN MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN UPDATE SET 
+            ${updateMatched.join(', ')}
             ${refAliasesString && `WHEN MATCHED THEN RAISERROR 70001`}
     `;
 
