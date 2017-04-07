@@ -1,9 +1,8 @@
-var _ = require('lodash');
-const debug = require('debug')('stapi:orm:insertQuery');
+import _ from 'lodash';
 import selectQuery from './selectQuery';
+const debug = require('debug')('stapi:orm:insertQuery');
 
 export default function (config, body, predicates, poolConfig, joins) {
-  "use strict";
 
   let fields = {};
   let result = {
@@ -17,12 +16,10 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     let cnfProp = config.fields [k];
 
-    if (cnfProp.ref && !cnfProp.insertRaw) {
-      fields[cnfProp.field] = {
-        body: val,
-        refConfig: cnfProp.refConfig,
-        optional: cnfProp.optional
-      };
+    if (cnfProp.ref && !(cnfProp.insertRaw || cnfProp.converter)) {
+      let field = _.pick(cnfProp, ['refConfig', 'optional']);
+      field.body = val;
+      fields[cnfProp.field] = field;
     } else {
       fields[cnfProp.field] = val;
     }
@@ -33,7 +30,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     let queryAlias = config.alias === 'm' ? 'n' : 'm';
     let refAliases = [];
-    var immutables = [];
+    let immutables = [];
 
     result.query =
       `MERGE INTO ${config.tableName} AS [${config.alias}] USING WITH AUTO NAME (
