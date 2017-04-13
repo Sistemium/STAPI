@@ -198,6 +198,8 @@ export default function (parameters) {
 
         if (field.ref || name === 'author') return;
 
+        if (field.expr && !field.aggregable) return;
+
         if (/^decimal|int|integer$/.test(field.type)) {
           result.query += `, sum([${alias}].[${field.field}]) as [sum(${name})]`;
         }
