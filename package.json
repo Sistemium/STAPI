@@ -16,7 +16,7 @@
     "errorhandler": ">=1.4.2",
     "express": ">=4.13.3",
     "express-session": ">=1.11.3",
-    "generic-pool": ">=2.3.1",
+    "generic-pool": "~2.5.4",
     "jade": ">=1.11.0",
     "lodash": ">=3.10.1",
     "lru-cache": "^4.0.0",
