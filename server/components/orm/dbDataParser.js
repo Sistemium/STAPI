@@ -5,7 +5,7 @@ const debug = require('debug')('stapi:orm:dbDataParser');
 
 function parseScalar(field, val, req) {
   if (field.parser) {
-    if (!(val == null || val == undefined)) {
+    if (val !== null && val !== undefined || field.parseEmpty) {
       return field.parser(val, req);
     }
   }
@@ -21,7 +21,7 @@ function parseObject(config, obj, req) {
     if (field.fields) {
       parsed [key] = {};
       _.each(field.fields, function (f, prop) {
-        parsed [key] [prop] = parseScalar(f, obj [key + '.' + prop]);
+        parsed [key] [prop] = parseScalar(f, obj [key + '.' + prop], req, obj);
       });
     } else {
 
@@ -34,11 +34,7 @@ function parseObject(config, obj, req) {
         val = (parsed [key] = obj [key]);
       }
 
-      if (field.parser) {
-        if (!(val === null || val === undefined)) {
-          parsed [key] = parseScalar(field, val, req);
-        }
-      }
+      parsed [key] = parseScalar(field, val, req, obj);
 
     }
 
