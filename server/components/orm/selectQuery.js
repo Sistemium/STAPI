@@ -315,7 +315,7 @@ export default function (parameters) {
           } else if (field.expr && params['agg:']) {
             predicateStr += `${field.expr}`;
           } else if (field.expr) {
-            predicateStr += `${field.field}`
+            predicateStr += `[${field.field}]`
           } else {
             predicateStr += `${alias}.[${field.field}]`;
           }
