@@ -192,7 +192,9 @@ export default function (parameters) {
       groupBy = groupByList.join(', ');
       orderBy = groupBy;
 
-      result.query = `SELECT ${selectGrouped.join(', ')}, count(*) as [count()] `;
+      selectGrouped.push('count(*) as [count()]');
+
+      result.query = `SELECT ${selectGrouped.join(', ')}`;
 
       _.each(cnfg.fields, (field, name) => {
 
