@@ -18,6 +18,8 @@ export default function (parameters) {
 
   let groupBy = params['groupBy:'];
 
+  let onlyCountQuery = false;
+
   function parseOrderByParams(params) {
 
     let arr = params.split(',');
@@ -192,6 +194,7 @@ export default function (parameters) {
       groupBy = groupByList.join(', ');
       orderBy = groupBy;
 
+      if (selectGrouped.length === 0) onlyCountQuery = true;
       selectGrouped.push('count(*) as [count()]');
 
       result.query = `SELECT ${selectGrouped.join(', ')}`;
@@ -424,7 +427,7 @@ export default function (parameters) {
       result.query += ` GROUP BY ${groupBy} `
     }
 
-    if (!params['agg:']) {
+    if (!params['agg:'] && !onlyCountQuery) {
       if (orderBy) {
         result.query += ` ORDER BY ${orderBy}`;
       } else {
