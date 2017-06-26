@@ -19,9 +19,10 @@ export default function (config, body, predicates, poolConfig, joins) {
     if (cnfProp.ref && !cnfProp.insertRaw) {
       let field = _.pick(cnfProp, ['refConfig', 'optional']);
       field.body = val;
+      field.config = cnfProp;
       fields[cnfProp.field] = field;
     } else {
-      fields[cnfProp.field] = val;
+      fields[cnfProp.field] = {config: cnfProp, body: val};
     }
 
   });
@@ -67,12 +68,14 @@ export default function (config, body, predicates, poolConfig, joins) {
       } else {
 
         result.query += `? AS [${fieldKey}],`;
-        result.params.push(field);
+        result.params.push(field.body);
 
       }
 
-      if (_.get(config.fields[fieldKey],'immutable') !== true) {
+      if (field.config.immutable !== true) {
         updateMatched.push(`${config.alias}.[${fieldKey}] = ${queryAlias}.[${fieldKey}]`);
+      } else {
+        debug('immutable', fieldKey);
       }
 
     });
