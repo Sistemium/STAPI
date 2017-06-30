@@ -322,6 +322,9 @@ export default function (parameters) {
 
           if (value === '') {
             predicateStr += ' is null AND ';
+          } else if (_.isArray(value)) {
+            predicateStr += ` in (${_.map(value, () => '?').join()}) AND `;
+            Array.prototype.push.apply(result.params, value);
           } else {
             predicateStr += ' = ? AND ';
             if (field.converter) {
