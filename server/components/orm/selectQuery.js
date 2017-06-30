@@ -371,19 +371,18 @@ export default function (parameters) {
 
       }
 
-      let q = params['q:'];
-
-      if (q) {
-
-        withPredicate = true;
+      if (params['q:']) {
 
         try {
-          let searchFields = q.searchFields;
-          let searchFor = q.searchFor;
+
+          let {searchFields, searchFor} = params['q:'];
+
           if (_.isString(searchFields)) {
+            withPredicate = true;
             searchFields = searchFields.split(',');
+            predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg) + ')';
           }
-          predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg) + ')';
+
         } catch (err) {
           throw new Error(err);
         }
