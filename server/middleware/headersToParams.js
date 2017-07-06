@@ -53,6 +53,11 @@ export default function () {
           _.each(predicates, (value, operator) => {
 
             switch (operator) {
+              case '>=':
+              case '<=': {
+                xParams[field] = {value, operator};
+                break;
+              }
               case '==': {
                 xParams[field] = value;
                 break;

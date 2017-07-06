@@ -321,16 +321,28 @@ export default function (parameters) {
           }
 
           if (value === '') {
+
             predicateStr += ' is null AND ';
+
+          } else if (value.operator) {
+
+            predicateStr += ` ${value.operator} ? AND `;
+            result.params.push(value.value || null);
+
           } else if (_.isArray(value)) {
+
             predicateStr += ` in (${_.map(value, () => '?').join()}) AND `;
             Array.prototype.push.apply(result.params, value);
           } else {
+
             predicateStr += ' = ? AND ';
+
             if (field.converter) {
               value = field.converter(value, req);
             }
+
             result.params.push(value);
+
           }
 
           withPredicate = true;
