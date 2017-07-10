@@ -422,6 +422,12 @@ export default function (parameters) {
         }
       }
 
+      if (params.IDREF) {
+        withPredicate = true;
+        predicateStr += `${alias}.id = ? AND `;
+        result.params.push(params.IDREF);
+      }
+
       if (withPredicate) {
         predicateStr = predicateStr.replace(/ AND $/i, '');
         result.query += predicateStr;
