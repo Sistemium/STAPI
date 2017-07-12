@@ -27,7 +27,7 @@
   "disallowSpacesInsideArrayBrackets": true,
   "disallowSpacesInsideParentheses": true,
   "disallowTrailingComma": true,
-  "disallowTrailingWhitespace": true,
+  "disallowTrailingWhitespace": false,
   "requireCommaBeforeLineBreak": true,
   "requireLineFeedAtFileEnd": true,
   "requireSpaceAfterBinaryOperators": ["?", ":", "+", "-", "/", "*", "%", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "&&", "||"],
