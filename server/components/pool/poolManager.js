@@ -1,7 +1,9 @@
 'use strict';
-const Pool = require('./pool');
-const _ = require('lodash');
-var pools = {};
+
+import Pool from './pool';
+import _ from 'lodash';
+
+const pools = {};
 
 class PoolsManager {
 
@@ -15,8 +17,8 @@ class PoolsManager {
     return pools[name];
   }
 
-  getPoolsKeys () {
-    return Object.keys (pools);
+  getPoolsKeys() {
+    return Object.keys(pools);
   }
 
 }

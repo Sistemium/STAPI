@@ -586,6 +586,7 @@ module.exports = function (grunt) {
           src: [
             '**/*.{js,json}',
             '!config/local.env.js',
+            '!config/**/*.json',
             '!config/sqlanywhere/*'
           ],
           dest: '<%= yeoman.dist %>/<%= yeoman.server %>'

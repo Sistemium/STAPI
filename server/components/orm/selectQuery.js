@@ -320,19 +320,34 @@ export default function (parameters) {
           } else if (field.expr && params['agg:']) {
             predicateStr += `${field.expr}`;
           } else if (field.expr) {
-            predicateStr += `${field.field}`
+            predicateStr += `[${field.field}]`
           } else {
             predicateStr += `${alias}.[${field.field}]`;
           }
 
           if (value === '') {
+
             predicateStr += ' is null AND ';
+
+          } else if (value.operator) {
+
+            predicateStr += ` ${value.operator} ? AND `;
+            result.params.push(value.value || null);
+
+          } else if (_.isArray(value)) {
+
+            predicateStr += ` in (${_.map(value, () => '?').join()}) AND `;
+            Array.prototype.push.apply(result.params, value);
           } else {
+
             predicateStr += ' = ? AND ';
+
             if (field.converter) {
               value = field.converter(value, req);
             }
+
             result.params.push(value);
+
           }
 
           withPredicate = true;
@@ -373,19 +388,18 @@ export default function (parameters) {
 
       }
 
-      let q = params['q:'];
-
-      if (q) {
-
-        withPredicate = true;
+      if (params['q:']) {
 
         try {
-          let searchFields = q.searchFields;
-          let searchFor = q.searchFor;
+
+          let {searchFields, searchFor} = params['q:'];
+
           if (_.isString(searchFields)) {
+            withPredicate = true;
             searchFields = searchFields.split(',');
+            predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg) + ')';
           }
-          predicateStr += '(' + concatSearchStr(searchFields, searchFor, result.params, cnfg) + ')';
+
         } catch (err) {
           throw new Error(err);
         }
@@ -411,6 +425,12 @@ export default function (parameters) {
         } catch (e) {
           throw new Error('Wrong offset format: ' + offset);
         }
+      }
+
+      if (params.IDREF) {
+        withPredicate = true;
+        predicateStr += `${alias}.id = ? AND `;
+        result.params.push(params.IDREF);
       }
 
       if (withPredicate) {

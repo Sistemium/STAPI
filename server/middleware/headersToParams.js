@@ -5,7 +5,7 @@ const debug = require('debug')('stapi:headersToParams');
 export default function () {
   return function (req, res, next) {
 
-    debug ('params', req.params);
+    debug('params', req.params);
 
     let supportedHeaders = /x-page-size|x-start-page|x-order-by|x-offset/i;
 
@@ -43,9 +43,44 @@ export default function () {
       }
     }
 
-    debug ('x-params',xParams);
+    if (_.isString(xParams['where:'])) {
+      try {
 
-    req ['x-params'] = xParams;
+        let where = xParams['where:'] = JSON.parse(xParams['where:']);
+
+        _.each(where, (predicates, field) => {
+
+          _.each(predicates, (value, operator) => {
+
+            switch (operator) {
+              case '>=':
+              case '<=': {
+                xParams[field] = {value, operator};
+                break;
+              }
+              case '==': {
+                xParams[field] = value;
+                break;
+              }
+              case 'in': {
+                xParams[field] = _.isArray(value) ? value : [value || null];
+                break;
+              }
+            }
+
+          });
+
+        });
+
+      } catch (e) {
+        // console.error(e);
+        return res.status(400).end('Invalid JSON in where:');
+      }
+    }
+
+    debug('x-params', xParams);
+
+    req['x-params'] = xParams;
 
     next();
   }
