@@ -50,12 +50,22 @@ export default function () {
 
         _.each(where, (predicates, field) => {
 
+
           _.each(predicates, (value, operator) => {
+
+            let fieldParam = xParams[field];
 
             switch (operator) {
               case '>=':
+                if (_.get(fieldParam, 'operator') === '<=') {
+                  xParams[field] = {value: [value, fieldParam.value], operator: 'between'};
+                }
               case '<=': {
-                xParams[field] = {value, operator};
+                if (_.get(fieldParam, 'operator') === '>=') {
+                  xParams[field] = {value: [fieldParam.value, value], operator: 'between'};
+                } else {
+                  xParams[field] = {value, operator};
+                }
                 break;
               }
               case '==': {

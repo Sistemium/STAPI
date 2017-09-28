@@ -324,6 +324,11 @@ export default function (parameters) {
 
             predicateStr += ' is null AND ';
 
+          } else if (value.operator === 'between') {
+
+            predicateStr += ` BETWEEN ? AND ? AND `;
+            result.params.push(...(value.value || [null, null]));
+
           } else if (value.operator) {
 
             predicateStr += ` ${value.operator} ? AND `;
