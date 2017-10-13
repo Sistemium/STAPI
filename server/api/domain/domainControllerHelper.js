@@ -100,7 +100,7 @@ function doSelect (pool, conn, req, res) {
     conn.busy = false;
     pool.release(conn);
 
-    let offset = req['x-params']['x-offset:'] && result.length && getOffset(result);
+    let offset = req['x-params']['x-offset:'] && result.length && getOffset(result) || req['x-params']['x-offset:'];
 
     if (req.params.id) {
       result = result.length ? parseDbData(config, result[0], req) : undefined;
@@ -111,8 +111,16 @@ function doSelect (pool, conn, req, res) {
     }
 
     if (!result) {
+
       return res.status(404).json();
-    } else if (req.params.id || result.length) {
+
+    }
+
+    if (offset) {
+      res.set('X-Offset', offset);
+    }
+
+    if (req.params.id || result.length) {
 
       if (req['x-params']['agg:']) {
 
@@ -125,15 +133,16 @@ function doSelect (pool, conn, req, res) {
         });
 
       } else if (result.length) {
+
         res.set('X-Rows-Count', result.length);
-        if (offset) {
-          res.set('X-Offset', offset);
-        }
+
       }
 
       return res.status(200).json(result);
     } else {
+
       return res.status(204).json();
+
     }
 
   });
