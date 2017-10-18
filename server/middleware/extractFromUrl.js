@@ -13,7 +13,7 @@ export default function () {
 
       let keyInMap = `${req.pool}/${collection}`;
       let appLocals = req.app.locals;
-      let domainConfig = appLocals.domainConfig.get(keyInMap);
+      let domainConfig = appLocals && appLocals.domainConfig && appLocals.domainConfig.get(keyInMap);
 
       if (!appLocals) {
         return res.status(404).end('no appLocals');
