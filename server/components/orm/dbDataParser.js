@@ -14,6 +14,10 @@ function parseScalar(field, val, req) {
 
 function parseObject(config, obj, req) {
 
+  if (!obj) {
+    return null;
+  }
+
   let parsed = {};
 
   _.each(config.fields, (field, key) => {
