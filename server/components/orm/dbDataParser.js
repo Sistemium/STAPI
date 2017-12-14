@@ -30,12 +30,26 @@ function parseObject(config, obj, req) {
     } else {
 
       let sumKey = `sum(${key})`;
+
       let val = obj[sumKey];
 
       if (val) {
         key = sumKey;
       } else {
-        val = (parsed [key] = obj [key]);
+
+        let minKey = `min(${key})`;
+        let maxKey = `max(${key})`;
+
+        val = obj[minKey];
+
+        if (val) {
+          parsed [minKey] = parseScalar(field, val, req, obj);
+          parsed [maxKey] = parseScalar(field, obj[maxKey], req, obj);
+          return;
+        } else {
+          val = (parsed [key] = obj [key]);
+        }
+
       }
 
       parsed [key] = parseScalar(field, val, req, obj);

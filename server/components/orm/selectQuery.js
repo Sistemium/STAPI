@@ -202,6 +202,9 @@ export default function (parameters) {
 
         if (/^decimal|int|integer$/.test(field.type)) {
           result.query += `, sum([${alias}].[${field.field}]) as [sum(${name})]`;
+        } else if (/^date|timestamp$/.test(field.type)) {
+          result.query += `, max([${alias}].[${field.field}]) as [max(${name})]`;
+          result.query += `, min([${alias}].[${field.field}]) as [min(${name})]`;
         }
 
       });
