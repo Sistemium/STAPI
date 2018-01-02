@@ -24,32 +24,25 @@ function parseObject(config, obj, req) {
 
     if (field.fields) {
       parsed [key] = {};
-      _.each(field.fields, function (f, prop) {
+      _.each(field.fields, (f, prop) => {
         parsed [key] [prop] = parseScalar(f, obj [key + '.' + prop], req, obj);
       });
     } else {
 
+      let val = obj[key];
+
+      // let grouping = req.params['groupBy:'];
+
       let sumKey = `sum(${key})`;
+      let minKey = `min(${key})`;
+      let maxKey = `max(${key})`;
 
-      let val = obj[sumKey];
-
-      if (val) {
-        key = sumKey;
-      } else {
-
-        let minKey = `min(${key})`;
-        let maxKey = `max(${key})`;
-
-        val = obj[minKey];
-
-        if (val) {
-          parsed [minKey] = parseScalar(field, val, req, obj);
-          parsed [maxKey] = parseScalar(field, obj[maxKey], req, obj);
-          return;
-        } else {
-          val = (parsed [key] = obj [key]);
-        }
-
+      if (obj[sumKey]) {
+        parsed [sumKey] = parseScalar(field, obj[sumKey], req, obj);
+        return;
+      } else if (obj[minKey]) {
+        parsed [minKey] = parseScalar(field, obj[minKey], req, obj);
+        parsed [maxKey] = parseScalar(field, obj[maxKey], req, obj);
       }
 
       parsed [key] = parseScalar(field, val, req, obj);
