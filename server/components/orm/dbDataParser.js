@@ -34,18 +34,22 @@ function parseObject(config, obj, req) {
       // let grouping = req.params['groupBy:'];
 
       let sumKey = `sum(${key})`;
-      let minKey = `min(${key})`;
-      let maxKey = `max(${key})`;
 
-      if (obj[sumKey]) {
-        parsed [sumKey] = parseScalar(field, obj[sumKey], req, obj);
-        return;
-      } else if (obj[minKey]) {
-        parsed [minKey] = parseScalar(field, obj[minKey], req, obj);
-        parsed [maxKey] = parseScalar(field, obj[maxKey], req, obj);
+      if (obj.hasOwnProperty(sumKey)) {
+        parsed[sumKey] = parseScalar(field, obj[sumKey], req, obj);
+      } else {
+
+        let minKey = `min(${key})`;
+
+        if (obj.hasOwnProperty(minKey)) {
+          let maxKey = `max(${key})`;
+          parsed[minKey] = parseScalar(field, obj[minKey], req, obj);
+          parsed[maxKey] = parseScalar(field, obj[maxKey], req, obj);
+        }
+
+        parsed[key] = parseScalar(field, val, req, obj);
+
       }
-
-      parsed [key] = parseScalar(field, val, req, obj);
 
     }
 
