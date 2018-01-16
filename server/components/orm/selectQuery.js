@@ -332,10 +332,14 @@ export default function (parameters) {
             predicateStr += ` BETWEEN ? AND ? AND `;
             result.params.push(...(value.value || [null, null]));
 
+          } else if (value.operator === 'is') {
+
+            predicateStr += ` ${value.operator} ${value.value} AND `;
+
           } else if (value.operator) {
 
             predicateStr += ` ${value.operator} ? AND `;
-            result.params.push(value.value || null);
+            result.params.push(value.value);
 
           } else if (_.isArray(value)) {
 

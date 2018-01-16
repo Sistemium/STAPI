@@ -68,8 +68,20 @@ export default function () {
                 }
                 break;
               }
+              case '!=': {
+                if (value === null) {
+                  xParams[field] = {value: 'not null', operator: 'is'};
+                } else {
+                  xParams[field] = {value, operator: '<>'};
+                }
+                break;
+              }
               case '==': {
-                xParams[field] = value;
+                if (value === null) {
+                  xParams[field] = {value: 'null', operator: 'is'};
+                } else {
+                  xParams[field] = value;
+                }
                 break;
               }
               case 'in': {
