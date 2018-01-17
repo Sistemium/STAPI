@@ -270,7 +270,7 @@ export default function (parameters) {
         joins = [joins];
       }
 
-      _.each(joins, function (join) {
+      _.each(joins, join => {
 
         if (join.collection !== alias) {
           return;
