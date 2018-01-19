@@ -88,6 +88,11 @@ export default function () {
                 xParams[field] = _.isArray(value) ? value : [value || null];
                 break;
               }
+              case 'like':
+              case 'likei': {
+                xParams[field] = {value, operator: 'like'};
+                break;
+              }
             }
 
           });

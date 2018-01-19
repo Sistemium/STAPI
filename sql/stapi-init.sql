@@ -18,10 +18,10 @@ meta.defineType 'isDeleted:BOOL';
 meta.defineType 'accountName:CODE';
 
 meta.defineEntity 'RequestLog',
-  'resource;params;requestBody;responseBody;status;authorization;method;instanceName;isDeleted;query;accountName'
+  'resource;params,,nullable;requestBody;responseBody;status;authorization;method;instanceName;isDeleted;query;accountName'
 ;
 
-meta.createTable 'RequestLog',0,1;
+meta.createTable 'RequestLog',0,1, 'RequestLog1712';
 
 create index XK_sl_RequestLog_method_ts on sl.RequestLog (method, ts);
 create index XK_sl_RequestLog_resource_ts on sl.RequestLog ([resource], ts);
