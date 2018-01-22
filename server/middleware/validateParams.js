@@ -7,7 +7,7 @@ export default function () {
     var isValid = true;
 
     _.each(req['x-params'], (param, key) => {
-      if (key && key.match(/[^-_$@a-z0-9 :]/ig)) {
+      if (key && key.match(/[^-._$@a-z0-9 :]/ig)) {
         res.status(400).end(`Param value cannot contain symbols except: "-_$@a-z0-9 :"`);
         return (isValid = false);
       }

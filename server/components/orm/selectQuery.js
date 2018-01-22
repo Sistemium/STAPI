@@ -1,6 +1,7 @@
 'use strict';
 
 import _ from 'lodash';
+
 const debug = require('debug')('stapi:orm:selectQuery');
 
 export default function (parameters) {
@@ -297,69 +298,92 @@ export default function (parameters) {
       let predicateStr = ` WHERE `;
       let fields = cnfg.fields;
 
-      _.each(fields, (field, key) => {
+      if (!params) return;
 
-        let value = params[key];
+      _.each(params, (value, key) => {
 
-        if (params && !_.isUndefined(value)) {
+        let field = fields[key];
+        let paramAlias = alias;
 
-          if (field.ref && params['agg:']) {
-            predicateStr += `[${field.alias}].xid`;
-          } else if (field.ref) {
+        debug('makePredicate', field);
 
-            // FIXME won't work sometimes without proper alias
+        if (!field && key.match(/[.]/)) {
 
-            if (groupBy) {
-              predicateStr += `${field.alias}.xid`;
-            } else {
-              predicateStr += `[${key}]`;
+          let match = key.match(/(.*)\.(.*)/);
+
+          paramAlias = match[1];
+          field = fields[`${paramAlias}Id`];
+
+          debug('makePredicate dot paramAlias', paramAlias, field);
+
+          if (field) {
+            field = field.refConfig.fields[match[2]];
             }
 
-          } else if (field.expr && params['agg:']) {
-            predicateStr += `${field.expr}`;
-          } else if (field.expr) {
-            predicateStr += `[${field.field}]`
-          } else {
-            predicateStr += `${alias}.[${field.field}]`;
-          }
-
-          if (value === '') {
-
-            predicateStr += ' is null AND ';
-
-          } else if (value.operator === 'between') {
-
-            predicateStr += ` BETWEEN ? AND ? AND `;
-            result.params.push(...(value.value || [null, null]));
-
-          } else if (value.operator === 'is') {
-
-            predicateStr += ` ${value.operator} ${value.value} AND `;
-
-          } else if (value.operator) {
-
-            predicateStr += ` ${value.operator} ? AND `;
-            result.params.push(value.value);
-
-          } else if (_.isArray(value)) {
-
-            predicateStr += ` in (${_.map(value, () => '?').join()}) AND `;
-            Array.prototype.push.apply(result.params, value);
-          } else {
-
-            predicateStr += ' = ? AND ';
-
-            if (field.converter) {
-              value = field.converter(value, req);
-            }
-
-            result.params.push(value);
-
-          }
-
-          withPredicate = true;
+          debug('makePredicate dot ref field', field);
 
         }
+
+        if (!field) {
+          return;
+        }
+
+        if (field.ref && params['agg:']) {
+          predicateStr += `[${field.alias}].xid`;
+        } else if (field.ref) {
+
+          // FIXME won't work sometimes without proper alias
+
+          if (groupBy) {
+            predicateStr += `${field.alias}.xid`;
+          } else {
+            predicateStr += `[${key}]`;
+          }
+
+        } else if (field.expr && params['agg:']) {
+          predicateStr += `${field.expr}`;
+        } else if (field.expr) {
+          predicateStr += `[${field.field}]`
+        } else {
+          predicateStr += `[${paramAlias}].[${field.field}]`;
+        }
+
+        if (value === '') {
+
+          predicateStr += ' is null AND ';
+
+        } else if (value.operator === 'between') {
+
+          predicateStr += ` BETWEEN ? AND ? AND `;
+          result.params.push(...(value.value || [null, null]));
+
+        } else if (value.operator === 'is') {
+
+          predicateStr += ` ${value.operator} ${value.value} AND `;
+
+        } else if (value.operator) {
+
+          predicateStr += ` ${value.operator} ? AND `;
+          result.params.push(value.value);
+
+        } else if (_.isArray(value)) {
+
+          predicateStr += ` in (${_.map(value, () => '?').join()}) AND `;
+          Array.prototype.push.apply(result.params, value);
+        } else {
+
+          predicateStr += ' = ? AND ';
+
+          if (field.converter) {
+            value = field.converter(value, req);
+          }
+
+          result.params.push(value);
+
+        }
+
+        withPredicate = true;
+
 
       });
 
