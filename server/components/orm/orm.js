@@ -13,8 +13,8 @@ export function insert(config, body, predicates, poolConfig, joins) {
   return insertQuery(config, body, predicates, poolConfig, joins);
 }
 
-export function deleteQ(config, selectObj) {
-  return deleteQuery(config, selectObj);
+export function deleteQ(config, selectObj, req) {
+  return deleteQuery(config, selectObj, req);
 }
 
 export function parseDbData(config, dbObj, req) {

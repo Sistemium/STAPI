@@ -142,22 +142,30 @@ export function del(req, res, next) {
       };
 
       let selectQueryObj = select(params);
-      debug(selectQueryObj);
+      debug('delete select query:', selectQueryObj);
 
-      let query = deleteQ(config, selectQueryObj);
-      debug('del.q', 'query:', query);
+      let query = deleteQ(config, selectQueryObj, req);
+      debug('delete query:', query);
+
+      if (!query) {
+        pool.release(conn);
+        return res.status(404).end();
+      }
 
       conn.exec(query.query, query.params, (err, result) => {
+
         if (err) {
           return errorHandler(err, conn, pool, res);
         }
 
         pool.release(conn);
+
         if (!result) {
           return res.status(404).end();
         } else {
           return res.status(200).set('X-Rows-Affected', result).end();
         }
+
       });
 
     } catch (err) {
