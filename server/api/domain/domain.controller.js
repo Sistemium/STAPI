@@ -49,6 +49,7 @@ export function post(req, res, next) {
         debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
 
         conn.execWithoutCommit(query.query, query.params, (err, affected) => {
+
           if (err) {
             return done(err);
           }
@@ -57,6 +58,12 @@ export function post(req, res, next) {
             rowsAffected++;
             if (typeof affected === 'object') {
               debug('affected:', affected);
+              let insertedResponse = affected[0];
+
+              if (!insertedResponse) {
+                return done({code: '-70002', text: 'Empty response after merge'});
+              }
+
               let parsed = parseDbData(config, affected[0]);
               responseArray.push(parsed);
               // debug('parsed:', parsed);
