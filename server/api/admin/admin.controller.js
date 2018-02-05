@@ -2,7 +2,9 @@
 import makeMap from '../../components/orm/domainConfigsParser';
 import path from 'path';
 
-export function index(req, res) {
+export {index};
+
+function index(req, res) {
 
   let domainConfig = req.app.locals.domainConfig;
   let pool = req.params.pool || req.query.pool;
