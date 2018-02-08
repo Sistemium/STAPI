@@ -14,6 +14,7 @@ class Pool {
   }
 
   createPool() {
+
     let self = this;
     let pool = poolModule.Pool({
 
@@ -22,7 +23,7 @@ class Pool {
 
         let connName = `${self.config.name}-${++self.counter}`;
 
-        var conn = {
+        let conn = {
 
           process: fork(sqlAnywhereConnect, [self.config.params, connName]),
           number: self.counter,
@@ -30,7 +31,8 @@ class Pool {
           requestCount: 0,
 
           exec: function (sql, params, callback, autoCommit = true) {
-            var _params = params;
+
+            let _params = params;
 
             if (typeof params === 'function') {
               conn.callback = params;
@@ -45,6 +47,7 @@ class Pool {
               params: _params,
               autoCommit: autoCommit
             });
+
           },
 
           rollback: function (callback) {
@@ -63,7 +66,7 @@ class Pool {
 
           rejectExec: function () {
             conn.callback = () => {
-              conn.rollback (() =>{
+              conn.rollback(() => {
                 conn.busy = false;
                 pool.release(conn);
               })
@@ -128,53 +131,70 @@ class Pool {
       min: this.config.min || 2,
       refreshIdle: this.config.refreshIdle || true,
       idleTimeoutMillis: this.config.idleTimeoutMillis || 60000,
+
       log: function (str, level) {
-        if (level != 'verbose') {
+        if (level !== 'verbose') {
           debug(level + ' pool: ' + pool.getName(), str);
         }
       }
+
     });
 
-    pool.acquirePromise = function () {
-      return new Promise(function (resolve, reject) {
-        pool.acquire(function (err, aConn) {
+    pool.acquirePromise = () => {
+
+      return new Promise((resolve, reject) => {
+
+        pool.acquire((err, aConn) => {
           if (err) {
             reject(err)
           } else {
             resolve(aConn);
           }
         });
+
       });
+
     };
 
-    pool.customAcquire = function () {
-      var args = arguments;
-      return new Promise(function (resolve, reject) {
-        pool.acquirePromise().then(function (aConn) {
-          if (pool.config.onAcquire) {
+    pool.customAcquire = function() {
+
+      let args = arguments;
+
+      return new Promise((resolve, reject) => {
+
+        pool.acquirePromise()
+          .then(aConn => {
+
+            if (!pool.config.onAcquire) {
+              return resolve(aConn);
+            }
+
             pool.config.onAcquire.apply(aConn, args)
-              .then(function () {
-                resolve(aConn);
-              }, function (err) {
+              .then(() => resolve(aConn))
+              .catch(err => {
+
                 if (err.code && err.code.match(/(-308)|(-2005)|(-121)|(-101)/ig)) {
                   pool.destroy(aConn);
                 } else {
                   pool.release(aConn);
                 }
-                debug ('onAcquire', 'reject:', err);
+
+                debug('onAcquire', 'reject:', err);
                 reject(err);
-              })
-          } else {
-            resolve(aConn);
-          }
-        }, reject);
+
+              });
+
+          })
+          .catch(reject);
+
       });
+
     };
 
     pool.config = self.config;
 
-
     return pool;
+
   }
 }
 
