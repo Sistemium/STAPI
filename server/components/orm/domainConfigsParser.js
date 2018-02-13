@@ -150,16 +150,22 @@ function processConfig(cfg, filename) {
 
   let extendedCfg = normalizeConfig(cfg, filename);
 
-  let pools = cfg.pools && _.filter(getPoolsKeys(), key => {
+  let pools = cfg.pools && _.filter(_.map(getPoolsKeys(), key => {
 
       let {aliasesRe} = getPoolByName(key).config;
 
-      return key.match(`^(${cfg.pools.join('|')})$`) ||
+      let matches = key.match(`^(${cfg.pools.join('|')})$`) ||
         aliasesRe && _.find(cfg.pools, key => key.match(aliasesRe));
 
-    });
+      if (matches) {
+        return {pool: key, aliasesRe};
+      }
 
-  _.forEach(pools || [''], pool => {
+    }));
+
+  _.forEach(pools || [{pool: ''}], poolObj => {
+
+    let {pool, aliasesRe = /-/} = poolObj;
 
     let extendsArray = Array.isArray(cfg.extends) ? cfg.extends : [cfg.extends];
     let pooledCfg = _.cloneDeep(extendedCfg);
@@ -184,6 +190,22 @@ function processConfig(cfg, filename) {
 
       pooledCfg = _.merge(parentCfg, extendedCfg);
       delete pooledCfg.pools;
+
+    });
+
+    _.each(pooledCfg.fields, (field, key) => {
+
+      let {pools} = field;
+
+      pools = pools || field.pool && [field.pool] || [];
+
+      if (!pools.length) {
+        return;
+      }
+
+      if (!_.find(pools, fieldPool => fieldPool === pool || aliasesRe.test(fieldPool))) {
+        delete pooledCfg.fields[key];
+      }
 
     });
 
