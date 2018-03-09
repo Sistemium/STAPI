@@ -2,11 +2,12 @@
 
 require('epipebomb')();
 
-const debug = require('debug')('stapi:sqlAnywhere');
+// const debug = require('debug')('stapi:sqlAnywhere');
 const sqlanywhere = require('sqlanywhere');
 const connParams = process.argv[2];
 const conn = sqlanywhere.createConnection();
-const errorHandlers = require('./errorHandlers')(conn);
+
+require('./errorHandlers')(conn);
 
 conn.name = process.argv.length > 3 ? process.argv[3] : 'unnamed';
 
