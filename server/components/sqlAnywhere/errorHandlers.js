@@ -1,10 +1,13 @@
 'use strict';
 
-var debug = require('debug')('stapi:sa');
+const debug = require('debug')('stapi:sa');
 
-module.exports = function (conn) {
-  var killer = function () {
+module.exports = function(conn) {
+
+  function killer() {
+
     debug('killer', 'conn name:', conn.name);
+
     if (conn.connectedAt) {
       conn.disconnect(function () {
         process.exit();
@@ -12,9 +15,11 @@ module.exports = function (conn) {
     } else {
       process.exit();
     }
-  };
+
+  }
 
   process.on('disconnect', killer);
   process.on('SIGINT', killer);
   process.on('SIGTERM', killer);
+
 };
