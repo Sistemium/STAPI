@@ -24,7 +24,7 @@ export default function (app) {
   app.use(compression());
   app.use(cors({
     allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type', 'X-Return-Post'],
-    exposedHeaders: ['X-Aggregate-Count', 'X-Offset']
+    exposedHeaders: ['X-Aggregate-Count', 'X-Offset', 'Origin']
   }));
   app.use(bodyParser.urlencoded({extended: false}));
   app.use(bodyParser.json({limit: process.env.JSON_LIMIT || '100kb'}));
