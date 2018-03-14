@@ -14,7 +14,7 @@ import config from './environment';
 import cors from 'cors';
 import logResponseBody from '../middleware/logResponseBodyMiddleware';
 import afterResponse from '../middleware/afterResponseMiddleware';
-
+import {logErrorRequestToFile} from '../middleware/logFiles';
 
 export default function (app) {
   var env = app.get('env');
@@ -27,7 +27,13 @@ export default function (app) {
     exposedHeaders: ['X-Aggregate-Count', 'X-Offset', 'Origin']
   }));
   app.use(bodyParser.urlencoded({extended: false}));
-  app.use(bodyParser.json({limit: process.env.JSON_LIMIT || '100kb'}));
+  app.use(bodyParser.json({
+    limit: process.env.JSON_LIMIT || '100kb'
+  }));
+
+  if (process.env.LOG_ERROR_REQUEST_FOLDER) {
+    app.use(logErrorRequestToFile);
+  }
 
   app.set('appPath', path.join(config.root, 'client'));
 
