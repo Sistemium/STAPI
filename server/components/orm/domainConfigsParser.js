@@ -1,5 +1,7 @@
 'use strict';
 
+let exclude = process.env.DOMAIN_CONFIG_EXCLUDE || '.*\/lib\\/.*';
+
 export default domainConfigParser;
 
 import _ from 'lodash';
@@ -15,9 +17,15 @@ let map = new Map();
 
 function domainConfigParser(path, callback) {
 
+  let excludeRe = new RegExp(exclude);
+
   readConfigFiles(path, (files) => {
 
     _.each(files, (file) => {
+
+      if (excludeRe.test(file)) {
+        return;
+      }
 
       let config = require(file);
       let filename = file.split('/').slice(-1)[0].match(/([^\/]+)(?=\.\w+$)/)[0];
