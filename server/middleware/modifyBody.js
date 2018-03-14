@@ -1,7 +1,7 @@
 'use strict';
 import _ from 'lodash';
-var debug = require('debug')('stapi:modifyBody');
-var uuid = require('node-uuid');
+const debug = require('debug')('stapi:modifyBody');
+const uuid = require('uuid');
 
 /**
  * Middleware converts object to array, adds queryString params to each array element
