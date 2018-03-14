@@ -42,11 +42,15 @@ export function post(req, res, next) {
     let rowsAffected = 0;
     let responseArray = [];
 
-    function execReqBody (item, done) {
+    function execReqBody(item, done) {
       try {
-        let query = insert(res.locals.config, item, res.locals.predicates, pool.config, res.locals.joins);
 
-        debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
+        let {config, predicates, joins} = res.locals;
+        let query = insert(config, item, predicates, pool.config, joins);
+
+        if (req.body.length === 1) {
+          debug('insert', conn.name, 'query:', query.query, 'params:', query.params);
+        }
 
         conn.execWithoutCommit(query.query, query.params, (err, affected) => {
 
