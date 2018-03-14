@@ -26,7 +26,7 @@ export default function () {
 
       applyParams(req['x-params'], req.body);
 
-      if (req.wasOneObject && !req.body[0].id) {
+      if (req.wasOneObject && !req.body[0].id && !config.primaryKeys) {
         req.body[0].id = (req.createMode = uuid.v4());
       }
 
@@ -36,7 +36,12 @@ export default function () {
 
     }
 
-    debug('body:', req.body);
+    if (req.body.length > 1) {
+      debug('body.length:', req.body.length);
+    } else {
+      debug('body:', req.body);
+    }
+
     next();
 
   };

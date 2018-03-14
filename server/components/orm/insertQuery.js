@@ -57,7 +57,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
         refPredicates = refPredicates.join(' AND ');
         result.query += `(
-          SELECT id FROM ${field.refConfig.tableName} as [${fieldKey}] 
+          SELECT id FROM ${field.refConfig.tableName} as [${fieldKey}]
           WHERE xid = ? ${refPredicates && ` AND ${refPredicates}`}
         ) AS [${fieldKey}],`;
 
@@ -99,8 +99,12 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     tPredicates = tPredicates.join(' AND ');
 
+    let primaryKeys = config.primaryKeys || ['xid'];
+
+    let pkJoin = _.map(primaryKeys, pk => `${config.alias}.[${pk}] = ${queryAlias}.[${pk}]`).join(' AND ');
+
     result.query +=
-      `) AS ${queryAlias} ON ${config.alias}.[xid] = ${queryAlias}.[xid]
+      `) AS ${queryAlias} ON ${pkJoin}
             WHEN NOT MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN INSERT
             ${refAliasesString && `WHEN NOT MATCHED THEN RAISERROR 70001`}
             ${tPredicates && `WHEN MATCHED AND NOT (${tPredicates}) THEN RAISERROR 70002`}
