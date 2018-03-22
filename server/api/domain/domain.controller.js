@@ -1,14 +1,15 @@
 import _ from 'lodash';
 import async from 'async';
+
 import {select, insert, deleteQ, parseDbData} from '../../components/orm/orm';
 import {doSelect, errorHandler, locationUrl} from './domainControllerHelper';
-import pools from '../../components/pool';
+import {getPoolByName} from '../../components/pool';
 
 const debug = require('debug')('stapi:domain:controller');
 
 
 export function index(req, res, next) {
-  let pool = pools(req.pool);
+  let pool = getPoolByName(req.pool);
 
   pool.customAcquire(req.headers.authorization).then(conn => {
 
@@ -26,7 +27,7 @@ export function index(req, res, next) {
 }
 
 export function post(req, res, next) {
-  var pool = pools(req.pool);
+  var pool = getPoolByName(req.pool);
   let config = res.locals.config;
 
   if (_.isEmpty(req.body)) {
@@ -132,7 +133,7 @@ export function post(req, res, next) {
 
 export function del(req, res, next) {
 
-  let pool = pools(req.pool);
+  let pool = getPoolByName(req.pool);
 
   if (!res.locals.config.deletable) {
     return res.status(403) && next('Collection is not deletable');

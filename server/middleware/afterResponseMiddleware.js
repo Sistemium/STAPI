@@ -1,4 +1,4 @@
-import getPoolByName from '../components/pool';
+import {getPoolByName} from '../components/pool';
 import url from 'url';
 import RequestHttpClient from 'request';
 import config from '../config/environment';

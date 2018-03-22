@@ -7,14 +7,12 @@ const poolManager = new PoolsManager();
 
 poolManager.initPools(connections);
 
-export default function (name) {
-  return getPoolByName(name);
-}
+export {getPoolByName, getPoolsKeys};
 
-export function getPoolByName(name) {
+function getPoolByName(name) {
   return poolManager.getPoolByName(name);
 }
 
-export function getPoolsKeys() {
+function getPoolsKeys() {
   return poolManager.getPoolsKeys();
 }

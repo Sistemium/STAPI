@@ -1,7 +1,7 @@
 'use strict';
 
-import poolManager from 'components/pool/poolManager';
 import async from 'async';
+import {getPoolByName} from '../../components/pool';
 
 export default function (key) {
 
@@ -9,7 +9,7 @@ export default function (key) {
 
   return (req, res, next) => {
 
-    let pool = poolManager.getPoolByName(req.pool);
+    let pool = getPoolByName(req.pool);
 
     if (!pool) {
       return res.status(404).end();
