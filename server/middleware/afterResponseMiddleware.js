@@ -41,10 +41,20 @@ export default function (request, response, done) {
       } else {
 
         let responseBodyLength = response.body.toString().length;
+        let responseBody = response.body || '';
 
         if (responseBodyLength > SL_BODY_LENGTH_MAX) {
-          response.body = {
+          responseBody = {
             error: `Response length exceeds the max length: ${SL_BODY_LENGTH_MAX}`
+          };
+        }
+
+        let requestBody = request.body || '';
+        let requestBodyLength = requestBody.toString().length;
+
+        if (requestBodyLength > SL_BODY_LENGTH_MAX) {
+          requestBody = {
+            error: `Request length exceeds the max length: ${SL_BODY_LENGTH_MAX}`
           };
         }
 
@@ -53,13 +63,13 @@ export default function (request, response, done) {
           resource: `${request.pool}/${_.get(request, 'params.collection')}`,
           params: request.params,
           method: request.method,
-          requestBody: request.body,
-          responseBody: response.body,
+          requestBody,
+          responseBody,
           status: response.statusCode,
           authorization: request.authorization || _.get(request, 'headers.authorization'),
           instanceName: config.instanceName,
           query: request.query,
-          accountName: accountName
+          accountName: accountName || 'anonymous'
         };
 
         RequestHttpClient({
