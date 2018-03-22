@@ -77,10 +77,11 @@ export default function (request, response, done) {
             method: 'POST',
             json: true,
             headers: {
-              "content-type": "application/json"
+              'content-type': 'application/json'
             },
-            body: requestLogData
-          }, function (error) {
+            body: requestLogData,
+            timeout: config.slTimeout
+          }, error => {
             if (error) {
               console.error(`error: ${error}`);
             }

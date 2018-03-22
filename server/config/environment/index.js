@@ -1,7 +1,7 @@
 'use strict';
 
-var path = require('path');
-var _ = require('lodash');
+import path from 'path';
+import _ from 'lodash';
 
 function requiredProcessEnv(name) {
   if (!process.env[name]) {
@@ -12,7 +12,7 @@ function requiredProcessEnv(name) {
 
 // All configurations will extend these options
 // ============================================
-var all = {
+const all = {
   env: process.env.NODE_ENV,
 
   // Root path of server
@@ -25,6 +25,7 @@ var all = {
   ip: process.env.IP || '0.0.0.0',
 
   slBodyLengthMax: process.env.SL_BODY_LENGTH_MAX || 2500,
+  slTimeout: process.env.SL_TIMEOUT || 10000,
 
   instanceName: process.env.INSTANCE_NAME,
 
