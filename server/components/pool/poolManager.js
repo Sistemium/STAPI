@@ -24,4 +24,4 @@ class PoolsManager {
 }
 
 
-export default new PoolsManager();
+export default PoolsManager;
