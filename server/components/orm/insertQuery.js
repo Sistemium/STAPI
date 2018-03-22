@@ -1,37 +1,27 @@
 import _ from 'lodash';
 import selectQuery from './selectQuery';
+
 const debug = require('debug')('stapi:orm:insertQuery');
 
 export default function (config, body, predicates, poolConfig, joins) {
 
-  let fields = {};
-  let result = {
-    query: '',
-    params: []
-  };
-
   //debug('body', body);
 
-  _.each(body, (val, k) => {
+  return concatQuery(mergeFieldsData());
 
-    let cnfProp = config.fields [k];
+  /*
+  Functions
+   */
 
-    if (cnfProp.ref && !cnfProp.insertRaw) {
-      let field = _.pick(cnfProp, ['refConfig', 'optional']);
-      field.body = val;
-      field.config = cnfProp;
-      fields[cnfProp.field] = field;
-    } else {
-      fields[cnfProp.field] = {config: cnfProp, body: val};
-    }
-
-  });
-
-  function concatQuery(fields, config) {
+  function concatQuery(fields) {
 
     let queryAlias = config.alias === 'm' ? 'n' : 'm';
     let refAliases = [];
     let updateMatched = [];
+    let result = {
+      query: '',
+      params: []
+    };
 
     result.query =
       `MERGE INTO ${config.tableName} AS [${config.alias}] USING WITH AUTO NAME (
@@ -50,7 +40,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
         refPredicates = _.map(refPredicates, (rp) => {
           if (rp.params) {
-            Array.prototype.push.apply(result.params,rp.params);
+            Array.prototype.push.apply(result.params, rp.params);
           }
           return `${rp.field || ''} ${rp.sql}`;
         });
@@ -92,7 +82,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
     tPredicates = _.map(tPredicates, (tp) => {
       if (tp.params) {
-        Array.prototype.push.apply(result.params,tp.params);
+        Array.prototype.push.apply(result.params, tp.params);
       }
       return tp.field ? `[${config.alias}].[${tp.field}] ${tp.sql}` : `${tp.sql || (tp)}`;
     });
@@ -127,7 +117,36 @@ export default function (config, body, predicates, poolConfig, joins) {
     }
 
     return result;
+
   }
 
-  return concatQuery(fields, config);
+  function mergeFieldsData() {
+
+    let res = {};
+
+    _.each(body, (val, k) => {
+
+      let cnfProp = config.fields [k];
+      let field;
+
+      if (cnfProp.ref && !cnfProp.insertRaw) {
+
+        field = _.pick(cnfProp, ['refConfig', 'optional']);
+
+        field.body = val;
+        field.config = cnfProp;
+
+      } else {
+        field = {config: cnfProp, body: val};
+      }
+
+      res[cnfProp.field] = field;
+
+    });
+
+    return res;
+
+  }
+
+
 }
