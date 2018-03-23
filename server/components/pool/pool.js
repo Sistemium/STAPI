@@ -34,13 +34,16 @@ class Pool {
 
     let originalRelease = pool.release;
 
+    if (self.config.maxRequestCount) {
+      pool.release = releaseWrap;
+    }
+
     return _.assign(pool, {
 
       config: this.config,
 
       acquirePromise,
-      customAcquire,
-      release: releaseWrap
+      customAcquire
 
     });
 
@@ -50,11 +53,12 @@ class Pool {
 
     function releaseWrap(item) {
 
-
       if (item.requestCount > self.config.maxRequestCount) {
         debug('destroy by maxCount', item.name);
         return pool.destroy(item);
       }
+
+      debug('requestCount', item.requestCount, item.name);
 
       originalRelease.call(pool, item);
 
