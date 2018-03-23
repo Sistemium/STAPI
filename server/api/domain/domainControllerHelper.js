@@ -9,7 +9,7 @@ import url from 'url';
 export {errorHandler, doSelect, locationUrl};
 
 
-function locationUrl (req, id) {
+function locationUrl(req, id) {
   return url.format({
     pathname: `${req.path}/${id}`,
     port: process.env.PORT,
@@ -18,7 +18,7 @@ function locationUrl (req, id) {
   });
 }
 
-function statusByErr (err) {
+function statusByErr(err) {
 
   if (err.code === '-70001') {
     return 404;
@@ -30,7 +30,7 @@ function statusByErr (err) {
 
 }
 
-function errorHandler (err, conn, pool, res) {
+function errorHandler(err, conn, pool, res) {
 
   console.error('Client:', conn.number, 'exec error:', err);
 
@@ -66,7 +66,7 @@ function getOffset(data) {
   return `1-${top1.ts.replace(/[^\d]/g, '')}-${top1.IDREF}`;
 }
 
-function doSelect (pool, conn, req, res) {
+function doSelect(pool, conn, req, res) {
 
   debug('index.doSelect', 'start');
 
