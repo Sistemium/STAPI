@@ -32,18 +32,33 @@ class Pool {
 
     });
 
+    let originalRelease = pool.release;
+
     return _.assign(pool, {
 
       config: this.config,
 
       acquirePromise,
-      customAcquire
+      customAcquire,
+      release: releaseWrap
 
     });
 
     /*
     Functions
      */
+
+    function releaseWrap(item) {
+
+
+      if (item.requestCount > self.config.maxRequestCount) {
+        debug('destroy by maxCount', item.name);
+        return pool.destroy(item);
+      }
+
+      originalRelease.call(pool, item);
+
+    }
 
     function log(str, level) {
       if (level !== 'verbose') {
