@@ -40,8 +40,8 @@ export default function (request, response, done) {
         return done();
       } else {
 
-        let responseBodyLength = response.body.toString().length;
         let responseBody = response.body || '';
+        let responseBodyLength = responseBody.toString().length;
 
         if (responseBodyLength > SL_BODY_LENGTH_MAX) {
           responseBody = {
