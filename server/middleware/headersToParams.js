@@ -85,7 +85,11 @@ export default function () {
                 break;
               }
               case 'in': {
-                xParams[field] = _.isArray(value) ? value : [value || null];
+                let inRes = _.isArray(value) ? value : [value || null];
+                if (!inRes.length) {
+                  return res.status(204);
+                }
+                xParams[field] = inRes;
                 break;
               }
               case 'like':
