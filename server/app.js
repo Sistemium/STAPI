@@ -3,25 +3,24 @@
  */
 
 'use strict';
+
 import express from 'express';
 import config from './config/environment';
-
 import http from 'http';
-import registerPlugins from './components/plugins/registerPlugins';
-import domainConfig from './components/orm/domainConfigsParser';
 import path from 'path';
-// Setup server
-var app = express();
-var server = http.createServer(app);
-
 import debug from 'debug';
+
+import domainConfig from './components/orm/domainConfigsParser';
+
+// Setup server
+const app = express();
+const server = http.createServer(app);
+
 debug.log = console.info.bind(console);
 
-import expressConfig from './config/express';
-expressConfig (app);
-
-import routesConfig from './routes';
-routesConfig (app);
+require('./components/plugins/registerPlugins');
+require('./config/express')(app);
+require('./routes')(app);
 
 // Start server
 function startServer() {
@@ -34,9 +33,10 @@ function startServer() {
  * read configuration from specified folder or default folder is server/domain
  */
 
-domainConfig(path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)) || `${__dirname}/domain`, (map) => {
-  app.locals.domainConfig = map;
-});
+const configPath = path.normalize(path.join(config.root, process.env.DOMAIN_CONFIG)) || `${__dirname}/domain`;
+
+domainConfig(configPath, (map) => app.locals.domainConfig = map);
+
 setImmediate(startServer);
 
 // Expose app

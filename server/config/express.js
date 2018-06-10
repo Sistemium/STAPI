@@ -17,7 +17,10 @@ import afterResponse from '../middleware/afterResponseMiddleware';
 import {logErrorRequestToFile} from '../middleware/logFiles';
 
 export default function (app) {
-  var env = app.get('env');
+
+  const env = app.get('env');
+
+  console.log(process.env);
 
   app.set('views', config.root + '/server/views');
   app.set('view engine', 'jade');
@@ -26,7 +29,7 @@ export default function (app) {
     allowedHeaders: ['X-Page-Size', 'X-Start-Page', 'Authorization', 'Content-Type', 'X-Return-Post'],
     exposedHeaders: ['X-Aggregate-Count', 'X-Offset', 'Origin']
   }));
-  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json({
     limit: process.env.JSON_LIMIT || '100kb'
   }));
