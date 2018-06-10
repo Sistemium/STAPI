@@ -56,6 +56,9 @@ export default function () {
             let fieldParam = xParams[field];
 
             switch (operator) {
+              case '>':
+                xParams[field] = {value, operator};
+                break;
               case '>=':
                 if (_.get(fieldParam, 'operator') === '<=') {
                   xParams[field] = {value: [value, fieldParam.value], operator: 'between'};
