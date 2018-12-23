@@ -84,6 +84,7 @@ function doSelect(pool, conn, req, res) {
     query = select(params);
   } catch (err) {
     debug('doSelect', `exception ${err.stack} `);
+    pool.release(conn);
     return res.status(400).end(err.message);
   }
 
