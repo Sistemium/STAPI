@@ -1,7 +1,9 @@
 'use strict';
 
 const debug = require('debug')('stapi:domain:helper');
-import {select, insert, deleteQ, parseDbData} from '../../components/orm/orm';
+const error = require('debug')('stapi:error:domain:helper');
+
+import {select, parseDbData} from '../../components/orm/orm';
 import _ from 'lodash';
 import url from 'url';
 // import async from 'async';
@@ -48,7 +50,7 @@ function errorHandler(err, conn, pool, res) {
 
   res.status(status);
 
-  if (status == 500) {
+  if (status === 500) {
     res.json(err);
   } else {
     res.end();
@@ -57,13 +59,15 @@ function errorHandler(err, conn, pool, res) {
 }
 
 function getOffset(data) {
+
   if (!data.length) {
     return null;
   }
 
-  let top1 = _.last(data);
+  const { ts, IDREF } = _.last(data);
 
-  return `1-${top1.ts.replace(/[^\d]/g, '')}-${top1.IDREF}`;
+
+  return `1-${ts.replace(/[^\d]/g, '')}-${_.padStart(IDREF, 11, '0')}`;
 }
 
 function doSelect(pool, conn, req, res) {
@@ -95,6 +99,7 @@ function doSelect(pool, conn, req, res) {
     debug('index.doSelect', 'exec done');
 
     if (err) {
+      error('error:', query.query, query.params);
       return errorHandler(err, conn, pool, res);
     }
 
@@ -125,7 +130,7 @@ function doSelect(pool, conn, req, res) {
 
       if (req['x-params']['agg:']) {
 
-        var cnt = result.length && result[0].cnt || result.cnt || 0;
+        const cnt = result.length && result[0].cnt || result.cnt || 0;
 
         res.set('X-Aggregate-Count', cnt);
 

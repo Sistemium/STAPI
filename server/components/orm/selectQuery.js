@@ -439,7 +439,7 @@ export default function (parameters) {
 
       if (offset && offset !== '*') {
         try {
-          let offsetId = offset.match(/[\d]+$/)[0];
+          let offsetId = parseInt(offset.match(/[\d]+$/)[0]);
           let offsetTsMatch = offset.match(/.+-(\d{14})(\d{3})-.+/);
 
           let offsetSeconds = offsetTsMatch[1];
