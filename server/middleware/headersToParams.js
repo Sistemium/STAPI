@@ -22,7 +22,7 @@ export default function () {
       return params;
     }
 
-    let xParams = _.assign(headersToParams(req.headers), req.query, req.params.id && {id: req.params.id});
+    let xParams = _.assign(headersToParams(req.headers), req.query, req.params.id && { id: req.params.id });
 
     if (req.params.filterCollection && req.params.filterCollectionId) {
       xParams [req.params.filterCollection] = req.params.filterCollectionId;
@@ -43,11 +43,14 @@ export default function () {
       }
     }
 
-    if (_.isString(xParams['where:'])) {
+    const whereFilter = xParams['where:'];
+
+    if (whereFilter) {
       try {
 
-        let where = xParams['where:'] = JSON.parse(xParams['where:']);
+        let where = _.isString(whereFilter) ? JSON.parse(xParams['where:']) : whereFilter;
 
+        xParams['where:'] = where;
         _.each(where, (predicates, field) => {
 
 
@@ -57,31 +60,31 @@ export default function () {
 
             switch (operator) {
               case '>':
-                xParams[field] = {value, operator};
+                xParams[field] = { value, operator };
                 break;
               case '>=':
                 if (_.get(fieldParam, 'operator') === '<=') {
-                  xParams[field] = {value: [value, fieldParam.value], operator: 'between'};
+                  xParams[field] = { value: [value, fieldParam.value], operator: 'between' };
                 }
               case '<=': {
                 if (_.get(fieldParam, 'operator') === '>=') {
-                  xParams[field] = {value: [fieldParam.value, value], operator: 'between'};
+                  xParams[field] = { value: [fieldParam.value, value], operator: 'between' };
                 } else {
-                  xParams[field] = {value, operator};
+                  xParams[field] = { value, operator };
                 }
                 break;
               }
               case '!=': {
                 if (value === null) {
-                  xParams[field] = {value: 'not null', operator: 'is'};
+                  xParams[field] = { value: 'not null', operator: 'is' };
                 } else {
-                  xParams[field] = {value, operator: '<>'};
+                  xParams[field] = { value, operator: '<>' };
                 }
                 break;
               }
               case '==': {
                 if (value === null) {
-                  xParams[field] = {value: 'null', operator: 'is'};
+                  xParams[field] = { value: 'null', operator: 'is' };
                 } else {
                   xParams[field] = value;
                 }
@@ -97,7 +100,7 @@ export default function () {
               }
               case 'like':
               case 'likei': {
-                xParams[field] = {value, operator: 'like'};
+                xParams[field] = { value, operator: 'like' };
                 break;
               }
             }
