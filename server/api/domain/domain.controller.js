@@ -6,7 +6,7 @@ import {doSelect, errorHandler, locationUrl} from './domainControllerHelper';
 import {getPoolByName} from '../../components/pool';
 
 const debug = require('debug')('stapi:domain:controller');
-
+const error = require('debug')('stapi:error:domain:controller');
 
 export function index(req, res, next) {
   let pool = getPoolByName(req.pool);
@@ -27,7 +27,8 @@ export function index(req, res, next) {
 }
 
 export function post(req, res, next) {
-  var pool = getPoolByName(req.pool);
+
+  const pool = getPoolByName(req.pool);
   let config = res.locals.config;
 
   if (_.isEmpty(req.body)) {
@@ -56,6 +57,7 @@ export function post(req, res, next) {
         conn.execWithoutCommit(query.query, query.params, (err, affected) => {
 
           if (err) {
+            error('execWithoutCommit:', query.query, query.params);
             return done(err);
           }
 
