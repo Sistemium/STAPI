@@ -37,7 +37,7 @@ export default function (parameters) {
 
       if (colPrefixMatch) {
         colPrefix = colPrefixMatch[1];
-        let refField = _.find(config.fields, {alias: colPrefix});
+        let refField = _.find(config.fields, { alias: colPrefix });
         if (refField && !refField.fields) {
           colPrefix = `[${colPrefix}].`;
           colName = colPrefixMatch[2];
@@ -224,8 +224,7 @@ export default function (parameters) {
         if (params[param]) {
           result.params.push(params[param]);
           return `[${param}] = ?`;
-        }
-        else if (p.match(/\?}$/)) {
+        } else if (p.match(/\?}$/)) {
           return '';
         } else {
           throw new Error(`Required parameter missing: "${param}"`);
@@ -255,7 +254,7 @@ export default function (parameters) {
           return p.collection === ref[1].alias;
         });
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND (${p.field ? `${ref[1].alias}.${p.field} ` : ''}${p.sql}) `;
+          result.query += `AND (${p.field ? `${ref[1].alias}.${escaped(p.field)} ` : ''}${p.sql}) `;
           if (_.isArray(p.params)) {
             Array.prototype.push.apply(result.params, p.params);
           }
@@ -318,7 +317,7 @@ export default function (parameters) {
 
           if (field) {
             field = field.refConfig.fields[match[2]];
-            }
+          }
 
           debug('makePredicate dot ref field', field);
 
@@ -402,7 +401,7 @@ export default function (parameters) {
             let predField = fields[pred.field];
             // TODO support pred.dbField
             let predAlias = (predField && predField.field === pred.field && !groupBy) ? '' : (alias + '.');
-            predicateStr += `(${predAlias}${pred.field} ${pred.sql}) AND `;
+            predicateStr += `(${predAlias}${escaped(pred.field)} ${pred.sql}) AND `;
 
           } else if (!pred.field && pred.collection === alias) {
             // or maybe better check for field in modelPredicates
@@ -423,7 +422,7 @@ export default function (parameters) {
 
         try {
 
-          let {searchFields, searchFor} = params['q:'];
+          let { searchFields, searchFor } = params['q:'];
 
           if (_.isString(searchFields)) {
             withPredicate = true;
@@ -504,3 +503,10 @@ export default function (parameters) {
 
   return makeQuery(config);
 };
+
+function escaped(field) {
+  if (/\[.+]/.test(field)) {
+    return field;
+  }
+  return `[${field}]`;
+}
