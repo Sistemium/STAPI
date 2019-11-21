@@ -16,8 +16,11 @@ export default function (parameters) {
   let joins = _.cloneDeep(parameters.joins) || config.joins;
   let req = params.req;
   let orderBy;
+  let whereOptional = [];
 
   let groupBy = params['groupBy:'];
+
+  return makeQuery(config);
 
   function parseOrderByParams(params) {
 
@@ -239,27 +242,39 @@ export default function (parameters) {
     if (refTableNames.size > 0) {
       //debug('refTableNames', [...refTableNames]);
       for (let ref of refTableNames) {
+
+        const parentIdRef = `[${ref[1].alias}].id`;
+
         if (ref[1].optional) {
           result.query += ' LEFT';
         }
+
         let localField = alias + '.[' + ref[1].field + ']';
 
         if (ref[1].expr) {
           localField = ref[1].expr;
         }
 
-        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].alias}] on [${ref[1].alias}].id = ${localField} `;
+        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].alias}] on ${parentIdRef} = ${localField} `;
+
+        if (ref[1].optional === 'not null') {
+          whereOptional.push(`${parentIdRef} is not null or ${localField} is null`);
+        }
+
         //debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
           return p.collection === ref[1].alias;
         });
+
         _.each(predicatesForJoin, (p) => {
           result.query += `AND (${p.field ? `${ref[1].alias}.${escaped(p.field)} ` : ''}${p.sql}) `;
           if (_.isArray(p.params)) {
             Array.prototype.push.apply(result.params, p.params);
           }
         });
+
         //debug('predicatesForJoin', predicatesForJoin);
+
       }
     }
 
@@ -436,6 +451,11 @@ export default function (parameters) {
 
       }
 
+      if (whereOptional.length) {
+        withPredicate = true;
+        predicateStr += `${whereOptional.map(p => `(${p})`).join(' AND ')} AND `;
+      }
+
       if (offset && offset !== '*') {
         try {
           let offsetId = parseInt(offset.match(/[\d]+$/)[0]);
@@ -501,7 +521,6 @@ export default function (parameters) {
     return result;
   }
 
-  return makeQuery(config);
 };
 
 function escaped(field) {
