@@ -98,7 +98,7 @@ export default function (config, body, predicates, poolConfig, joins) {
             WHEN NOT MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN INSERT
             ${refAliasesString && `WHEN NOT MATCHED THEN RAISERROR 70001`}
             ${tPredicates && `WHEN MATCHED AND NOT (${tPredicates}) THEN RAISERROR 70002`}
-            WHEN MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN UPDATE SET 
+            WHEN MATCHED ${refAliasesString && `AND ${refAliasesString} IS NOT NULL`} THEN UPDATE SET
             ${updateMatched.join(', ')}
             ${refAliasesString && `WHEN MATCHED THEN RAISERROR 70001`}
     `;
