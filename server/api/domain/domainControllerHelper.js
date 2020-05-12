@@ -25,7 +25,7 @@ function statusByErr(err) {
   if (err.code === '-70001') {
     return 404;
   } else if (err.code === '-70002') {
-    return 403;
+    return 410;
   }
 
   return 500;
