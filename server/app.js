@@ -19,8 +19,8 @@ const server = http.createServer(app);
 debug.log = console.info.bind(console);
 
 require('./components/plugins/registerPlugins');
-require('./config/express')(app);
-require('./routes')(app);
+require('./config/express').default(app);
+require('./routes').default(app);
 
 // Start server
 function startServer() {

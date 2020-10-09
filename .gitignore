@@ -11,3 +11,4 @@ npm-debug.log
 server/config/domain
 sasrv.ini
 logs
+.DS_Store

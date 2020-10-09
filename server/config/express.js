@@ -20,7 +20,7 @@ export default function (app) {
 
   const env = app.get('env');
 
-  console.log(process.env);
+  // console.log(process.env);
 
   app.set('views', config.root + '/server/views');
   app.set('view engine', 'jade');
@@ -46,11 +46,11 @@ export default function (app) {
     app.use(morgan(process.env.MORGAN || 'dev'));
   }
 
-  if ('development' === env) {
-    app.use(require('connect-livereload')({
-      port: 35731
-    }));
-  }
+  // if ('development' === env) {
+  //   app.use(require('connect-livereload')({
+  //     port: 35731
+  //   }));
+  // }
 
   if ('development' === env || 'test' === env) {
     app.use(express.static(path.join(config.root, '.tmp')));
