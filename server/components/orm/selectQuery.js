@@ -462,9 +462,11 @@ export default function (parameters) {
           let offsetTsMatch = offset.match(/.+-(\d{14})(\d{3})-.+/);
 
           let offsetSeconds = offsetTsMatch[1];
-          let offsetMs = offsetTsMatch.length > 2 ? parseInt(offsetTsMatch[2]) : 0;
-          let offsetTs = `${offsetSeconds}.${_.padStart(offsetMs, 3, '0')}`;
-          let offsetTs1 = `${offsetSeconds}.${_.padStart(offsetMs + 1, 3, '0')}`;
+          // let offsetMs = offsetTsMatch.length > 2 ? parseInt(offsetTsMatch[2]) : 0;
+          // let offsetTs = `${offsetSeconds}.${_.padStart(offsetMs, 3, '0')}`;
+          // let offsetTs1 = `${offsetSeconds}.${_.padStart(offsetMs + 1, 3, '0')}`;
+          const offsetTs = ts1FromOffset(offset, 0);
+          const offsetTs1 = ts1FromOffset(offset, 1);
 
           withPredicate = true;
 
@@ -528,4 +530,14 @@ function escaped(field) {
     return field;
   }
   return `[${field}]`;
+}
+
+const OFFSET_PARTS_RE = /1-(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(\d{3})-/;
+
+function ts1FromOffset(offset, addMs = 0) {
+  const [, year, month, day, hour, minute, second, ms] = offset.match(OFFSET_PARTS_RE);
+  const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}.${ms}Z`);
+  return new Date(date.getTime() + addMs).toISOString()
+    .replace('T', ' ')
+    .replace('Z', '');
 }
