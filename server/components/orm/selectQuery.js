@@ -243,31 +243,33 @@ export default function (parameters) {
       //debug('refTableNames', [...refTableNames]);
       for (let ref of refTableNames) {
 
-        const parentIdRef = `[${ref[1].alias}].id`;
+        const [, refProps] = ref;
 
-        if (ref[1].optional) {
+        const parentIdRef = `[${refProps.alias}].id`;
+
+        if (refProps.optional) {
           result.query += ' LEFT';
         }
 
-        let localField = alias + '.[' + ref[1].field + ']';
+        let localField = alias + '.[' + refProps.field + ']';
 
-        if (ref[1].expr) {
-          localField = ref[1].expr;
+        if (refProps.expr) {
+          localField = refProps.expr;
         }
 
-        result.query += ` JOIN ${ref[1].tableName} as [${ref[1].alias}] on ${parentIdRef} = ${localField} `;
+        result.query += ` JOIN ${refProps.tableName} as [${refProps.alias}] on ${parentIdRef} = ${localField} `;
 
-        if (ref[1].optional === 'not null') {
+        if (refProps.optional === 'not null') {
           whereOptional.push(`${parentIdRef} is not null or ${localField} is null`);
         }
 
         //debug('predicatesForJoin', 'predicates:', predicates);
         let predicatesForJoin = _.filter(predicates, (p) => {
-          return p.collection === ref[1].alias;
+          return p.collection === refProps.alias && !refProps.noPredicates;
         });
 
         _.each(predicatesForJoin, (p) => {
-          result.query += `AND (${p.field ? `${ref[1].alias}.${escaped(p.field)} ` : ''}${p.sql}) `;
+          result.query += `AND (${p.field ? `${refProps.alias}.${escaped(p.field)} ` : ''}${p.sql}) `;
           if (_.isArray(p.params)) {
             Array.prototype.push.apply(result.params, p.params);
           }

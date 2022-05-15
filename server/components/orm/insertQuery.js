@@ -38,7 +38,7 @@ export default function (config, body, predicates, poolConfig, joins) {
 
         result.params.push(field.body);
 
-        refPredicates = _.map(refPredicates, (rp) => {
+        refPredicates = _.map(!field.noPredicates && refPredicates, (rp) => {
           if (rp.params) {
             Array.prototype.push.apply(result.params, rp.params);
           }
@@ -52,7 +52,7 @@ export default function (config, body, predicates, poolConfig, joins) {
         ) AS [${fieldKey}],`;
 
         if (!field.optional || field.body) {
-          refAliases.push(`${queryAlias}.${fieldKey}`);
+          refAliases.push(`${queryAlias}.[${fieldKey}]`);
         }
 
       } else {
