@@ -59,7 +59,7 @@ export default function (app) {
     app.use(errorHandler()); // Error handler - has to be last
   }
 
-  app.use(logResponseBody);
+  // app.use(logResponseBody);
   //  register the 'after response' middleware
-  app.use(afterResponse);
+  // app.use(afterResponse);
 }
