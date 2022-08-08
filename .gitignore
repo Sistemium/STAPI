@@ -12,3 +12,4 @@ server/config/domain
 sasrv.ini
 logs
 .DS_Store
+nodemon.json
